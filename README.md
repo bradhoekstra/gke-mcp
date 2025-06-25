@@ -10,8 +10,8 @@ Clone this repo and add the following to your AI tool. For [Gemini CLI](https://
 "mcpServers":{
   "gke": {
     "cwd": "<CLONE DIR>/gke-mcp",
-    "command": "go",
-    "args": ["run", "server.go"]
+    "command": "sh",
+    "args": ["./run_mcp_server.sh"]
   }
 }
 ```
