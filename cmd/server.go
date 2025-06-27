@@ -17,19 +17,25 @@ package main
 import (
 	"log"
 
+	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools"
 	"github.com/mark3labs/mcp-go/server"
+)
+
+const (
+	version = "1.0.0"
 )
 
 func main() {
 	// Create a new MCP server
 	s := server.NewMCPServer(
 		"GKE MCP Server",
-		"1.0.0",
+		version,
 		server.WithToolCapabilities(true),
 	)
 
-	tools.Install(s)
+	c := config.New(version)
+	tools.Install(s, c)
 
 	// Start the stdio server
 	log.Printf("Starting GKE MCP Server")

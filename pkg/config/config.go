@@ -33,9 +33,9 @@ func (c *Config) DefaultProjectID() string {
 	return c.defaultProjectID
 }
 
-func New() *Config {
+func New(version string) *Config {
 	return &Config{
-		userAgent:        "gke-mcp",
+		userAgent:        "gke-mcp/" + version,
 		defaultProjectID: getDefaultProjectID(),
 	}
 }

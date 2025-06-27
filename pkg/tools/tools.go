@@ -21,10 +21,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-func Install(s *server.MCPServer) {
-
-	c := config.New()
-
+func Install(s *server.MCPServer, c *config.Config) {
 	cluster.Install(s, c)
 	giq.Install(s, c)
 }
