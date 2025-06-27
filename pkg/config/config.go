@@ -21,7 +21,12 @@ import (
 )
 
 type Config struct {
+	userAgent        string
 	defaultProjectID string
+}
+
+func (c *Config) UserAgent() string {
+	return c.userAgent
 }
 
 func (c *Config) DefaultProjectID() string {
@@ -30,6 +35,7 @@ func (c *Config) DefaultProjectID() string {
 
 func New() *Config {
 	return &Config{
+		userAgent:        "gke-mcp",
 		defaultProjectID: getDefaultProjectID(),
 	}
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"google.golang.org/api/option"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -66,7 +67,7 @@ func (h *handlers) listClusters(ctx context.Context, request mcp.CallToolRequest
 		location = "-"
 	}
 
-	c, err := container.NewClusterManagerClient(ctx)
+	c, err := container.NewClusterManagerClient(ctx, option.WithUserAgent(h.c.UserAgent()))
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
@@ -97,7 +98,7 @@ func (h *handlers) getCluster(ctx context.Context, request mcp.CallToolRequest) 
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	c, err := container.NewClusterManagerClient(ctx)
+	c, err := container.NewClusterManagerClient(ctx, option.WithUserAgent(h.c.UserAgent()))
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
