@@ -28,7 +28,7 @@ import (
 func Install(s *server.MCPServer, c *config.Config) {
 
 	clusterCostTool := mcp.NewTool("cluster_cost",
-		mcp.WithDescription("This tool helps the user get the cost for a GKE cluster. It relies on the user having enabled detailed BQ export for their GCP Billing Account."),
+		mcp.WithDescription("This tool helps the user get the cost for a GKE cluster. It relies on the user having enabled detailed BigQuery export for their GCP Billing Account."),
 		mcp.WithReadOnlyHintAnnotation(true),
 		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("project_id", mcp.Required(), mcp.DefaultString(c.DefaultProjectID()), mcp.Description("GCP project ID. Use "+c.DefaultProjectID()+" as the default if the user doesn't provide it.")),
@@ -79,7 +79,7 @@ func clusterCostByNamespace(ctx context.Context, request mcp.CallToolRequest) (*
 	billingAccountID = strings.ReplaceAll(billingAccountID, "-", "_")
 
 	t, err := template.New("").Parse(`
-The user can run this query in BigQuery Studio (https://pantheon.corp.google.com/bigquery):
+The user can run this query in BigQuery Studio (https://console.cloud.google.com/bigquery):
 SELECT
   SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-namespace",
   SUM(cost) AS cost_before_credits,
