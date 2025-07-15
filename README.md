@@ -32,7 +32,7 @@ Enable MCP-compatible AI agents to interact with Google Kubernetes Engine.
 
 ## Context 
 
-In addition to the tools above, a lot of value is provided through the bundles context instructions.
+In addition to the tools above, a lot of value is provided through the bundled context instructions.
 
 - **Cost**: The provided instructions allows the AI to answer many questions related to GKE costs, including queries related to clusters, namespaces, and Kubernetes workloads.
 
