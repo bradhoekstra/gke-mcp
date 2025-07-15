@@ -1,6 +1,8 @@
 module github.com/GoogleCloudPlatform/gke-mcp
 
-go 1.23.3
+go 1.24.0
+
+toolchain go1.24.5
 
 require (
 	cloud.google.com/go/container v1.43.0
