@@ -15,8 +15,6 @@
 name: Release
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
   push:
     tags:
       - 'v*'
