@@ -24,5 +24,8 @@ docker run \
   -e RUN_LOCAL=true \
   -e DEFAULT_BRANCH=main \
   -e VALIDATE_BASH=true \
+  -e VALIDATE_CHECKOV=true \
+  -e VALIDATE_YAML=true \
+  -e VALIDATE_YAML_PRETTIER=true \
   -v "$(pwd)":/tmp/lint \
   ghcr.io/super-linter/super-linter:slim-v8.0.0
