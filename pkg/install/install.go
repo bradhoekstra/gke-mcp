@@ -16,7 +16,6 @@ package install
 import (
 	_ "embed"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -49,7 +48,7 @@ func NewInstallOptions(
 
 	exePath, err := os.Executable()
 	if err != nil {
-		log.Fatalf("Failed to get executable path: %v", err)
+		return nil, fmt.Errorf("failed to get executable path: %w", err)
 	}
 
 	return &InstallOptions{
