@@ -205,7 +205,7 @@ func TestGeminiCLIExtension(t *testing.T) {
 }
 
 func TestGeminiCLIExtensionDeveloperMode(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "gemini-cli-test")
+	tmpDir, err := os.MkdirTemp(".", ".gemini-cli-test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
