@@ -20,6 +20,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func GeminiCLIExtension(opts *InstallOptions) error {
@@ -27,8 +28,8 @@ func GeminiCLIExtension(opts *InstallOptions) error {
 	contextFilename := "GEMINI.md"
 	// In developer mode, we use the GEMINI.md file directly from the repo.
 	if opts.developerMode {
-		if opts.version == "(devel)" {
-			return fmt.Errorf("Cannot install in developer mode using `go run`. Try again using `go build` and `./gke-mcp`.")
+		if strings.HasPrefix(opts.exePath, os.TempDir()) {
+			return fmt.Errorf("cannot install in developer mode using `go run`. Try again using `go build` and `./gke-mcp`")
 		}
 		log.Printf("version: %s", opts.version)
 		contextFilename = filepath.Join(filepath.Dir(opts.exePath), "pkg", "install", "GEMINI.md")
