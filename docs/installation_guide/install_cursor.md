@@ -10,7 +10,7 @@ Please follow the [installation instructions in the main readme](../../README.md
 
 ## Installing `gke-mcp` for Cursor via Command Line
 
-The `gke-mcp` tool provides a convenient command-line interface to automatically configure Cursor with the GKE MCP Server. This method handles the configuration files and rule creation automatically.
+The `gke-mcp` tool provides a convenient command-line interface to automatically configure Cursor with the GKE MCP mcp. This method handles the configuration files and rule creation automatically.
 
 ### Basic Installation
 

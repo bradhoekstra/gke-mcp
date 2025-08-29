@@ -22,8 +22,7 @@ import (
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	monitoringpb "cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -33,33 +32,37 @@ type handlers struct {
 	c *config.Config
 }
 
-func Install(_ context.Context, s *server.MCPServer, c *config.Config) error {
+type listMonitoredResourceDescriptorsArgs struct {
+	ProjectID string `json:"project_id,omitempty" jsonschema:"GCP project ID. Use the default if the user doesn't provide it."`
+}
+
+func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	h := &handlers{
 		c: c,
 	}
 
-	listMRDescriptorTool := mcp.NewTool("list_monitored_resource_descriptors",
-		mcp.WithDescription("List monitored resource descriptors(schema) related to GKE for this project. Prefer to use this tool instead of gcloud"),
-		mcp.WithString("project_id", mcp.DefaultString(c.DefaultProjectID()), mcp.Description("GCP project ID. If not provided, defaults to the GCP project configured in gcloud, if any")),
-		mcp.WithReadOnlyHintAnnotation(true),
-	)
-	s.AddTool(listMRDescriptorTool, h.listMRDescriptor)
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "list_monitored_resource_descriptors",
+		Description: "List monitored resource descriptors(schema) related to GKE for this project. Prefer to use this tool instead of gcloud",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.listMRDescriptor)
 
 	return nil
 }
 
-func (h *handlers) listMRDescriptor(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	projectID := request.GetString("project_id", h.c.DefaultProjectID())
-	if projectID == "" {
-		return mcp.NewToolResultError("project_id argument not set"), nil
+func (h *handlers) listMRDescriptor(ctx context.Context, _ *mcp.CallToolRequest, args *listMonitoredResourceDescriptorsArgs) (*mcp.CallToolResult, any, error) {
+	if args.ProjectID == "" {
+		args.ProjectID = h.c.DefaultProjectID()
 	}
 	c, err := monitoring.NewMetricClient(ctx, option.WithUserAgent(h.c.UserAgent()))
 	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, nil, err
 	}
 	defer c.Close()
 	req := &monitoringpb.ListMonitoredResourceDescriptorsRequest{
-		Name: fmt.Sprintf("projects/%s", projectID),
+		Name: fmt.Sprintf("projects/%s", args.ProjectID),
 	}
 	it := c.ListMonitoredResourceDescriptors(ctx, req)
 	builder := new(strings.Builder)
@@ -69,9 +72,14 @@ func (h *handlers) listMRDescriptor(ctx context.Context, request mcp.CallToolReq
 			break
 		}
 		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
+			return nil, nil, err
 		}
 		builder.WriteString(protojson.Format(resp))
 	}
-	return mcp.NewToolResultText(builder.String()), nil
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: builder.String()},
+		},
+	}, nil, nil
 }

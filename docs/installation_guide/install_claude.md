@@ -4,7 +4,7 @@ This guide covers installation of the GKE MCP server for Claude Desktop, Claude 
 
 ## Claude Desktop
 
-Claude Desktop provides a graphical interface for interacting with the GKE MCP Server.
+Claude Desktop provides a graphical interface for interacting with the GKE MCP mcp.
 
 ### Prerequisites
 

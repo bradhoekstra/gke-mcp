@@ -22,35 +22,37 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-func Install(_ context.Context, s *server.MCPServer, _ *config.Config) error {
-	clusterToolkitDownloadTool := mcp.NewTool("cluster_toolkit_download",
-		mcp.WithDescription("Cluster Toolkit, is open-source software offered by Google Cloud which simplifies the process for you to create Google Kubernetes Engine clusters and deploy high performance computing (HPC), artificial intelligence (AI), and machine learning (ML). It is designed to be highly customizable and extensible, and intends to address the deployment needs of a broad range of use cases. This tool will download the public git repository so that Cluster Toolkit can be used."),
-		mcp.WithReadOnlyHintAnnotation(true),
-		mcp.WithIdempotentHintAnnotation(true),
-		mcp.WithString("download_directory", mcp.Required(), mcp.Description("Download directory for the git repo. By default use the absolute path to the current working directory.")),
-	)
-	s.AddTool(clusterToolkitDownloadTool, clusterToolkitDownload)
+type clusterToolkitDownloadArgs struct {
+	DownloadDirectory string `json:"download_directory" jsonschema:"Download directory for the git repo. By default use the absolute path to the current working directory."`
+}
+
+func Install(_ context.Context, s *mcp.Server, _ *config.Config) error {
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "cluster_toolkit_download",
+		Description: "Cluster Toolkit, is open-source software offered by Google Cloud which simplifies the process for you to create Google Kubernetes Engine clusters and deploy high performance computing (HPC), artificial intelligence (AI), and machine learning (ML). It is designed to be highly customizable and extensible, and intends to address the deployment needs of a broad range of use cases. This tool will download the public git repository so that Cluster Toolkit can be used.",
+	}, clusterToolkitDownload)
 
 	return nil
 }
 
-func clusterToolkitDownload(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	download_dir, err := request.RequireString("download_directory")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
+func clusterToolkitDownload(ctx context.Context, _ *mcp.CallToolRequest, args *clusterToolkitDownloadArgs) (*mcp.CallToolResult, any, error) {
+	downloadDir := args.DownloadDirectory
 	// Make sure we download into a sub-directory
-	if !strings.HasSuffix(download_dir, "cluster-toolkit") {
-		download_dir = filepath.Join(download_dir, "cluster-toolkit")
+	if !strings.HasSuffix(downloadDir, "cluster-toolkit") {
+		downloadDir = filepath.Join(downloadDir, "cluster-toolkit")
 	}
-	out, err := exec.Command("git", "clone", "https://github.com/GoogleCloudPlatform/cluster-toolkit.git", download_dir).Output()
+	out, err := exec.Command("git", "clone", "https://github.com/GoogleCloudPlatform/cluster-toolkit.git", downloadDir).Output()
 	if err != nil {
 		log.Printf("Failed to download Cluster Toolkit: %v %s", err, out)
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, nil, err
 	}
-	return mcp.NewToolResultText(string(out)), nil
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: string(out)},
+		},
+	}, nil, nil
 }

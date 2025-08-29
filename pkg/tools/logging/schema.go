@@ -19,17 +19,15 @@ import (
 	"embed"
 	"fmt"
 	"path/filepath"
-	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 //go:embed schemas/*.md
 var schemas embed.FS
 
 type GetLogSchemaRequest struct {
-	LogType string `json:"log_type"`
+	LogType string `json:"log_type" jsonschema:"The type of log to get schema for."`
 }
 
 var supportedLogTypes = map[string]bool{
@@ -38,29 +36,30 @@ var supportedLogTypes = map[string]bool{
 	"k8s_event_logs":       true,
 }
 
-func installGetLogSchemas(s *server.MCPServer) {
-	var logTypeArr []string
-	for k := range supportedLogTypes {
-		logTypeArr = append(logTypeArr, k)
-	}
-	getLogSchemaTool := mcp.NewTool("get_log_schema",
-		mcp.WithDescription("Get the schema for a specific log type."),
-		mcp.WithReadOnlyHintAnnotation(true),
-		mcp.WithString("log_type", mcp.Description(fmt.Sprintf("The type of log to get schema for. Supported values are: ['%s'].", strings.Join(logTypeArr, "', '"))), mcp.Required()),
-	)
-	s.AddTool(getLogSchemaTool, mcp.NewTypedToolHandler(getLogSchema))
+func installGetLogSchemas(s *mcp.Server) {
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_log_schema",
+		Description: "Get the schema for a specific log type.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, getLogSchema)
 }
 
-func getLogSchema(_ context.Context, _ mcp.CallToolRequest, req GetLogSchemaRequest) (*mcp.CallToolResult, error) {
+func getLogSchema(_ context.Context, _ *mcp.CallToolRequest, req *GetLogSchemaRequest) (*mcp.CallToolResult, any, error) {
 	if supportedLogTypes[req.LogType] {
 		fileName := fmt.Sprintf("%s.md", req.LogType)
 		filePath := filepath.Join("schemas", fileName)
 		content, err := schemas.ReadFile(filePath)
 		if err != nil {
-			return nil, fmt.Errorf("could not find schema for log_type %s: %v", req.LogType, err)
+			return nil, nil, fmt.Errorf("could not find schema for log_type %s: %w", req.LogType, err)
 		}
-		return mcp.NewToolResultText(string(content)), nil
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				&mcp.TextContent{Text: string(content)},
+			},
+		}, nil, nil
 	} else {
-		return mcp.NewToolResultErrorf("unsupported log_type: %s", req.LogType), nil
+		return nil, nil, fmt.Errorf("unsupported log_type: %s", req.LogType)
 	}
 }

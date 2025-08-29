@@ -18,11 +18,11 @@ import (
 	"context"
 
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// Install adds GCP logging related tools to an MCP server.
-func Install(_ context.Context, s *server.MCPServer, c *config.Config) error {
+// Install adds GCP logging related tools to an MCP mcp.
+func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	installQueryLogsTool(s, c)
 	installGetLogSchemas(s)
 

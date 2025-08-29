@@ -24,12 +24,12 @@ import (
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/logging"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/monitoring"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/recommendation"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-type installer func(ctx context.Context, s *server.MCPServer, c *config.Config) error
+type installer func(ctx context.Context, s *mcp.Server, c *config.Config) error
 
-func Install(ctx context.Context, s *server.MCPServer, c *config.Config) error {
+func Install(ctx context.Context, s *mcp.Server, c *config.Config) error {
 	installers := []installer{
 		cluster.Install,
 		clustertoolkit.Install,

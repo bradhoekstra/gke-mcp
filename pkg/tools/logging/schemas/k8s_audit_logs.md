@@ -1,7 +1,7 @@
 # Kubernetes Audit Logs Schema
 
 The Kubernetes API server emits logs for each request that it processes, according to GKE’s audit policy.
-These logs are useful to understand which user performed what operation through the Kubernetes API server.
+These logs are useful to understand which user performed what operation through the Kubernetes API mcp.
 
 See [GKE audit logging information](https://cloud.google.com/kubernetes-engine/docs/how-to/audit-logging) for details about Kubernetes audit logs on GKE.
 

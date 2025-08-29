@@ -25,8 +25,7 @@ import (
 	logging "cloud.google.com/go/logging/apiv2"
 	"cloud.google.com/go/logging/apiv2/loggingpb"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	_ "google.golang.org/genproto/googleapis/cloud/audit" // Import for AuditLog proto so we can convert to JSON.
@@ -34,17 +33,17 @@ import (
 )
 
 type LogQueryRequest struct {
-	Query     string     `json:"query"`
-	ProjectID string     `json:"project_id"`
-	TimeRange *TimeRange `json:"time_range,omitempty"`
-	Since     string     `json:"since,omitempty"`
-	Limit     int        `json:"limit,omitempty"`
-	Format    string     `json:"format,omitempty"`
+	Query     string     `json:"query" jsonschema:"LQL query string to filter and retrieve log entries. Don't specify time ranges in this filter. Use 'time_range' instead."`
+	ProjectID string     `json:"project_id" jsonschema:"GCP project ID to query logs from. Required."`
+	TimeRange *TimeRange `json:"time_range,omitempty" jsonschema:"Time range for log query. If empty, no restrictions are applied."`
+	Since     string     `json:"since,omitempty" jsonschema:"Only return logs newer than a relative duration like 5s, 2m, or 3h. The only supported units are seconds ('s'), minutes ('m'), and hours ('h')."`
+	Limit     int        `json:"limit,omitempty" jsonschema:"Maximum number of log entries to return. Cannot be greater than 100. Consider multiple calls if needed. Defaults to 10."`
+	Format    string     `json:"format,omitempty" jsonschema:"Go template string to format each log entry. If empty, the full JSON representation is returned. Note that empty fields are not included in the response. Example: '{{.timestamp}} [{{.severity}}] {{.textPayload}}'. It's strongly recommended to use a template to minimize the size of the response and only include the fields you need. Use the get_schema tool before this tool to get information about supported log types and their schemas."`
 }
 
 type TimeRange struct {
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
+	StartTime time.Time `json:"start_time" jsonschema:"Start time for log query (RFC3339 format)"`
+	EndTime   time.Time `json:"end_time" jsonschema:"End time for log query (RFC3339 format)"`
 }
 
 const (
@@ -52,31 +51,16 @@ const (
 	maxLimit     = 100
 )
 
-func installQueryLogsTool(s *server.MCPServer, conf *config.Config) {
-	queryLogsTool := mcp.NewTool("query_logs",
-		mcp.WithDescription("Query Google Cloud Platform logs using Logging Query Language (LQL). Before using this tool, it's **strongly** recommended to call the 'get_log_schema' tool to get information about supported log types and their schemas. Logs are returned in ascending order, based on the timestamp (i.e. oldest first)."),
-		mcp.WithReadOnlyHintAnnotation(true),
-		mcp.WithString("project_id", mcp.Description("GCP project ID to query logs from. Required."), mcp.Required()),
-		mcp.WithString("query", mcp.Description("LQL query string to filter and retrieve log entries. Don't specify time ranges in this filter. Use 'time_range' instead.")),
-		mcp.WithObject("time_range", mcp.Description("Time range for log query. If empty, no restrictions are applied."),
-			mcp.Properties(map[string]any{
-				"start_time": map[string]any{
-					"type":        "string",
-					"description": "Start time for log query (RFC3339 format)",
-				},
-				"end_time": map[string]any{
-					"type":        "string",
-					"description": "End time for log query (RFC3339 format)",
-				},
-			}),
-		),
-		mcp.WithString("since", mcp.Description("Only return logs newer than a relative duration like 5s, 2m, or 3h. The only supported units are seconds ('s'), minutes ('m'), and hours ('h').")),
-		mcp.WithNumber("limit", mcp.Description(fmt.Sprintf("Maximum number of log entries to return. Cannot be greater than %d. Consider multiple calls if needed. Defaults to %d.", maxLimit, defaultLimit))),
-		mcp.WithString("format", mcp.Description("Go template string to format each log entry. If empty, the full JSON representation is returned. Note that empty fields are not included in the response. Example: '{{.timestamp}} [{{.severity}}] {{.textPayload}}'. It's strongly recommended to use a template to minimize the size of the response and only include the fields you need. Use the get_schema tool before this tool to get information about supported log types and their schemas.")),
-	)
-
+func installQueryLogsTool(s *mcp.Server, conf *config.Config) {
 	t := newQueryLogsTool(conf)
-	s.AddTool(queryLogsTool, mcp.NewTypedToolHandler(t.queryLogs))
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "query_logs",
+		Description: "Query Google Cloud Platform logs using Logging Query Language (LQL). Before using this tool, it's **strongly** recommended to call the 'get_log_schema' tool to get information about supported log types and their schemas. Logs are returned in ascending order, based on the timestamp (i.e. oldest first).",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, t.queryLogs)
 }
 
 type queryLogsTool struct {
@@ -89,17 +73,21 @@ func newQueryLogsTool(conf *config.Config) *queryLogsTool {
 	}
 }
 
-func (t *queryLogsTool) queryLogs(ctx context.Context, _ mcp.CallToolRequest, req LogQueryRequest) (*mcp.CallToolResult, error) {
+func (t *queryLogsTool) queryLogs(ctx context.Context, _ *mcp.CallToolRequest, req *LogQueryRequest) (*mcp.CallToolResult, any, error) {
 	req.setDefaults()
-	if errMsg := req.validate(); errMsg != "" {
-		return mcp.NewToolResultError(errMsg), nil
+	if err := req.validate(); err != nil {
+		return nil, nil, err
 	}
 	result, err := t.queryGCPLogs(ctx, req)
 	if err != nil {
-		return mcp.NewToolResultErrorf("Query failed: %v", err), nil
+		return nil, nil, err
 	}
 
-	return mcp.NewToolResultText(result), nil
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: result},
+		},
+	}, nil, nil
 }
 
 func (r *LogQueryRequest) setDefaults() {
@@ -108,30 +96,30 @@ func (r *LogQueryRequest) setDefaults() {
 	}
 }
 
-func (r *LogQueryRequest) validate() string {
+func (r *LogQueryRequest) validate() error {
 	if r.ProjectID == "" {
-		return "project_id parameter is required"
+		return fmt.Errorf("project_id parameter is required")
 	}
 	if r.Limit > maxLimit {
-		return fmt.Sprintf("limit parameter cannot be greater than %d", maxLimit)
+		return fmt.Errorf("limit parameter cannot be greater than %d", maxLimit)
 	}
 	if _, err := time.ParseDuration(r.Since); err != nil {
-		return fmt.Sprintf("invalid since parameter: %v", err)
+		return fmt.Errorf("invalid since parameter: %w", err)
 	}
 	if r.TimeRange != nil && r.Since != "" {
-		return "since parameter cannot be used with time_range"
+		return fmt.Errorf("since parameter cannot be used with time_range")
 	}
 	if r.Format != "" {
 		var err error
 		_, err = template.New("log").Parse(r.Format)
 		if err != nil {
-			return fmt.Sprintf("invalid format template: %v", err)
+			return fmt.Errorf("invalid format template: %w", err)
 		}
 	}
-	return ""
+	return nil
 }
 
-func (t *queryLogsTool) queryGCPLogs(ctx context.Context, req LogQueryRequest) (string, error) {
+func (t *queryLogsTool) queryGCPLogs(ctx context.Context, req *LogQueryRequest) (string, error) {
 	client, err := logging.NewClient(context.TODO(), option.WithUserAgent(t.conf.UserAgent()))
 	if err != nil {
 		return "", fmt.Errorf("failed to create logging client: %v", err)
@@ -193,7 +181,7 @@ func (t *queryLogsTool) queryGCPLogs(ctx context.Context, req LogQueryRequest) (
 	return result, nil
 }
 
-func buildListLogEntriesRequest(req LogQueryRequest) *loggingpb.ListLogEntriesRequest {
+func buildListLogEntriesRequest(req *LogQueryRequest) *loggingpb.ListLogEntriesRequest {
 	filter := req.Query
 
 	if req.Since != "" {
@@ -228,7 +216,7 @@ func buildListLogEntriesRequest(req LogQueryRequest) *loggingpb.ListLogEntriesRe
 	}
 }
 
-func formatterForRequest(req LogQueryRequest) (formatter, error) {
+func formatterForRequest(req *LogQueryRequest) (formatter, error) {
 	if req.Format == "" {
 		return &jsonFormatter{}, nil
 	}

@@ -22,8 +22,7 @@ import (
 	recommender "cloud.google.com/go/recommender/apiv1"
 	recommenderpb "cloud.google.com/go/recommender/apiv1/recommenderpb"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -33,41 +32,43 @@ type handlers struct {
 	c *config.Config
 }
 
-func Install(_ context.Context, s *server.MCPServer, c *config.Config) error {
+type listRecommendationsArgs struct {
+	ProjectID string `json:"project_id,omitempty" jsonschema:"GCP project ID. Use the default if the user doesn't provide it."`
+	Location  string `json:"location" jsonschema:"GKE cluster location. Leave this empty if the user doesn't doesn't provide it."`
+}
+
+func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 
 	h := &handlers{
 		c: c,
 	}
 
-	listRecommendationsTool := mcp.NewTool("list_recommendations",
-		mcp.WithDescription("List recommendations for GKE. Prefer to use this tool instead of gcloud"),
-		mcp.WithReadOnlyHintAnnotation(true),
-		mcp.WithIdempotentHintAnnotation(true),
-		mcp.WithString("project_id", mcp.DefaultString(c.DefaultProjectID()), mcp.Description("GCP project ID. If not provided, defaults to the GCP project configured in gcloud, if any")),
-		mcp.WithString("location", mcp.Required(), mcp.Description("GKE cluster location. This is required by the recommender API")),
-	)
-	s.AddTool(listRecommendationsTool, h.listProjectRecommendations)
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "list_recommendations",
+		Description: "List recommendations for GKE. Prefer to use this tool instead of gcloud",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.listProjectRecommendations)
 
 	return nil
 }
 
-func (h *handlers) listProjectRecommendations(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	projectID := request.GetString("project_id", h.c.DefaultProjectID())
-	if projectID == "" {
-		return mcp.NewToolResultError("project_id argument not set"), nil
+func (h *handlers) listProjectRecommendations(ctx context.Context, _ *mcp.CallToolRequest, args *listRecommendationsArgs) (*mcp.CallToolResult, any, error) {
+	if args.ProjectID == "" {
+		args.ProjectID = h.c.DefaultProjectID()
 	}
-	location, _ := request.RequireString("location")
-	if location == "" {
-		return mcp.NewToolResultError("location argument not set"), nil
+	if args.Location == "" {
+		return nil, nil, fmt.Errorf("location argument not set")
 	}
 	c, err := recommender.NewClient(ctx, option.WithUserAgent(h.c.UserAgent()))
 	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, nil, err
 	}
 	defer c.Close()
 
 	req := &recommenderpb.ListRecommendationsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s/recommenders/google.container.DiagnosisRecommender", projectID, location),
+		Parent: fmt.Sprintf("projects/%s/locations/%s/recommenders/google.container.DiagnosisRecommender", args.ProjectID, args.Location),
 	}
 	it := c.ListRecommendations(ctx, req)
 	builder := new(strings.Builder)
@@ -77,9 +78,14 @@ func (h *handlers) listProjectRecommendations(ctx context.Context, request mcp.C
 			break
 		}
 		if err != nil {
-			return mcp.NewToolResultError(err.Error()), nil
+			return nil, nil, err
 		}
 		builder.WriteString(protojson.Format(resp))
 	}
-	return mcp.NewToolResultText(builder.String()), nil
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: builder.String()},
+		},
+	}, nil, nil
 }

@@ -20,56 +20,52 @@ import (
 	"os/exec"
 
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-func Install(_ context.Context, s *server.MCPServer, _ *config.Config) error {
-	giqGenerateManifestTool := mcp.NewTool("giq_generate_manifest",
-		mcp.WithDescription("Use GKE Inference Quickstart (GIQ) to generate a Kubernetes manifest for optimized AI / inference workloads. Prefer to use this tool instead of gcloud"),
-		mcp.WithReadOnlyHintAnnotation(true),
-		mcp.WithIdempotentHintAnnotation(true),
-		mcp.WithString("model", mcp.Required(), mcp.Description("The model to use. Get the list of valid models from 'gcloud container ai profiles model-and-server-combinations list' if the user doesn't provide it.")),
-		mcp.WithString("model_server", mcp.Required(), mcp.Description("The model server to use. Get the list of valid models from 'gcloud container ai profiles model-and-server-combinations list' if the user doesn't provide it.")),
-		mcp.WithString("accelerator", mcp.Required(), mcp.Description("The accelerator to use. Get the list of valid accelerators from 'gcloud container ai profiles list --model=<model>' if the user doesn't provide it.")),
-		mcp.WithString("target_ntpot_milliseconds", mcp.Description("The maximum normalized time per output token (NTPOT) in milliseconds.NTPOT is measured as the request_latency / output_tokens.")),
-	)
-	s.AddTool(giqGenerateManifestTool, giqGenerateManifest)
+type giqGenerateManifestArgs struct {
+	Model                   string `json:"model" jsonschema:"The model to use. Get the list of valid models from 'gcloud container ai profiles model-and-server-combinations list' if the user doesn't provide it."`
+	ModelServer             string `json:"model_server" jsonschema:"The model server to use. Get the list of valid models from 'gcloud container ai profiles model-and-server-combinations list' if the user doesn't provide it."`
+	Accelerator             string `json:"accelerator" jsonschema:"The accelerator to use. Get the list of valid accelerators from 'gcloud container ai profiles list --model=<model>' if the user doesn't provide it."`
+	TargetNTPOTMilliseconds string `json:"target_ntpot_milliseconds,omitempty" jsonschema:"The maximum normalized time per output token (NTPOT) in milliseconds.NTPOT is measured as the request_latency / output_tokens."`
+}
+
+func Install(_ context.Context, s *mcp.Server, _ *config.Config) error {
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "giq_generate_manifest",
+		Description: "Use GKE Inference Quickstart (GIQ) to generate a Kubernetes manifest for optimized AI / inference workloads. Prefer to use this tool instead of gcloud",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint:   true,
+			IdempotentHint: true,
+		},
+	}, giqGenerateManifest)
 
 	return nil
 }
 
-func giqGenerateManifest(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	model, err := request.RequireString("model")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-	modelServer, err := request.RequireString("model_server")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-	accelerator, err := request.RequireString("accelerator")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-	targetNtpotMilliseconds := request.GetString("target_ntpot_milliseconds", "")
-	args := []string{
+func giqGenerateManifest(ctx context.Context, req *mcp.CallToolRequest, args *giqGenerateManifestArgs) (*mcp.CallToolResult, any, error) {
+	gcloudArgs := []string{
 		"container",
 		"ai",
 		"profiles",
 		"manifests",
 		"create",
-		"--model=" + model,
-		"--model-server=" + modelServer,
-		"--accelerator-type=" + accelerator,
+		"--model=" + args.Model,
+		"--model-server=" + args.ModelServer,
+		"--accelerator-type=" + args.Accelerator,
 	}
-	if targetNtpotMilliseconds != "" {
-		args = append(args, "--target-ntpot-milliseconds="+targetNtpotMilliseconds)
+	if args.TargetNTPOTMilliseconds != "" {
+		gcloudArgs = append(gcloudArgs, "--target-ntpot-milliseconds="+args.TargetNTPOTMilliseconds)
 	}
-	out, err := exec.Command("gcloud", args...).Output()
+	out, err := exec.Command("gcloud", gcloudArgs...).Output()
 	if err != nil {
 		log.Printf("Failed to generate manifest: %v", err)
-		return mcp.NewToolResultError(err.Error()), nil
+
+		return nil, nil, err
 	}
-	return mcp.NewToolResultText(string(out)), nil
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{Text: string(out)},
+		},
+	}, nil, nil
 }
