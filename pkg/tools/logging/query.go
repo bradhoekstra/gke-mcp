@@ -103,8 +103,10 @@ func (r *LogQueryRequest) validate() error {
 	if r.Limit > maxLimit {
 		return fmt.Errorf("limit parameter cannot be greater than %d", maxLimit)
 	}
-	if _, err := time.ParseDuration(r.Since); err != nil {
-		return fmt.Errorf("invalid since parameter: %w", err)
+	if r.Since != "" {
+		if _, err := time.ParseDuration(r.Since); err != nil {
+			return fmt.Errorf("invalid since parameter: %w", err)
+		}
 	}
 	if r.TimeRange != nil && r.Since != "" {
 		return fmt.Errorf("since parameter cannot be used with time_range")
@@ -120,7 +122,7 @@ func (r *LogQueryRequest) validate() error {
 }
 
 func (t *queryLogsTool) queryGCPLogs(ctx context.Context, req *LogQueryRequest) (string, error) {
-	client, err := logging.NewClient(context.TODO(), option.WithUserAgent(t.conf.UserAgent()))
+	client, err := logging.NewClient(ctx, option.WithUserAgent(t.conf.UserAgent()))
 	if err != nil {
 		return "", fmt.Errorf("failed to create logging client: %v", err)
 	}

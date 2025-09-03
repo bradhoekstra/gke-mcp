@@ -61,12 +61,12 @@ func giqGenerateManifest(ctx context.Context, req *mcp.CallToolRequest, args *gi
 		"profiles",
 		"manifests",
 		"create",
-		"--model=" + args.Model,
-		"--model-server=" + args.ModelServer,
-		"--accelerator-type=" + args.Accelerator,
+		"--model", args.Model,
+		"--model-server", args.ModelServer,
+		"--accelerator-type", args.Accelerator,
 	}
 	if args.TargetNTPOTMilliseconds != "" {
-		gcloudArgs = append(gcloudArgs, "--target-ntpot-milliseconds="+args.TargetNTPOTMilliseconds)
+		gcloudArgs = append(gcloudArgs, "--target-ntpot-milliseconds", args.TargetNTPOTMilliseconds)
 	}
 	out, err := exec.Command("gcloud", gcloudArgs...).Output()
 	if err != nil {
