@@ -56,6 +56,9 @@ func (h *handlers) listMRDescriptor(ctx context.Context, _ *mcp.CallToolRequest,
 	if args.ProjectID == "" {
 		args.ProjectID = h.c.DefaultProjectID()
 	}
+	if args.ProjectID == "" {
+		return nil, nil, fmt.Errorf("project_id argument cannot be empty")
+	}
 	c, err := monitoring.NewMetricClient(ctx, option.WithUserAgent(h.c.UserAgent()))
 	if err != nil {
 		return nil, nil, err

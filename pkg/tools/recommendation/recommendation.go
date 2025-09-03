@@ -58,6 +58,9 @@ func (h *handlers) listProjectRecommendations(ctx context.Context, _ *mcp.CallTo
 	if args.ProjectID == "" {
 		args.ProjectID = h.c.DefaultProjectID()
 	}
+	if args.ProjectID == "" {
+		return nil, nil, fmt.Errorf("project_id argument cannot be empty")
+	}
 	if args.Location == "" {
 		return nil, nil, fmt.Errorf("location argument not set")
 	}

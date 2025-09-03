@@ -16,6 +16,7 @@ package clustertoolkit
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os/exec"
 	"path/filepath"
@@ -39,6 +40,9 @@ func Install(_ context.Context, s *mcp.Server, _ *config.Config) error {
 }
 
 func clusterToolkitDownload(ctx context.Context, _ *mcp.CallToolRequest, args *clusterToolkitDownloadArgs) (*mcp.CallToolResult, any, error) {
+	if args.DownloadDirectory == "" {
+		return nil, nil, fmt.Errorf("download_directory argument cannot be empty")
+	}
 	downloadDir := args.DownloadDirectory
 	// Make sure we download into a sub-directory
 	if !strings.HasSuffix(downloadDir, "cluster-toolkit") {

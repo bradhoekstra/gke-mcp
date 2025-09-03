@@ -252,7 +252,7 @@ func runInstallCursorCmd(cmd *cobra.Command, args []string) {
 	if err := install.CursorMCPExtension(opts); err != nil {
 		log.Fatalf("Failed to install for cursor: %v", err)
 	}
-	fmt.Println("Successfully installed GKE MCP server as a cursor MCP mcp.")
+	fmt.Println("Successfully installed GKE MCP server as a cursor MCP server.")
 }
 
 func runInstallClaudeDesktopCmd(cmd *cobra.Command, args []string) {

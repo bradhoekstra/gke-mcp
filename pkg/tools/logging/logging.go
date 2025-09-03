@@ -21,7 +21,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// Install adds GCP logging related tools to an MCP mcp.
+// Install adds GCP logging related tools to an MCP server.
 func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	installQueryLogsTool(s, c)
 	installGetLogSchemas(s)

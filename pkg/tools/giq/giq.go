@@ -16,6 +16,7 @@ package giq
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os/exec"
 
@@ -44,6 +45,16 @@ func Install(_ context.Context, s *mcp.Server, _ *config.Config) error {
 }
 
 func giqGenerateManifest(ctx context.Context, req *mcp.CallToolRequest, args *giqGenerateManifestArgs) (*mcp.CallToolResult, any, error) {
+	if args.Model == "" {
+		return nil, nil, fmt.Errorf("model argument cannot be empty")
+	}
+	if args.ModelServer == "" {
+		return nil, nil, fmt.Errorf("model_server argument cannot be empty")
+	}
+	if args.Accelerator == "" {
+		return nil, nil, fmt.Errorf("accelerator argument cannot be empty")
+	}
+
 	gcloudArgs := []string{
 		"container",
 		"ai",

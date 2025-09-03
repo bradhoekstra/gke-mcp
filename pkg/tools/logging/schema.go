@@ -27,7 +27,7 @@ import (
 var schemas embed.FS
 
 type GetLogSchemaRequest struct {
-	LogType string `json:"log_type" jsonschema:"The type of log to get schema for."`
+	LogType string `json:"log_type" jsonschema:"The type of log to get schema for. Supported values are: ['k8s_audit_logs', 'k8s_application_logs', 'k8s_event_logs']."`
 }
 
 var supportedLogTypes = map[string]bool{

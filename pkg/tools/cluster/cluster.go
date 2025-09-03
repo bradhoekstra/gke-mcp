@@ -100,6 +100,12 @@ func (h *handlers) getCluster(ctx context.Context, _ *mcp.CallToolRequest, args 
 	if args.ProjectID == "" {
 		args.ProjectID = h.c.DefaultProjectID()
 	}
+	if args.Location == "" {
+		args.Location = h.c.DefaultLocation()
+	}
+	if args.Name == "" {
+		return nil, nil, fmt.Errorf("name argument cannot be empty")
+	}
 
 	req := &containerpb.GetClusterRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/clusters/%s", args.ProjectID, args.Location, args.Name),
