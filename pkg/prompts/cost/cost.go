@@ -21,7 +21,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 const gkeCostPromptTemplate = `
@@ -44,17 +45,24 @@ Always be helpful, specific, and actionable in your response.
 
 var gkeCostTmpl = template.Must(template.New("gke-cost").Parse(gkeCostPromptTemplate))
 
-// GkeCostPrompt defines the /gke:cost command
-var GkeCostPrompt = mcp.NewPrompt("gke:cost",
-	mcp.WithPromptDescription("Answer natural language questions about GKE-related costs by leveraging the bundled cost context instructions within the gke-mcp server."),
-	mcp.WithArgument("user_question",
-		mcp.ArgumentDescription("The user's natural language question about GKE costs"),
-		mcp.RequiredArgument(),
-	),
-)
+func Install(_ context.Context, s *mcp.Server, _ *config.Config) error {
+	s.AddPrompt(&mcp.Prompt{
+		Name:        "gke:cost",
+		Description: "Answer natural language questions about GKE-related costs by leveraging the bundled cost context instructions within the gke-mcp server.",
+		Arguments: []*mcp.PromptArgument{
+			{
+				Name:        "user_question",
+				Description: "The user's natural language question about GKE costs",
+				Required:    true,
+			},
+		},
+	}, gkeCostHandler)
 
-// GkeCostHandler is the handler function for the /gke:cost prompt
-func GkeCostHandler(_ context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+	return nil
+}
+
+// gkeCostHandler is the handler function for the /gke:cost prompt
+func gkeCostHandler(_ context.Context, request *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	userQuestion := request.Params.Arguments["user_question"]
 	if strings.TrimSpace(userQuestion) == "" {
 		return nil, fmt.Errorf("argument 'user_question' cannot be empty")
@@ -65,13 +73,15 @@ func GkeCostHandler(_ context.Context, request mcp.GetPromptRequest) (*mcp.GetPr
 		return nil, fmt.Errorf("failed to execute prompt template: %w", err)
 	}
 
-	return mcp.NewGetPromptResult(
-		"GKE Cost Analysis Prompt",
-		[]mcp.PromptMessage{
-			mcp.NewPromptMessage(
-				mcp.RoleUser, // Using RoleUser to pass the whole block as user input
-				mcp.NewTextContent(buf.String()),
-			),
+	return &mcp.GetPromptResult{
+		Description: "GKE Cost Analysis Prompt",
+		Messages: []*mcp.PromptMessage{
+			{
+				Content: &mcp.TextContent{
+					Text: buf.String(),
+				},
+				Role: "user",
+			},
 		},
-	), nil
+	}, nil
 }

@@ -28,7 +28,7 @@ import (
 	"cloud.google.com/go/container/apiv1/containerpb"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/install"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/prompts/cost"
+	"github.com/GoogleCloudPlatform/gke-mcp/pkg/prompts"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/spf13/cobra"
@@ -165,7 +165,9 @@ func startMCPServer(ctx context.Context, opts startOptions) {
 		}, nil
 	})
 
-	s.AddPrompt(cost.GkeCostPrompt, cost.GkeCostHandler)
+	if err := prompts.Install(ctx, s, c); err != nil {
+		log.Fatalf("Failed to install prompts: %v\n", err)
+	}
 
 	if err := tools.Install(ctx, s, c); err != nil {
 		log.Fatalf("Failed to install tools: %v\n", err)
@@ -178,7 +180,8 @@ func startMCPServer(ctx context.Context, opts startOptions) {
 
 	switch opts.serverMode {
 	case "stdio":
-		err = s.Run(ctx, &mcp.StdioTransport{})
+		tr := &mcp.LoggingTransport{Transport: &mcp.StdioTransport{}, Writer: log.Writer()}
+		err = s.Run(ctx, tr)
 	case "http":
 		handler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
 			return s
@@ -187,7 +190,8 @@ func startMCPServer(ctx context.Context, opts startOptions) {
 		err = http.ListenAndServe(endpoint, handler)
 	default:
 		log.Printf("Unknown mode '%s', defaulting to 'stdio'", opts.serverMode)
-		err = s.Run(ctx, &mcp.StdioTransport{})
+		tr := &mcp.LoggingTransport{Transport: &mcp.StdioTransport{}, Writer: log.Writer()}
+		err = s.Run(ctx, tr)
 	}
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
