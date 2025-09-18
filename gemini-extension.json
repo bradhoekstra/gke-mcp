@@ -3,7 +3,7 @@
   "description": "Enable MCP-compatible AI agents to interact with Google Kubernetes Engine.",
   "mcpServers": {
     "gke": {
-      "command": "gke-mcp"
+      "command": "${extensionPath}${/}gke-mcp"
     }
   },
   "name": "gke-mcp",
