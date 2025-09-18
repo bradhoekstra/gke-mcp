@@ -15,7 +15,7 @@ archives:
   - formats: [tar.gz]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
-      {{  title .Os }}-
+      {{  .Os }}-
       {{- if eq .Arch "amd64" }}x64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
