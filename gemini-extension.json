@@ -1,0 +1,11 @@
+{
+  "contextFileName": "pkg/install/GEMINI.md",
+  "description": "Enable MCP-compatible AI agents to interact with Google Kubernetes Engine.",
+  "mcpServers": {
+    "gke": {
+      "command": "gke-mcp"
+    }
+  },
+  "name": "gke-mcp",
+  "version": "v0.1.0"
+}
