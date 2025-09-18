@@ -29,6 +29,8 @@ archives:
     files:
       - LICENSE
       - gemini-extension.json
+      - src: pkg/install/GEMINI.md
+        strip_parent: true
 
 changelog:
   use: github
