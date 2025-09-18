@@ -15,11 +15,11 @@ archives:
   - formats: [tar.gz]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
-      {{  .Os }}-
+      {{  .Os }}.
       {{- if eq .Arch "amd64" }}x64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}-
+      {{- if .Arm }}v{{ .Arm }}{{ end }}.
       {{- .ProjectName }}
     # use zip for windows archives
     format_overrides:
