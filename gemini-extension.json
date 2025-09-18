@@ -6,6 +6,5 @@
       "command": "${extensionPath}${/}gke-mcp"
     }
   },
-  "name": "gke-mcp",
-  "version": "v0.1.0"
+  "name": "gke-mcp"
 }
