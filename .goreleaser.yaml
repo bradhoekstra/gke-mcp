@@ -27,7 +27,8 @@ archives:
       - goos: windows
         formats: [zip]
 
-  - formats: [tar.gz]
+  - id: gemini-extension
+    formats: [tar.gz]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{  .Os }}.
