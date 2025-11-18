@@ -122,3 +122,13 @@ To compile the binary and update the `gemini-cli` extension with your local chan
    ```
 
    This will make `gemini-cli` use your locally compiled binary.
+
+## Disclaimers
+
+- The Google Cloud Platform Terms of Service (available at https://cloud.google.com/terms/) and the Data Processing and Security Terms (available at https://cloud.google.com/terms/data-processing-terms) do not apply to any component of the GKE MCP Server software.
+- This tool is provided for education and experimentation, and is not an officially supported Google product.  It is maintained on a best-effort basis, and may change without notice.
+- This project interacts with Large Language Models and comes with inherent risks.
+  *   **Use at Your Own Risk:** This software is experimental, non-deterministic, and provided "AS IS" with NO GUARANTEES or warranties.
+  *   **NOT FOR PRODUCTION USE.**
+  *   **Data Sensitivity:** Avoid using untrusted data. NEVER input secrets, API keys, or sensitive information.
+  *   **Verify Outputs:** LLM responses can be unpredictable and may be inaccurate. Always verify results.
