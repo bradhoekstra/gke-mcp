@@ -17,11 +17,11 @@ package prompts
 import (
 	"context"
 
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/prompts/cost"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/prompts/deploy"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/prompts/upgraderiskreport"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/prompts/upgradesbestpracticesriskreport"
+	"github.com/bradhoekstra/gke-mcp/pkg/config"
+	"github.com/bradhoekstra/gke-mcp/pkg/prompts/cost"
+	"github.com/bradhoekstra/gke-mcp/pkg/prompts/deploy"
+	"github.com/bradhoekstra/gke-mcp/pkg/prompts/upgraderiskreport"
+	"github.com/bradhoekstra/gke-mcp/pkg/prompts/upgradesbestpracticesriskreport"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
