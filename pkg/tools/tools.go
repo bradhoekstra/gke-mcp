@@ -17,15 +17,15 @@ package tools
 import (
 	"context"
 
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/cluster"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/clustertoolkit"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/giq"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/gkereleasenotes"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/k8schangelog"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/logging"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/monitoring"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/recommendation"
+	"github.com/bradhoekstra/gke-mcp/pkg/config"
+	"github.com/bradhoekstra/gke-mcp/pkg/tools/cluster"
+	"github.com/bradhoekstra/gke-mcp/pkg/tools/clustertoolkit"
+	"github.com/bradhoekstra/gke-mcp/pkg/tools/giq"
+	"github.com/bradhoekstra/gke-mcp/pkg/tools/gkereleasenotes"
+	"github.com/bradhoekstra/gke-mcp/pkg/tools/k8schangelog"
+	"github.com/bradhoekstra/gke-mcp/pkg/tools/logging"
+	"github.com/bradhoekstra/gke-mcp/pkg/tools/monitoring"
+	"github.com/bradhoekstra/gke-mcp/pkg/tools/recommendation"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

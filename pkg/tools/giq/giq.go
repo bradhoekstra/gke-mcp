@@ -20,7 +20,7 @@ import (
 	"log"
 	"os/exec"
 
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
+	"github.com/bradhoekstra/gke-mcp/pkg/config"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
