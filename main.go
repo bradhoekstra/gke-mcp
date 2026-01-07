@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/GoogleCloudPlatform/gke-mcp/cmd"
+import "github.com/bradhoekstra/gke-mcp/cmd"
 
 func main() {
 	cmd.Execute()
