@@ -24,7 +24,7 @@ import (
 
 	logging "cloud.google.com/go/logging/apiv2"
 	"cloud.google.com/go/logging/apiv2/loggingpb"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
+	"github.com/bradhoekstra/gke-mcp/pkg/config"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -35,7 +35,7 @@ import (
 type LogQueryRequest struct {
 	Query     string     `json:"query" jsonschema:"LQL query string to filter and retrieve log entries. Don't specify time ranges in this filter. Use 'time_range' instead."`
 	ProjectID string     `json:"project_id" jsonschema:"GCP project ID to query logs from. Required."`
-	TimeRange *TimeRange `json:"time_range,omitempty" jsonschema:"Time range for log query. If empty, no restrictions are applied."`
+	TimeRange TimeRange `json:"time_range,omitempty" jsonschema:"Time range for log query. If empty, no restrictions are applied."`
 	Since     string     `json:"since,omitempty" jsonschema:"Only return logs newer than a relative duration like 5s, 2m, or 3h. The only supported units are seconds ('s'), minutes ('m'), and hours ('h')."`
 	Limit     int        `json:"limit,omitempty" jsonschema:"Maximum number of log entries to return. Cannot be greater than 100. Consider multiple calls if needed. Defaults to 10."`
 	Format    string     `json:"format,omitempty" jsonschema:"Go template string to format each log entry. If empty, the full JSON representation is returned. Note that empty fields are not included in the response. Example: '{{.timestamp}} [{{.severity}}] {{.textPayload}}'. It's strongly recommended to use a template to minimize the size of the response and only include the fields you need. Use the get_schema tool before this tool to get information about supported log types and their schemas."`
@@ -56,7 +56,7 @@ func installQueryLogsTool(s *mcp.Server, conf *config.Config) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "query_logs",
-		Description: "Query Google Cloud Platform logs using Logging Query Language (LQL). Before using this tool, it's **strongly** recommended to call the 'get_log_schema' tool to get information about supported log types and their schemas. Logs are returned in ascending order, based on the timestamp (i.e. oldest first).",
+		Description: "Query Google Cloud Platform logs using Logging Query Language (LQL).",
 		Annotations: &mcp.ToolAnnotations{
 			ReadOnlyHint: true,
 		},
@@ -108,9 +108,9 @@ func (r *LogQueryRequest) validate() error {
 			return fmt.Errorf("invalid since parameter: %w", err)
 		}
 	}
-	if r.TimeRange != nil && r.Since != "" {
-		return fmt.Errorf("since parameter cannot be used with time_range")
-	}
+	// if r.TimeRange != nil && r.Since != "" {
+	// 	return fmt.Errorf("since parameter cannot be used with time_range")
+	// }
 	if r.Format != "" {
 		var err error
 		_, err = template.New("log").Parse(r.Format)
@@ -186,30 +186,30 @@ func (t *queryLogsTool) queryGCPLogs(ctx context.Context, req *LogQueryRequest) 
 func buildListLogEntriesRequest(req *LogQueryRequest) *loggingpb.ListLogEntriesRequest {
 	filter := req.Query
 
-	if req.Since != "" {
-		since, err := time.ParseDuration(req.Since)
-		if err != nil {
-			return nil
-		}
-		req.TimeRange = &TimeRange{
-			StartTime: time.Now().Add(-since),
-		}
-	}
-	if req.TimeRange != nil {
-		var timeFilters []string
-		if !req.TimeRange.StartTime.IsZero() {
-			timeFilters = append(timeFilters, fmt.Sprintf(`timestamp >= "%s"`, req.TimeRange.StartTime.Format(time.RFC3339)))
-		}
-		if !req.TimeRange.EndTime.IsZero() {
-			timeFilters = append(timeFilters, fmt.Sprintf(`timestamp <= "%s"`, req.TimeRange.EndTime.Format(time.RFC3339)))
-		}
-		if len(timeFilters) > 0 {
-			if filter != "" {
-				filter += " AND "
-			}
-			filter += strings.Join(timeFilters, " AND ")
-		}
-	}
+	// if req.Since != "" {
+	// 	since, err := time.ParseDuration(req.Since)
+	// 	if err != nil {
+	// 		return nil
+	// 	}
+	// 	req.TimeRange = &TimeRange{
+	// 		StartTime: time.Now().Add(-since),
+	// 	}
+	// }
+	// if req.TimeRange != nil {
+	// 	var timeFilters []string
+	// 	if !req.TimeRange.StartTime.IsZero() {
+	// 		timeFilters = append(timeFilters, fmt.Sprintf(`timestamp >= "%s"`, req.TimeRange.StartTime.Format(time.RFC3339)))
+	// 	}
+	// 	if !req.TimeRange.EndTime.IsZero() {
+	// 		timeFilters = append(timeFilters, fmt.Sprintf(`timestamp <= "%s"`, req.TimeRange.EndTime.Format(time.RFC3339)))
+	// 	}
+	// 	if len(timeFilters) > 0 {
+	// 		if filter != "" {
+	// 			filter += " AND "
+	// 		}
+	// 		filter += strings.Join(timeFilters, " AND ")
+	// 	}
+	// }
 	return &loggingpb.ListLogEntriesRequest{
 		ResourceNames: []string{fmt.Sprintf("projects/%s", req.ProjectID)},
 		Filter:        filter,

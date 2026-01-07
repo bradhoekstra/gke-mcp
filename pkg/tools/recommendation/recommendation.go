@@ -21,7 +21,7 @@ import (
 
 	recommender "cloud.google.com/go/recommender/apiv1"
 	recommenderpb "cloud.google.com/go/recommender/apiv1/recommenderpb"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
+	"github.com/bradhoekstra/gke-mcp/pkg/config"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
