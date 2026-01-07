@@ -27,8 +27,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/bradhoekstra/gke-mcp/pkg/config"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

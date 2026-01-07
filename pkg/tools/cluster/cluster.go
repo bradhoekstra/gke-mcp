@@ -23,7 +23,7 @@ import (
 
 	container "cloud.google.com/go/container/apiv1"
 	containerpb "cloud.google.com/go/container/apiv1/containerpb"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
+	"github.com/bradhoekstra/gke-mcp/pkg/config"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/encoding/protojson"

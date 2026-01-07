@@ -24,7 +24,7 @@ import (
 
 	logging "cloud.google.com/go/logging/apiv2"
 	"cloud.google.com/go/logging/apiv2/loggingpb"
-	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
+	"github.com/bradhoekstra/gke-mcp/pkg/config"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -56,7 +56,7 @@ func installQueryLogsTool(s *mcp.Server, conf *config.Config) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "query_logs",
-		Description: "Query Google Cloud Platform logs using Logging Query Language (LQL). Before using this tool, it's **strongly** recommended to call the 'get_log_schema' tool to get information about supported log types and their schemas. Logs are returned in ascending order, based on the timestamp (i.e. oldest first).",
+		Description: "Query Google Cloud Platform logs using Logging Query Language (LQL).",
 		Annotations: &mcp.ToolAnnotations{
 			ReadOnlyHint: true,
 		},

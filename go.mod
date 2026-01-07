@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/gke-mcp
+module github.com/bradhoekstra/gke-mcp
 
 go 1.24.0
 
