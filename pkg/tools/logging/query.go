@@ -33,12 +33,12 @@ import (
 )
 
 type LogQueryRequest struct {
-	Query     string     `json:"query" jsonschema:"LQL query string to filter and retrieve log entries. Don't specify time ranges in this filter. Use 'time_range' instead."`
-	ProjectID string     `json:"project_id" jsonschema:"GCP project ID to query logs from. Required."`
-	TimeRange *TimeRange `json:"time_range,omitempty" jsonschema:"Time range for log query. If empty, no restrictions are applied."`
-	Since     string     `json:"since,omitempty" jsonschema:"Only return logs newer than a relative duration like 5s, 2m, or 3h. The only supported units are seconds ('s'), minutes ('m'), and hours ('h')."`
-	Limit     int        `json:"limit,omitempty" jsonschema:"Maximum number of log entries to return. Cannot be greater than 100. Consider multiple calls if needed. Defaults to 10."`
-	Format    string     `json:"format,omitempty" jsonschema:"Go template string to format each log entry. If empty, the full JSON representation is returned. Note that empty fields are not included in the response. Example: '{{.timestamp}} [{{.severity}}] {{.textPayload}}'. It's strongly recommended to use a template to minimize the size of the response and only include the fields you need. Use the get_schema tool before this tool to get information about supported log types and their schemas."`
+	Query     string    `json:"query" jsonschema:"LQL query string to filter and retrieve log entries. Don't specify time ranges in this filter. Use 'time_range' instead."`
+	ProjectID string    `json:"project_id" jsonschema:"GCP project ID to query logs from. Required."`
+	TimeRange TimeRange `json:"time_range,omitempty" jsonschema:"Time range for log query. If empty, no restrictions are applied."`
+	Since     string    `json:"since,omitempty" jsonschema:"Only return logs newer than a relative duration like 5s, 2m, or 3h. The only supported units are seconds ('s'), minutes ('m'), and hours ('h')."`
+	Limit     int       `json:"limit,omitempty" jsonschema:"Maximum number of log entries to return. Cannot be greater than 100. Consider multiple calls if needed. Defaults to 10."`
+	Format    string    `json:"format,omitempty" jsonschema:"Go template string to format each log entry. If empty, the full JSON representation is returned. Note that empty fields are not included in the response. Example: '{{.timestamp}} [{{.severity}}] {{.textPayload}}'. It's strongly recommended to use a template to minimize the size of the response and only include the fields you need. Use the get_schema tool before this tool to get information about supported log types and their schemas."`
 }
 
 type TimeRange struct {
@@ -108,7 +108,7 @@ func (r *LogQueryRequest) validate() error {
 			return fmt.Errorf("invalid since parameter: %w", err)
 		}
 	}
-	if r.TimeRange != nil && r.Since != "" {
+	if (r.TimeRange != TimeRange{}) && r.Since != "" {
 		return fmt.Errorf("since parameter cannot be used with time_range")
 	}
 	if r.Format != "" {
@@ -191,11 +191,12 @@ func buildListLogEntriesRequest(req *LogQueryRequest) *loggingpb.ListLogEntriesR
 		if err != nil {
 			return nil
 		}
-		req.TimeRange = &TimeRange{
+		req.TimeRange = TimeRange{
 			StartTime: time.Now().Add(-since),
 		}
 	}
-	if req.TimeRange != nil {
+	// filters based on TimeRange
+	{
 		var timeFilters []string
 		if !req.TimeRange.StartTime.IsZero() {
 			timeFilters = append(timeFilters, fmt.Sprintf(`timestamp >= "%s"`, req.TimeRange.StartTime.Format(time.RFC3339)))
