@@ -67,7 +67,7 @@ func TestLogQueryRequest_Validate(t *testing.T) {
 			req: LogQueryRequest{
 				ProjectID: "test-project",
 				Since:     "1h",
-				TimeRange: &TimeRange{
+				TimeRange: TimeRange{
 					StartTime: time.Now(),
 				},
 			},
@@ -119,7 +119,7 @@ func TestBuildListLogEntriesRequest(t *testing.T) {
 				ProjectID: "test-project",
 				Query:     "severity=ERROR",
 				Limit:     10,
-				TimeRange: &TimeRange{
+				TimeRange: TimeRange{
 					StartTime: now.Add(-1 * time.Hour),
 					EndTime:   now,
 				},
