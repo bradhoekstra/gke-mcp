@@ -31,6 +31,7 @@ import (
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/prompts"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"google.golang.org/api/option"
 )
@@ -43,8 +44,10 @@ var (
 	version = "(unknown)"
 
 	// command flags
-	serverMode string
-	serverPort int
+	serverMode     string
+	serverHost     string
+	serverPort     int
+	allowedOrigins []string
 
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd = &cobra.Command{
@@ -103,7 +106,9 @@ func init() {
 	}
 
 	rootCmd.Flags().StringVar(&serverMode, "server-mode", "stdio", "transport to use for the server: stdio (default) or http")
+	rootCmd.Flags().StringVar(&serverHost, "server-host", "127.0.0.1", "server host to use when server-mode is http; defaults to 127.0.0.1")
 	rootCmd.Flags().IntVar(&serverPort, "server-port", 8080, "server port to use when server-mode is http; defaults to 8080")
+	rootCmd.Flags().StringSliceVar(&allowedOrigins, "allowed-origins", []string{"http://localhost"}, "comma-separated list of allowed Origin headers")
 	rootCmd.AddCommand(installCmd)
 
 	installCmd.AddCommand(installGeminiCLICmd)
@@ -119,14 +124,18 @@ func init() {
 }
 
 type startOptions struct {
-	serverMode string
-	serverPort int
+	serverMode     string
+	serverHost     string
+	serverPort     int
+	allowedOrigins []string
 }
 
 func runRootCmd(cmd *cobra.Command, args []string) {
 	opts := startOptions{
-		serverMode: serverMode,
-		serverPort: serverPort,
+		serverMode:     serverMode,
+		serverHost:     serverHost,
+		serverPort:     serverPort,
+		allowedOrigins: allowedOrigins,
 	}
 	startMCPServer(cmd.Context(), opts)
 }
@@ -184,18 +193,26 @@ func startMCPServer(ctx context.Context, opts startOptions) {
 	// start server in the right mode
 	log.Printf("Starting GKE MCP Server (%s) in mode '%s'", version, opts.serverMode)
 	var err error
-	endpoint := fmt.Sprintf(":%d", opts.serverPort)
 
 	switch opts.serverMode {
 	case "stdio":
 		tr := &mcp.LoggingTransport{Transport: &mcp.StdioTransport{}, Writer: log.Writer()}
 		err = s.Run(ctx, tr)
 	case "http":
-		handler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
+		mcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
 			return s
 		}, nil)
-		log.Printf("Listening for HTTP connections on port: %d", opts.serverPort)
-		err = http.ListenAndServe(endpoint, handler)
+
+		// Create a new CORS handler
+		c := cors.New(cors.Options{
+			AllowedOrigins: allowedOrigins,
+			Debug:          true, // Enable debug logging to see what the library is doing
+		})
+		corsHandler := c.Handler(mcpHandler)
+
+		addr := fmt.Sprintf("%s:%d", opts.serverHost, opts.serverPort)
+		log.Printf("Listening for HTTP connections on port: %s", addr)
+		err = http.ListenAndServe(addr, corsHandler)
 	default:
 		log.Printf("Unknown mode '%s', defaulting to 'stdio'", opts.serverMode)
 		tr := &mcp.LoggingTransport{Transport: &mcp.StdioTransport{}, Writer: log.Writer()}
