@@ -26,14 +26,14 @@ git checkout upstream/main
 TAG=$(git tag --points-at HEAD)
 VERSION="${TAG/v/}"
 
-git branch -D update-version-${TAG} || true
-git checkout -b update-version-${TAG}
+git branch -D "update-version-${TAG}" || true
+git checkout -b "update-version-${TAG}"
 
 tmp=$(mktemp)
 jq --arg ver "${VERSION}" '.version = $ver' gemini-extension.json > "${tmp}" && mv "${tmp}" gemini-extension.json
 
 git add gemini-extension.json
 git commit -m "chore: Update Gemini extension JSON to ${TAG}"
-git push -u origin update-version-${TAG}
+git push -u origin "update-version-${TAG}"
 
 gh pr create -f
