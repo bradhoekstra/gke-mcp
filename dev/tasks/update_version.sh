@@ -24,7 +24,7 @@ git fetch upstream main
 git checkout upstream/main
 
 TAG=$(git tag --points-at HEAD)
-VERSION=$(echo ${TAG} | sed 's/^v//')
+VERSION="${TAG/v/}"
 
 git branch -D update-version-${TAG} || true
 git checkout -b update-version-${TAG}
