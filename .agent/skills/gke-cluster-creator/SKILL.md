@@ -9,18 +9,18 @@ This skill helps users create Google Kubernetes Engine (GKE) clusters by providi
 
 ## core_behavior
 
-1.  **Template Selection**:
-    - Present the available templates to the user if they haven't specified one.
-    - Explain the trade-offs (e.g., Cost vs. Availability, Autopilot vs. Standard).
-2.  **Customization**:
-    - Once a template is selected, present the default configuration (JSON/YAML).
-    - Ask the user for essential missing information: `project_id`, `location`, `cluster_name`.
-    - Ask if they want to modify optional fields (e.g., `machineType`, `nodeCount`, `network`).
-3.  **Validation**:
-    - Ensure `project_id`, `location`, and `cluster_name` are set.
-    - Ensure the configuration matches the `create_cluster` MCP tool schema.
-4.  **Execution**:
-    - Call the `create_cluster` MCP tool with the final configuration.
+1. **Template Selection**:
+   - Present the available templates to the user if they haven't specified one.
+   - Explain the trade-offs (e.g., Cost vs. Availability, Autopilot vs. Standard).
+2. **Customization**:
+   - Once a template is selected, present the default configuration (JSON/YAML).
+   - Ask the user for essential missing information: `project_id`, `location`, `cluster_name`.
+   - Ask if they want to modify optional fields (e.g., `machineType`, `nodeCount`, `network`).
+3. **Validation**:
+   - Ensure `project_id`, `location`, and `cluster_name` are set.
+   - Ensure the configuration matches the `create_cluster` MCP tool schema.
+4. **Execution**:
+   - Call the `create_cluster` MCP tool with the final configuration.
 
 ## templates
 
@@ -130,7 +130,7 @@ _Note: High cost and strict quota requirements._
 - **ALWAYS** ask for a unique `cluster_name`.
 - **CHECK** if the user wants `Access to Google Cloud APIs` (default `cloud-platform` scope is usually best for modern GKE).
 - **WARN** the user about cost if they select GPU or Reginal clusters.
-- **USE** `create_cluster` MCP tool to create the cluster. The `parent` argument is `projects/{PROJECT_ID}/locations/{LOCATION}` and the `cluster` argument is the JSON object (excluding the `name` field if the API requires `parent` separate, but the tool usually takes the full resource name or split components. _Correction_: The tool `create_cluster` takes `parent` and `cluster` object. The `cluster` object _should_ ideally contain the `name` relative to parent, but strictly it's usually defined by the user in the prompt. Actually, `create_cluster` usually just needs the body. The `parent` is the location. The `cluster.name` is just the short name (e.g. "my-cluster").
+- **USE** `create_cluster` MCP tool to create the cluster. The `parent` argument is `projects/{PROJECT_ID}/locations/{LOCATION}` and the `cluster` argument is the JSON object. The `cluster.name` is just the short name (e.g. "my-cluster").
 - **IMPORTANT**: When calling `create_cluster`, the `cluster.name` should be the **short name** (e.g., `my-cluster`), NOT the full resource path, because the `parent` argument defines the scope.
 
 ## example_usage
