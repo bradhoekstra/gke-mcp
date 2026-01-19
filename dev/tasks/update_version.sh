@@ -20,20 +20,78 @@ set -o pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "${REPO_ROOT}"
 
-git fetch upstream main
-git checkout upstream/main
+# Default to patch if no argument
+BUMP_TYPE="${1:-patch}"
 
-TAG=$(git tag --points-at HEAD)
-VERSION="${TAG/v/}"
+if [[ ! "$BUMP_TYPE" =~ ^(major|minor|patch)$ ]]; then
+    echo "Error: Argument must be 'major', 'minor', or 'patch'"
+    exit 1
+fi
 
-git branch -D "update-version-${TAG}" || true
-git checkout -b "update-version-${TAG}"
+# Ensure we are up to date with upstream
+# If upstream doesn't exist, we might want to fallback or fail. 
+# Assuming upstream exists as per previous script.
+if git remote | grep -q upstream; then
+    git fetch upstream main
+    git checkout upstream/main
+else
+    git fetch origin main
+    git checkout origin/main
+fi
 
+CURRENT_VERSION=$(jq -r '.version' gemini-extension.json)
+IFS='.' read -r -a parts <<< "$CURRENT_VERSION"
+
+if [ ${#parts[@]} -ne 3 ]; then
+    echo "Error: Version in gemini-extension.json does not seem to be X.Y.Z format: $CURRENT_VERSION"
+    exit 1
+fi
+
+MAJOR="${parts[0]}"
+MINOR="${parts[1]}"
+PATCH="${parts[2]}"
+
+case "$BUMP_TYPE" in
+    major)
+        MAJOR=$((MAJOR + 1))
+        MINOR=0
+        PATCH=0
+        ;;
+    minor)
+        MINOR=$((MINOR + 1))
+        PATCH=0
+        ;;
+    patch)
+        PATCH=$((PATCH + 1))
+        ;;
+esac
+
+NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+echo "Bumping version: ${CURRENT_VERSION} -> ${NEW_VERSION}"
+
+BRANCH_NAME="bump-version-${NEW_VERSION}"
+
+# Create branch (delete if exists to start fresh)
+if git show-ref --verify --quiet "refs/heads/${BRANCH_NAME}"; then
+    git branch -D "${BRANCH_NAME}" || true
+fi
+git checkout -b "${BRANCH_NAME}"
+
+# Update gemini-extension.json
 tmp=$(mktemp)
-jq --arg ver "${VERSION}" '.version = $ver' gemini-extension.json > "${tmp}" && mv "${tmp}" gemini-extension.json
+jq --arg ver "${NEW_VERSION}" '.version = $ver' gemini-extension.json > "${tmp}" && mv "${tmp}" gemini-extension.json
 
 git add gemini-extension.json
-git commit -m "chore: Update Gemini extension JSON to ${TAG}"
-git push -u origin "update-version-${TAG}"
+git commit -m "chore: Bump version to ${NEW_VERSION}"
 
-gh pr create -f
+echo "Ready to push and create PR for version ${NEW_VERSION}."
+read -p "Do you want to proceed? (y/N) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 1
+fi
+
+# Push and create PR
+git push -u origin "${BRANCH_NAME}" --force
+gh pr create --fill --title "chore: Bump version to ${NEW_VERSION}" --body "Bumps version to ${NEW_VERSION}"
