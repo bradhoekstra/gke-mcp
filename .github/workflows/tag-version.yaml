@@ -22,7 +22,7 @@ jobs:
       run: echo "CUSTOM_TAG=v$(jq -r '.version' gemini-extension.json)" >> "$GITHUB_OUTPUT"
 
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@v1.75.0
+      uses: anothrNick/github-tag-action@1.75.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CUSTOM_TAG: ${{ steps.get_version.outputs.CUSTOM_TAG }}
