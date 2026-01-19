@@ -1,7 +1,7 @@
 # Makefile for GKE MCP Server
 # Provides convenient shortcuts for common development tasks
 
-.PHONY: help build install test clean presubmit
+.PHONY: help build run install test clean presubmit
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -18,6 +18,9 @@ build: ## Build the binary
 	@echo "Building $(BINARY_NAME)..."
 	go build -o $(BINARY_NAME) .
 	@echo "✓ Built $(BINARY_NAME)"
+
+run: build ## Build and run the server
+	./$(BINARY_NAME)
 
 install: ## Install the binary to GOPATH/bin
 	@echo "Installing $(BINARY_NAME)..."
