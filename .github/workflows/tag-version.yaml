@@ -9,7 +9,7 @@ on:
 permissions: read-all
 
 jobs:
-  build:
+  tag-action:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -28,3 +28,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CUSTOM_TAG: ${{ steps.get_version.outputs.CUSTOM_TAG }}
+
+    - name: Trigger release workflow
+      run: gh workflow run release -r  ${{ steps.get_version.outputs.CUSTOM_TAG }}
+      env:
