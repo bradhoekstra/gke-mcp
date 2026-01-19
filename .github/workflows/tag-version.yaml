@@ -6,6 +6,8 @@ on:
     paths:
       - 'gemini-extension.json'
 
+permissions: read-all
+
 jobs:
   build:
     runs-on: ubuntu-22.04
