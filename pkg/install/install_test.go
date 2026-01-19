@@ -368,12 +368,12 @@ func TestGeminiCLIExtensionDeveloperMode(t *testing.T) {
 	}
 
 	extensionDir := filepath.Join(tmpDir, ".gemini", "extensions", "gke-mcp")
-		manifestPath := filepath.Join(extensionDir, "gemini-extension.json")
-		// #nosec G304
-		manifestData, err := os.ReadFile(manifestPath)
-		if err != nil {
-			t.Fatalf("Failed to read manifest file: %v", err)
-		}
+	manifestPath := filepath.Join(extensionDir, "gemini-extension.json")
+	// #nosec G304
+	manifestData, err := os.ReadFile(manifestPath)
+	if err != nil {
+		t.Fatalf("Failed to read manifest file: %v", err)
+	}
 
 	expected := map[string]any{
 		"name":            "gke-mcp",
