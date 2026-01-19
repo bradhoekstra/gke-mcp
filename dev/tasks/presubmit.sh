@@ -17,15 +17,32 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+# Colors
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+function run_task() {
+    local task_path=$1
+    echo -e "${BLUE}Running ${task_path}...${NC}"
+    if "${task_path}"; then
+        echo -e "${GREEN}✓ ${task_path} passed.${NC}"
+    else
+        echo -e "${RED}✗ ${task_path} failed.${NC}"
+        return 1
+    fi
+}
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "${REPO_ROOT}"
 
-./dev/ci/presubmits/go-build.sh
-./dev/ci/presubmits/go-test.sh
-./dev/ci/presubmits/go-vet.sh
+run_task "./dev/ci/presubmits/go-build.sh"
+run_task "./dev/ci/presubmits/go-test.sh"
+run_task "./dev/ci/presubmits/go-vet.sh"
 
-./dev/tasks/format.sh
-./dev/tasks/gomod.sh
-./dev/tasks/super-linter.sh
+run_task "./dev/tasks/format.sh"
+run_task "./dev/tasks/gomod.sh"
+run_task "./dev/tasks/super-linter.sh"
 
-echo "Local presubmit checks complete, commit any changed files."
+echo -e "${GREEN}Local presubmit checks complete, commit any changed files.${NC}"
