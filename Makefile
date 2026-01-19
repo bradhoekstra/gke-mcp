@@ -8,8 +8,6 @@
 
 # Variables
 BINARY_NAME := gke-mcp
-VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
-LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 
 help: ## Display available commands
 	@echo "GKE MCP Server - Available Commands"
@@ -18,7 +16,7 @@ help: ## Display available commands
 
 build: ## Build the binary
 	@echo "Building $(BINARY_NAME)..."
-	go build $(LDFLAGS) -o $(BINARY_NAME) .
+	go build -o $(BINARY_NAME) .
 	@echo "✓ Built $(BINARY_NAME)"
 
 run: build ## Build and run the server
@@ -26,7 +24,7 @@ run: build ## Build and run the server
 
 install: ## Install the binary to GOPATH/bin
 	@echo "Installing $(BINARY_NAME)..."
-	go install $(LDFLAGS) .
+	go install .
 	@echo "✓ Installed to $(shell go env GOPATH)/bin/$(BINARY_NAME)"
 
 test: ## Run tests
