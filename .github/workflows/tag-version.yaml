@@ -1,0 +1,28 @@
+name: Tag version
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gemini-extension.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.merge_commit_sha }}
+        fetch-depth: '0'
+
+    - name: Extract version from gemini-extension.json
+      id: get_version
+      run: echo "CUSTOM_TAG=v$(jq -r '.version' gemini-extension.json)" >> "$GITHUB_OUTPUT"
+
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@v1.75.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CUSTOM_TAG: ${{ steps.get_version.outputs.CUSTOM_TAG }}
