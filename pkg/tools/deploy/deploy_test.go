@@ -77,17 +77,6 @@ func TestGkeDeploy(t *testing.T) {
 			if !strings.Contains(textContent.Text, tc.wantContained) {
 				t.Errorf("gkeDeployHandler() result does not contain expected text.\nGot: ...%s...\nWant contained: %s", textContent.Text[:100], tc.wantContained)
 			}
-
-			// Also check that the user request is embedded in the output if it was successful
-			if tc.args.UserRequest != "" && !strings.Contains(textContent.Text, tc.args.UserRequest) {
-				// Note: The current template might not actually print the user_request back to the user,
-				// but based on `gkeDeployTmpl.Execute(&buf, map[string]string{"user_request": args.UserRequest})
-				// it likely uses it. Let's check the template content in deploy.go again if this fails.
-				// Wait, looking at deploy.go:
-				// const gkeDeployPromptTemplate = `...`
-				// It doesn't seem to actually use {{.user_request}} in the template string I read earlier!
-				// Let's re-read deploy.go to be sure.
-			}
 		})
 	}
 }

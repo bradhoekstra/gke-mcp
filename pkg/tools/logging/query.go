@@ -135,6 +135,7 @@ func (t *queryLogsTool) queryGCPLogs(ctx context.Context, req *LogQueryRequest) 
 
 	listLogsReq := buildListLogEntriesRequest(req)
 	// Request one more than the limit to check for truncation.
+	// #nosec G115
 	listLogsReq.PageSize = int32(req.Limit + 1)
 
 	resp := client.ListLogEntries(ctx, listLogsReq)
@@ -219,8 +220,9 @@ func buildListLogEntriesRequest(req *LogQueryRequest) *loggingpb.ListLogEntriesR
 	return &loggingpb.ListLogEntriesRequest{
 		ResourceNames: []string{fmt.Sprintf("projects/%s", req.ProjectID)},
 		Filter:        filter,
-		PageSize:      int32(req.Limit),
-		OrderBy:       "timestamp asc",
+		// #nosec G115
+		PageSize: int32(req.Limit),
+		OrderBy:  "timestamp asc",
 	}
 }
 

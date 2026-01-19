@@ -56,6 +56,7 @@ func getK8sChangelog(ctx context.Context, req *mcp.CallToolRequest, args *getK8s
 	}
 
 	changelogUrl := fmt.Sprintf("%s/kubernetes/kubernetes/refs/heads/master/CHANGELOG/CHANGELOG-%s.md", changelogHostUrl, version)
+	// #nosec G107
 	resp, err := http.Get(changelogUrl)
 	if err != nil {
 		log.Printf("Failed to get changelog: %v", err)

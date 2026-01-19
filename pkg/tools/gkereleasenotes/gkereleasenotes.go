@@ -22,6 +22,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -57,6 +58,7 @@ func Install(_ context.Context, s *mcp.Server, _ *config.Config) error {
 
 func getGkeReleaseNotes(ctx context.Context, req *mcp.CallToolRequest, args *getGkeReleaseNotesArgs) (*mcp.CallToolResult, any, error) {
 	releaseNotesFilePath := fmt.Sprintf("release-notes-%s.html", time.Now().Format("2006-01-02"))
+	releaseNotesFilePath = filepath.Clean(releaseNotesFilePath)
 
 	var out []byte
 	var err error
@@ -82,7 +84,7 @@ func getGkeReleaseNotes(ctx context.Context, req *mcp.CallToolRequest, args *get
 			log.Printf("Failed to read release notes response body: %v", err)
 			return nil, nil, err
 		}
-		if err = os.WriteFile(releaseNotesFilePath, out, 0644); err != nil {
+		if err = os.WriteFile(releaseNotesFilePath, out, 0600); err != nil {
 			log.Printf("Failed to write release notes to file: %v", err)
 		}
 	}

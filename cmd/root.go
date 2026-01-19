@@ -23,6 +23,7 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
+	"time"
 
 	container "cloud.google.com/go/container/apiv1"
 	"cloud.google.com/go/container/apiv1/containerpb"
@@ -212,7 +213,15 @@ func startMCPServer(ctx context.Context, opts startOptions) {
 
 		addr := fmt.Sprintf("%s:%d", opts.serverHost, opts.serverPort)
 		log.Printf("Listening for HTTP connections on port: %s", addr)
-		err = http.ListenAndServe(addr, corsHandler)
+		server := &http.Server{
+			Addr:              addr,
+			Handler:           corsHandler,
+			ReadHeaderTimeout: 5 * time.Second,
+			ReadTimeout:       5 * time.Second,
+			WriteTimeout:      10 * time.Second,
+			IdleTimeout:       120 * time.Second,
+		}
+		err = server.ListenAndServe()
 	default:
 		log.Printf("Unknown mode '%s', defaulting to 'stdio'", opts.serverMode)
 		tr := &mcp.LoggingTransport{Transport: &mcp.StdioTransport{}, Writer: log.Writer()}

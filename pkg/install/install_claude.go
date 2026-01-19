@@ -34,8 +34,14 @@ func ClaudeDesktopExtension(opts *InstallOptions) error {
 		return fmt.Errorf("could not determine Claude Desktop config path: %w", err)
 	}
 
+	configPath, err = filepath.Abs(configPath)
+	if err != nil {
+		return fmt.Errorf("could not determine absolute Claude Desktop config path: %w", err)
+	}
+	configPath = filepath.Clean(configPath)
+
 	// Ensure the directory exists
-	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(configPath), 0750); err != nil {
 		return fmt.Errorf("could not create Claude Desktop config directory: %w", err)
 	}
 
@@ -67,7 +73,7 @@ func ClaudeDesktopExtension(opts *InstallOptions) error {
 		return fmt.Errorf("could not marshal Claude Desktop config: %w", err)
 	}
 
-	if err := os.WriteFile(configPath, data, 0644); err != nil {
+	if err := os.WriteFile(configPath, data, 0600); err != nil {
 		return fmt.Errorf("could not write Claude Desktop config: %w", err)
 	}
 
@@ -137,7 +143,7 @@ func ClaudeCodeExtension(opts *InstallOptions) error {
 
 	// Create the GKE_MCP_USAGE_GUIDE.md file
 	usageGuideMDPath := filepath.Join(installDir, "GKE_MCP_USAGE_GUIDE.md")
-	if err := os.WriteFile(usageGuideMDPath, []byte(GeminiMarkdown), 0644); err != nil {
+	if err := os.WriteFile(usageGuideMDPath, []byte(GeminiMarkdown), 0600); err != nil {
 		return fmt.Errorf("could not create GKE_MCP_USAGE_GUIDE.md: %w", err)
 	}
 	fmt.Println("Created GKE_MCP_USAGE_GUIDE.md.")
@@ -145,7 +151,8 @@ func ClaudeCodeExtension(opts *InstallOptions) error {
 	// Add the reference line with the actual path to CLAUDE.md
 	claudeLine := fmt.Sprintf("\n# GKE-MCP Server Instructions\n - @%s", usageGuideMDPath)
 
-	file, err := os.OpenFile(claudeMDPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// #nosec G304
+	file, err := os.OpenFile(claudeMDPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("could not open or create CLAUDE.md: %w", err)
 	}
@@ -169,6 +176,7 @@ func ClaudeCodeExtension(opts *InstallOptions) error {
 		opts.exePath,
 	}
 
+	// #nosec G204
 	cmdToRun := exec.Command(command, args...)
 	cmdToRun.Stdout = os.Stdout
 	cmdToRun.Stderr = os.Stderr

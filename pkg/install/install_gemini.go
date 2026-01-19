@@ -33,13 +33,14 @@ func GeminiCLIExtension(opts *InstallOptions) error {
 		}
 		log.Printf("version: %s", opts.version)
 		contextFilename = filepath.Join(filepath.Dir(opts.exePath), "pkg", "install", "GEMINI.md")
+		// #nosec G304
 		if _, err := os.ReadFile(contextFilename); err != nil {
 			return fmt.Errorf("could not read context file from %s: %w", contextFilename, err)
 		}
 	}
 
 	extensionDir := filepath.Join(opts.installDir, ".gemini", "extensions", "gke-mcp")
-	if err := os.MkdirAll(extensionDir, 0755); err != nil {
+	if err := os.MkdirAll(extensionDir, 0750); err != nil {
 		return fmt.Errorf("could not create extension directory: %w", err)
 	}
 
@@ -62,14 +63,14 @@ func GeminiCLIExtension(opts *InstallOptions) error {
 		return fmt.Errorf("could not marshal manifest.json: %w", err)
 	}
 
-	if err := os.WriteFile(manifestPath, data, 0644); err != nil {
+	if err := os.WriteFile(manifestPath, data, 0600); err != nil {
 		return fmt.Errorf("could not write manifest.json: %w", err)
 	}
 
 	// In developer mode we don't need to create the GEMINI.md file.
 	if !opts.developerMode {
 		geminiMdPath := filepath.Join(extensionDir, "GEMINI.md")
-		if err := os.WriteFile(geminiMdPath, GeminiMarkdown, 0644); err != nil {
+		if err := os.WriteFile(geminiMdPath, GeminiMarkdown, 0600); err != nil {
 			return fmt.Errorf("could not write GEMINI.md: %w", err)
 		}
 	}
