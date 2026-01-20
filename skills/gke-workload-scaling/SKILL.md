@@ -63,6 +63,7 @@ gcloud container clusters update <cluster-name> --enable-vertical-pod-autoscalin
 - `Off`: Calculates recommendations but does not apply them. Good for "dry run" analysis.
 - `Initial`: Assigns resources only at pod creation time.
 - `Auto`: Updates running pods by restarting them if recommendations differ significantly from requests.
+- `InPlaceOrRecreate`: Attempts to update Pod resources without recreating the Pod. If in-place update is not possible, it reverts to `Auto` mode (requires GKE 1.34+).
 
 **Example:**
 See [assets/vpa-example.yaml](assets/vpa-example.yaml) for a configuration template.
@@ -102,3 +103,4 @@ gcloud container clusters update <cluster-name> \
 3. **Pod Disruption Budgets (PDBs):** Define PDBs to ensure application availability during scaling events or node upgrades.
 4. **HPA Lag:** HPA has a stabilization window (default 5 mins) to prevent rapid fluctuation.
 5. **VPA "Auto" Mode Risks:** In "Auto" mode, VPA restarts pods to change resources. Ensure your application handles restarts gracefully (e.g., handles SIGTERM).
+   - _Note:_ By default, VPA requires at least 2 replicas to perform evictions. In GKE 1.22+, you can override this by setting `minReplicas` in `PodUpdatePolicy`.
