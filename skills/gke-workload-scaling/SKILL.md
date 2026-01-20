@@ -1,11 +1,11 @@
 ---
 name: gke-workload-scaling
-description: Specific workflows for scaling GKE workloads using HPA, VPA, and MPA, as well as best practices for autoscaling configuration.
+description: Specific workflows for scaling GKE workloads using HPA and VPA, as well as best practices for autoscaling configuration.
 ---
 
 # GKE Workload Scaling
 
-This skill provides workflows and best practices for scaling applications on Google Kubernetes Engine (GKE). It covers manual scaling, Horizontal Pod Autoscaling (HPA), Vertical Pod Autoscaling (VPA), and Multidimensional Pod Autoscaling (MPA).
+This skill provides workflows and best practices for scaling applications on Google Kubernetes Engine (GKE). It covers manual scaling, Horizontal Pod Autoscaling (HPA), and Vertical Pod Autoscaling (VPA).
 
 ## Workflows
 
@@ -68,19 +68,7 @@ gcloud container clusters update <cluster-name> --enable-vertical-pod-autoscalin
 **Example:**
 See [assets/vpa-example.yaml](assets/vpa-example.yaml) for a configuration template.
 
-### 4. Multidimensional Pod Autoscaling (MPA)
-
-Scale vertically on memory and horizontally on CPU simultaneously. This addresses the limitation where HPA and VPA cannot control the same metric.
-
-**Prerequisites:**
-
-- GKE version 1.19.4-gke.1700 or later.
-- VPA enabled on the cluster.
-
-**Example:**
-See [assets/mpa-example.yaml](assets/mpa-example.yaml) for a configuration template.
-
-### 5. Cluster Autoscaler
+### 4. Cluster Autoscaler
 
 While not a workload-level scaler, the Cluster Autoscaler is essential for ensuring your cluster has enough nodes to run the scaled pods.
 
@@ -98,7 +86,7 @@ gcloud container clusters update <cluster-name> \
 ## Best Practices
 
 1. **Define Resource Requests:** HPA and VPA rely on accurate resource requests. Always define them in your container specs.
-2. **Avoid Metric Conflicts:** Do not configure HPA and VPA to use the same metric (e.g., both CPU) unless using MPA. This causes thrashing.
+2. **Avoid Metric Conflicts:** Do not configure HPA and VPA to use the same metric (e.g., both CPU). This causes thrashing.
    - _Typical Pattern:_ HPA on CPU, VPA on Memory.
 3. **Pod Disruption Budgets (PDBs):** Define PDBs to ensure application availability during scaling events or node upgrades.
 4. **HPA Lag:** HPA has a stabilization window (default 5 mins) to prevent rapid fluctuation.
