@@ -14,6 +14,7 @@ This skill provides workflows and best practices for scaling applications on Goo
 Quickly scale a deployment to a fixed number of replicas. Useful for immediate manual intervention or testing.
 
 **Command:**
+
 ```bash
 kubectl scale deployment <deployment-name> --replicas=<number> -n <namespace>
 ```
@@ -23,10 +24,12 @@ kubectl scale deployment <deployment-name> --replicas=<number> -n <namespace>
 Automatically scale the number of pods based on observed CPU utilization, memory utilization, or custom metrics.
 
 **Prerequisites:**
+
 - Metrics Server must be running (enabled by default on GKE).
 - Containers clearly define resource requests/limits.
 
 **Quick Command:**
+
 ```bash
 kubectl autoscale deployment <deployment-name> --cpu-percent=50 --min=1 --max=10
 ```
@@ -44,16 +47,19 @@ kubectl apply -f assets/hpa-example.yaml
 Automatically adjust the CPU and memory reservations for your pods to match actual usage. This is critical for right-sizing workloads.
 
 **Prerequisites:**
+
 - VPA must be enabled on the cluster.
   - **Autopilot:** Enabled by default.
   - **Standard:** Must be enabled manually.
 
 **Enable VPA on Standard Cluster:**
+
 ```bash
 gcloud container clusters update <cluster-name> --enable-vertical-pod-autoscaling --zone <zone>
 ```
 
 **Update Modes:**
+
 - `Off`: Calculates recommendations but does not apply them. Good for "dry run" analysis.
 - `Initial`: Assigns resources only at pod creation time.
 - `Auto`: Updates running pods by restarting them if recommendations differ significantly from requests.
@@ -66,6 +72,7 @@ See [assets/vpa-example.yaml](assets/vpa-example.yaml) for a configuration templ
 Scale vertically on memory and horizontally on CPU simultaneously. This addresses the limitation where HPA and VPA cannot control the same metric.
 
 **Prerequisites:**
+
 - GKE version 1.19.4-gke.1700 or later.
 - VPA enabled on the cluster.
 
@@ -77,6 +84,7 @@ See [assets/mpa-example.yaml](assets/mpa-example.yaml) for a configuration templ
 While not a workload-level scaler, the Cluster Autoscaler is essential for ensuring your cluster has enough nodes to run the scaled pods.
 
 **Enable on a Node Pool:**
+
 ```bash
 gcloud container clusters update <cluster-name> \
     --enable-autoscaling \
@@ -88,9 +96,9 @@ gcloud container clusters update <cluster-name> \
 
 ## Best Practices
 
-1.  **Define Resource Requests:** HPA and VPA rely on accurate resource requests. Always define them in your container specs.
-2.  **Avoid Metric Conflicts:** Do not configure HPA and VPA to use the same metric (e.g., both CPU) unless using MPA. This causes thrashing.
-    - *Typical Pattern:* HPA on CPU, VPA on Memory.
-3.  **Pod Disruption Budgets (PDBs):** Define PDBs to ensure application availability during scaling events or node upgrades.
-4.  **HPA Lag:** HPA has a stabilization window (default 5 mins) to prevent rapid fluctuation.
-5.  **VPA "Auto" Mode Risks:** In "Auto" mode, VPA restarts pods to change resources. Ensure your application handles restarts gracefully (e.g., handles SIGTERM).
+1. **Define Resource Requests:** HPA and VPA rely on accurate resource requests. Always define them in your container specs.
+2. **Avoid Metric Conflicts:** Do not configure HPA and VPA to use the same metric (e.g., both CPU) unless using MPA. This causes thrashing.
+   - _Typical Pattern:_ HPA on CPU, VPA on Memory.
+3. **Pod Disruption Budgets (PDBs):** Define PDBs to ensure application availability during scaling events or node upgrades.
+4. **HPA Lag:** HPA has a stabilization window (default 5 mins) to prevent rapid fluctuation.
+5. **VPA "Auto" Mode Risks:** In "Auto" mode, VPA restarts pods to change resources. Ensure your application handles restarts gracefully (e.g., handles SIGTERM).
