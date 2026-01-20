@@ -68,6 +68,7 @@ func giqGenerateManifest(ctx context.Context, req *mcp.CallToolRequest, args *gi
 	if args.TargetNTPOTMilliseconds != "" {
 		gcloudArgs = append(gcloudArgs, "--target-ntpot-milliseconds", args.TargetNTPOTMilliseconds)
 	}
+	// #nosec G204
 	out, err := exec.Command("gcloud", gcloudArgs...).Output()
 	if err != nil {
 		log.Printf("Failed to generate manifest: %v", err)

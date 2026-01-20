@@ -38,7 +38,7 @@ This rule provides context for using the gke-mcp tool within Cursor.
 func CursorMCPExtension(opts *InstallOptions) error {
 	mcpDir := filepath.Join(opts.installDir, ".cursor")
 
-	if err := os.MkdirAll(mcpDir, 0755); err != nil {
+	if err := os.MkdirAll(mcpDir, 0750); err != nil {
 		return fmt.Errorf("could not create Cursor directory at %s: %w", mcpDir, err)
 	}
 	mcpPath := filepath.Join(mcpDir, "mcp.json")
@@ -48,6 +48,7 @@ func CursorMCPExtension(opts *InstallOptions) error {
 
 	if _, err := os.Stat(mcpPath); err == nil {
 		// File exists, read and parse it
+		// #nosec G304
 		data, err := os.ReadFile(mcpPath)
 		if err != nil {
 			return fmt.Errorf("could not read existing MCP configuration: %w", err)
@@ -86,13 +87,13 @@ func CursorMCPExtension(opts *InstallOptions) error {
 		return fmt.Errorf("could not marshal MCP configuration: %w", err)
 	}
 
-	if err := os.WriteFile(mcpPath, data, 0644); err != nil {
+	if err := os.WriteFile(mcpPath, data, 0600); err != nil {
 		return fmt.Errorf("could not write MCP configuration: %w", err)
 	}
 
 	// Create the rules directory and gke-mcp.mdc file
 	rulesDir := filepath.Join(mcpDir, "rules")
-	if err := os.MkdirAll(rulesDir, 0755); err != nil {
+	if err := os.MkdirAll(rulesDir, 0750); err != nil {
 		return fmt.Errorf("could not create rules directory: %w", err)
 	}
 
@@ -100,7 +101,7 @@ func CursorMCPExtension(opts *InstallOptions) error {
 	ruleContent := append([]byte(cursorRuleHeader), GeminiMarkdown...)
 
 	rulePath := filepath.Join(rulesDir, "gke-mcp.mdc")
-	if err := os.WriteFile(rulePath, ruleContent, 0644); err != nil {
+	if err := os.WriteFile(rulePath, ruleContent, 0600); err != nil {
 		return fmt.Errorf("could not write gke-mcp rule file: %w", err)
 	}
 

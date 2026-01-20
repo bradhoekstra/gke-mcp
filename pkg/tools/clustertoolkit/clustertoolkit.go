@@ -48,6 +48,7 @@ func clusterToolkitDownload(ctx context.Context, _ *mcp.CallToolRequest, args *c
 	if !strings.HasSuffix(downloadDir, "cluster-toolkit") {
 		downloadDir = filepath.Join(downloadDir, "cluster-toolkit")
 	}
+	// #nosec G204
 	out, err := exec.Command("git", "clone", "https://github.com/GoogleCloudPlatform/cluster-toolkit.git", downloadDir).Output()
 	if err != nil {
 		log.Printf("Failed to download Cluster Toolkit: %v %s", err, out)

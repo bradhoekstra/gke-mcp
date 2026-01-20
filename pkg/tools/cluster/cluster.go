@@ -257,6 +257,11 @@ func (h *handlers) getNodeSosReport(ctx context.Context, _ *mcp.CallToolRequest,
 	if args.Node == "" {
 		return nil, nil, fmt.Errorf("node argument cannot be empty")
 	}
+	// Basic validation for node name to prevent command injection
+	if match, _ := regexp.MatchString(`^[a-z0-9][a-z0-9\-\.]*[a-z0-9]$`, args.Node); !match {
+		return nil, nil, fmt.Errorf("invalid node name: %s", args.Node)
+	}
+
 	if args.Destination == "" {
 		args.Destination = "/tmp/sos-report"
 	}
@@ -269,6 +274,7 @@ func (h *handlers) getNodeSosReport(ctx context.Context, _ *mcp.CallToolRequest,
 
 	// Check if node is healthy
 	isHealthy := false
+	// #nosec G204
 	cmd := exec.CommandContext(ctx, "kubectl", "get", "node", args.Node, "-o", "jsonpath='{.status.conditions[?(@.type==\"Ready\")].status}'")
 	out, err := cmd.Output()
 	if err == nil && strings.Contains(string(out), "True") {
@@ -279,7 +285,7 @@ func (h *handlers) getNodeSosReport(ctx context.Context, _ *mcp.CallToolRequest,
 		args.Method = "ssh"
 	}
 
-	if err := os.MkdirAll(args.Destination, 0755); err != nil {
+	if err := os.MkdirAll(args.Destination, 0750); err != nil {
 		return nil, nil, fmt.Errorf("failed to create destination directory %s: %w", args.Destination, err)
 	}
 
@@ -348,6 +354,7 @@ func (h *handlers) getNodeSosReportWithPod(ctx context.Context, args *getNodeSos
 		return nil, nil, fmt.Errorf("failed to marshal overrides: %w", err)
 	}
 
+	// #nosec G204
 	runCmd := exec.CommandContext(ctx, "kubectl", "run", podName, "--image=gke.gcr.io/debian-base", "--restart=Never", "--overrides="+string(overridesBytes))
 	if out, err := runCmd.CombinedOutput(); err != nil {
 		return nil, nil, fmt.Errorf("failed to create debug pod: %s, %w", string(out), err)
@@ -355,11 +362,13 @@ func (h *handlers) getNodeSosReportWithPod(ctx context.Context, args *getNodeSos
 
 	defer func() {
 		// Cleanup pod
+		// #nosec G204
 		delCmd := exec.Command("kubectl", "delete", "pod", podName, "--wait=false", "--grace-period=0", "--force")
 		_ = delCmd.Run() // Best-effort cleanup
 	}()
 
 	// 2. Wait for pod to be ready
+	// #nosec G204
 	waitCmd := exec.CommandContext(ctx, "kubectl", "wait", "--for=condition=Ready", "pod/"+podName, "--timeout=60s")
 	if out, err := waitCmd.CombinedOutput(); err != nil {
 		return nil, nil, fmt.Errorf("debug pod did not become ready: %s, %w", string(out), err)
@@ -372,6 +381,7 @@ func (h *handlers) getNodeSosReportWithPod(ctx context.Context, args *getNodeSos
 	// Note: chroot /host allows us to use the host's sosreport command and filesystem
 	execScript := fmt.Sprintf("apt update && apt install -y sosreport && mkdir -p /host%s && sos report --sysroot=/host --all-logs --batch --tmp-dir=/host%s", remoteTmpDir, remoteTmpDir)
 
+	// #nosec G204
 	execCmd := exec.CommandContext(ctx, "kubectl", "exec", podName, "--", "sh", "-c", execScript)
 	outBytes, err := execCmd.CombinedOutput()
 	output := string(outBytes)
@@ -397,13 +407,14 @@ func (h *handlers) getNodeSosReportWithPod(ctx context.Context, args *getNodeSos
 	}
 	localFilename := fmt.Sprintf("sosreport-%s-%s.tar.xz", args.Node, time.Now().Format("2006-01-02-15-04-05"))
 	localPath := filepath.Join(args.Destination, localFilename)
-
+	localPath = filepath.Clean(localPath)
 	// 5. Copy the file from the pod to local current directory
 	f, err := os.Create(localPath)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create local file %s: %w", localPath, err)
 	}
 
+	// #nosec G204
 	catCmd := exec.CommandContext(ctx, "kubectl", "exec", podName, "--", "cat", remotePath)
 	catCmd.Stdout = f
 	var stderr bytes.Buffer
@@ -418,6 +429,7 @@ func (h *handlers) getNodeSosReportWithPod(ctx context.Context, args *getNodeSos
 
 	// 6. Cleanup remote files on host (via pod)
 	cleanupScript := fmt.Sprintf("rm -rf %s", remoteTmpDir)
+	// #nosec G204
 	cleanCmd := exec.CommandContext(ctx, "kubectl", "exec", podName, "--", "sh", "-c", cleanupScript)
 	_ = cleanCmd.Run() // Best-effort cleanup
 
@@ -431,6 +443,7 @@ func (h *handlers) getNodeSosReportWithPod(ctx context.Context, args *getNodeSos
 func (h *handlers) getNodeSosReportWithSSH(ctx context.Context, args *getNodeSosReportArgs) (*mcp.CallToolResult, any, error) {
 	// 1. Find the zone of the VM
 	// gcloud compute instances list --filter="name=NODE_NAME" --format="value(zone)"
+	// #nosec G204
 	findZoneCmd := exec.CommandContext(ctx, "gcloud", "compute", "instances", "list", fmt.Sprintf("--filter=name=%s", args.Node), "--format=value(zone)")
 	zoneOut, err := findZoneCmd.Output()
 	if err != nil {
@@ -443,6 +456,7 @@ func (h *handlers) getNodeSosReportWithSSH(ctx context.Context, args *getNodeSos
 
 	// 2. Generate SOS report via SSH
 	// gcloud compute ssh --zone "ZONE" "NODE_NAME" --command "sudo sos report --all-logs --batch --tmp-dir=/var"
+	// #nosec G204
 	sshCmd := exec.CommandContext(ctx, "gcloud", "compute", "ssh", "--zone", zone, args.Node, "--command", "sudo sos report --all-logs --batch --tmp-dir=/var")
 	outBytes, err := sshCmd.CombinedOutput()
 	output := string(outBytes)
@@ -461,6 +475,7 @@ func (h *handlers) getNodeSosReportWithSSH(ctx context.Context, args *getNodeSos
 
 	// 4. Change ownership of the file
 	// gcloud compute ssh ... --command "sudo chown $USER REMOTE_PATH"
+	// #nosec G204
 	chownCmd := exec.CommandContext(ctx, "gcloud", "compute", "ssh", "--zone", zone, args.Node, "--command", fmt.Sprintf("sudo chown $USER %s", remotePath))
 	if out, err := chownCmd.CombinedOutput(); err != nil {
 		return nil, nil, fmt.Errorf("failed to chown remote file: %s, %w", string(out), err)
@@ -470,12 +485,14 @@ func (h *handlers) getNodeSosReportWithSSH(ctx context.Context, args *getNodeSos
 	// gcloud compute scp --zone "ZONE" "NODE_NAME:REMOTE_PATH" LOCAL_DESTINATION
 	localFilename := fmt.Sprintf("sosreport-%s-%s.tar.xz", args.Node, time.Now().Format("2006-01-02-15-04-05"))
 	localPath := filepath.Join(args.Destination, localFilename)
+	// #nosec G204
 	scpCmd := exec.CommandContext(ctx, "gcloud", "compute", "scp", "--zone", zone, fmt.Sprintf("%s:%s", args.Node, remotePath), localPath)
 	if out, err := scpCmd.CombinedOutput(); err != nil {
 		return nil, nil, fmt.Errorf("failed to scp file: %s, %w", string(out), err)
 	}
 
 	// 6. Cleanup remote files on host
+	// #nosec G204
 	rmCmd := exec.CommandContext(ctx, "gcloud", "compute", "ssh", "--zone", zone, args.Node, "--command", fmt.Sprintf("sudo rm %s", remotePath))
 	_ = rmCmd.Run() // Best-effort cleanup
 

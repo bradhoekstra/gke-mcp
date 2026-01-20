@@ -107,7 +107,8 @@ func MockClaudeCommand(t *testing.T) (logFile string, cleanup func()) {
 		mockScript = fmt.Sprintf("#!/bin/bash\necho \"$@\" >> %s\n", logFile)
 	}
 
-	if err := os.WriteFile(claudePath, []byte(mockScript), 0755); err != nil {
+	// #nosec G306
+	if err := os.WriteFile(claudePath, []byte(mockScript), 0700); err != nil {
 		t.Fatalf("Failed to create logging claude command: %v", err)
 	}
 
@@ -126,6 +127,7 @@ func MockClaudeCommand(t *testing.T) (logFile string, cleanup func()) {
 func verifyArgs(t *testing.T, logFile string, testExePath string) {
 
 	// Verify the claude command was called with correct arguments
+	// #nosec G304
 	logContent, err := os.ReadFile(logFile)
 	if err != nil {
 		t.Fatalf("Failed to read command log: %v", err)
@@ -168,6 +170,7 @@ func verifyClaudeCodeInstallation(t *testing.T, installDir, testExePath string) 
 	if _, err := os.Stat(claudeMDPath); os.IsNotExist(err) {
 		t.Errorf("Expected CLAUDE.md file to be created at %s, but it was not", claudeMDPath)
 	} else {
+		// #nosec G304
 		claudeContent, err := os.ReadFile(claudeMDPath)
 		if err != nil {
 			t.Fatalf("Failed to read CLAUDE.md: %v", err)
@@ -183,6 +186,7 @@ func verifyClaudeCodeInstallation(t *testing.T, installDir, testExePath string) 
 	if _, err := os.Stat(usageGuidePath); os.IsNotExist(err) {
 		t.Errorf("Expected GKE_MCP_USAGE_GUIDE.md file to be created at %s, but it was not", usageGuidePath)
 	} else {
+		// #nosec G304
 		usageContent, err := os.ReadFile(usageGuidePath)
 		if err != nil {
 			t.Fatalf("Failed to read GKE_MCP_USAGE_GUIDE.md: %v", err)
@@ -197,6 +201,8 @@ func verifyClaudeCodeInstallation(t *testing.T, installDir, testExePath string) 
 
 // verifyMCPConfig validates the MCP configuration file content
 func verifyMCPConfig(t *testing.T, mcpPath, expectedExePath string) {
+	// #nosec G304
+	// #nosec G304
 	mcpData, err := os.ReadFile(mcpPath)
 	if err != nil {
 		t.Fatalf("Failed to read MCP config file: %v", err)
@@ -230,7 +236,7 @@ func verifyMCPConfig(t *testing.T, mcpPath, expectedExePath string) {
 
 // createExistingConfig creates a pre-existing MCP configuration file for testing and returns the path to the file
 func createExistingConfig(t *testing.T, cursorDir string, config map[string]interface{}) string {
-	if err := os.MkdirAll(cursorDir, 0755); err != nil {
+	if err := os.MkdirAll(cursorDir, 0700); err != nil {
 		t.Fatalf("Failed to create cursor directory: %v", err)
 	}
 
@@ -240,7 +246,7 @@ func createExistingConfig(t *testing.T, cursorDir string, config map[string]inte
 	}
 
 	mcpPath := filepath.Join(cursorDir, "mcp.json")
-	if err := os.WriteFile(mcpPath, configData, 0644); err != nil {
+	if err := os.WriteFile(mcpPath, configData, 0600); err != nil {
 		t.Fatalf("Failed to write config: %v", err)
 	}
 
@@ -255,6 +261,7 @@ func verifyRuleFile(t *testing.T, rulesPath string) {
 	}
 
 	// Read and verify the rule file content
+	// #nosec G304
 	ruleData, err := os.ReadFile(rulesPath)
 	if err != nil {
 		t.Fatalf("Failed to read rule file: %v", err)
@@ -301,6 +308,7 @@ func TestGeminiCLIExtension(t *testing.T) {
 		t.Errorf("Expected GEMINI.md file to be created at %s, but it was not", geminiMdPath)
 	}
 
+	// #nosec G304
 	manifestData, err := os.ReadFile(manifestPath)
 	if err != nil {
 		t.Fatalf("Failed to read manifest file: %v", err)
@@ -361,7 +369,7 @@ func TestGeminiCLIExtensionDeveloperMode(t *testing.T) {
 
 	extensionDir := filepath.Join(tmpDir, ".gemini", "extensions", "gke-mcp")
 	manifestPath := filepath.Join(extensionDir, "gemini-extension.json")
-
+	// #nosec G304
 	manifestData, err := os.ReadFile(manifestPath)
 	if err != nil {
 		t.Fatalf("Failed to read manifest file: %v", err)
@@ -454,6 +462,7 @@ func TestCursorMCPExtensionWithExistingConfig(t *testing.T) {
 	}
 
 	// Verify that existing configuration is preserved
+	// #nosec G304
 	mcpData, err := os.ReadFile(mcpPath)
 	if err != nil {
 		t.Fatalf("Failed to read MCP config file: %v", err)
@@ -519,6 +528,7 @@ func TestCursorMCPExtensionWithMalformedConfig(t *testing.T) {
 	}
 
 	// Verify that the malformed config was fixed
+	// #nosec G304
 	mcpData, err := os.ReadFile(mcpPath)
 	if err != nil {
 		t.Fatalf("Failed to read MCP config file: %v", err)
@@ -567,6 +577,7 @@ func verifyGkeMcpInClaudeConfig(t *testing.T, config map[string]interface{}, exp
 
 // verifyClaudeDesktopConfig validates the Claude Desktop configuration file content
 func verifyClaudeDesktopConfig(t *testing.T, configPath, expectedExePath string) {
+	// #nosec G304
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
 		t.Fatalf("Failed to read Claude Desktop config file: %v", err)
@@ -582,8 +593,9 @@ func verifyClaudeDesktopConfig(t *testing.T, configPath, expectedExePath string)
 
 // createExistingClaudeConfig creates a pre-existing Claude Desktop configuration file for testing
 func createExistingClaudeConfig(t *testing.T, configPath string, config map[string]interface{}) {
-	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
-		t.Fatalf("Failed to create claude config directory: %v", err)
+	// Ensure the directory exists
+	if err := os.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
+		t.Fatalf("Failed to create mock config directory: %v", err)
 	}
 
 	configData, err := json.MarshalIndent(config, "", "  ")
@@ -591,7 +603,7 @@ func createExistingClaudeConfig(t *testing.T, configPath string, config map[stri
 		t.Fatalf("Failed to marshal config: %v", err)
 	}
 
-	if err := os.WriteFile(configPath, configData, 0644); err != nil {
+	if err := os.WriteFile(configPath, configData, 0600); err != nil {
 		t.Fatalf("Failed to write config: %v", err)
 	}
 }
@@ -658,6 +670,7 @@ func TestClaudeDesktopExtensionWithExistingConfig(t *testing.T) {
 	}
 
 	// Verify that existing configuration is preserved
+	// #nosec G304
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
 		t.Fatalf("Failed to read Claude Desktop config file: %v", err)
@@ -725,6 +738,7 @@ func TestClaudeDesktopExtensionWithMalformedConfig(t *testing.T) {
 	}
 
 	// Verify that the malformed config was fixed
+	// #nosec G304
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
 		t.Fatalf("Failed to read Claude Desktop config file: %v", err)
@@ -777,7 +791,7 @@ func TestClaudeCodeExtensionWithExistingClaude(t *testing.T) {
 	// Create existing CLAUDE.md file
 	claudeMDPath := filepath.Join(tmpDir, "CLAUDE.md")
 	existingContent := "# Existing Content\nSome existing instructions."
-	if err := os.WriteFile(claudeMDPath, []byte(existingContent), 0644); err != nil {
+	if err := os.WriteFile(claudeMDPath, []byte(existingContent), 0600); err != nil {
 		t.Fatalf("Failed to create existing CLAUDE.md: %v", err)
 	}
 
@@ -799,6 +813,7 @@ func TestClaudeCodeExtensionWithExistingClaude(t *testing.T) {
 	}
 
 	// Verify that existing content is preserved and new content is appended
+	// #nosec G304
 	claudeContent, err := os.ReadFile(claudeMDPath)
 	if err != nil {
 		t.Fatalf("Failed to read CLAUDE.md: %v", err)
