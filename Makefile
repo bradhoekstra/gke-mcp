@@ -1,7 +1,7 @@
 # Makefile for GKE MCP Server
 # Provides convenient shortcuts for common development tasks
 
-.PHONY: help build run install test clean presubmit
+.PHONY: help build run install test clean presubmit update-version
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -42,3 +42,7 @@ presubmit: ## Run all presubmit checks (build, test, vet, format)
 	@echo "Running presubmit checks..."
 	@./dev/tasks/presubmit.sh
 	@echo "✓ All presubmit checks passed"
+
+update-version: ## Update version. Usage: make update-version [BUMP_TYPE=major|minor|patch]
+	@echo "Updating version..."
+	@./dev/tasks/update_version.sh $(BUMP_TYPE)
