@@ -84,7 +84,7 @@ gcloud container clusters update <cluster-name> \
 ```
 
 **Apply Default Deny Policy:**
-Isolate namespaces by denying all ingress traffic by default.
+Isolate namespaces by denying all ingress and egress traffic by default.
 
 ```bash
 kubectl apply -f .agent/skills/gke-workload-security/assets/default-deny-netpol.yaml
