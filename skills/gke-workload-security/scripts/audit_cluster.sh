@@ -18,7 +18,7 @@ CLUSTER_JSON=$(gcloud container clusters describe "$CLUSTER_NAME" --region "$REG
 
 # Check Workload Identity
 WI_CONFIG=$(echo "$CLUSTER_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin).get('workloadIdentityConfig', {}).get('workloadPool', 'DISABLED'))")
-if [ "$WI_CONFIG" != "DISABLED" ] && [ "$WI_CONFIG" != "{}" ]; then
+if [ "$WI_CONFIG" != "DISABLED" ]; then
     echo "[PASS] Workload Identity is ENABLED ($WI_CONFIG)"
 else
     echo "[FAIL] Workload Identity is DISABLED"
