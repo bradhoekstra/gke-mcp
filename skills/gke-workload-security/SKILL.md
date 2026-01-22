@@ -86,7 +86,8 @@ gcloud container clusters update <cluster-name> \
 **Apply Default Deny Policy:**
 Isolate namespaces by denying all ingress and egress traffic by default.
 
-# Replace <target-namespace> with the namespace you want to isolate.
+**Replace <target-namespace> with the namespace you want to isolate.**
+
 kubectl apply -f .agent/skills/gke-workload-security/assets/default-deny-netpol.yaml -n <target-namespace>
 
 ### 4. Enable Shielded Nodes

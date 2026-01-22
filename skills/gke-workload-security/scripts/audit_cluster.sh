@@ -17,7 +17,7 @@ echo "---------------------------------------------------"
 CLUSTER_JSON=$(gcloud container clusters describe "$CLUSTER_NAME" --region "$REGION" --project "$PROJECT_ID" --format=json)
 
 # Check Workload Identity
-WI_CONFIG=$(echo "$CLUSTER_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin).get('workloadIdentityConfig', {}).get('workloadPool', 'DISABLED'))")
+WI_CONFIG=$(echo "$CLUSTER_JSON" | jq -r '.workloadIdentityConfig.workloadPool // "DISABLED"')
 if [ "$WI_CONFIG" != "DISABLED" ]; then
     echo "[PASS] Workload Identity is ENABLED ($WI_CONFIG)"
 else
@@ -25,7 +25,7 @@ else
 fi
 
 # Check Network Policy
-NETPOL_CONFIG=$(echo "$CLUSTER_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin).get('networkPolicy', {}).get('enabled', 'FALSE'))")
+NETPOL_CONFIG=$(echo "$CLUSTER_JSON" | jq -r '.networkPolicy.enabled // "FALSE"')
 if [ "$NETPOL_CONFIG" == "True" ] || [ "$NETPOL_CONFIG" == "true" ]; then
     echo "[PASS] Network Policy is ENABLED"
 else
@@ -33,7 +33,7 @@ else
 fi
 
 # Check Shielded Nodes
-SHIELDED_NODES=$(echo "$CLUSTER_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin).get('shieldedNodes', {}).get('enabled', 'FALSE'))")
+SHIELDED_NODES=$(echo "$CLUSTER_JSON" | jq -r '.shieldedNodes.enabled // "FALSE"')
 if [ "$SHIELDED_NODES" == "True" ] || [ "$SHIELDED_NODES" == "true" ]; then
     echo "[PASS] Shielded Nodes are ENABLED"
 else
@@ -41,7 +41,7 @@ else
 fi
 
 # Check Binary Authorization
-BINAUTH_CONFIG=$(echo "$CLUSTER_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin).get('binaryAuthorization', {}).get('evaluationMode', 'DISABLED'))")
+BINAUTH_CONFIG=$(echo "$CLUSTER_JSON" | jq -r '.binaryAuthorization.evaluationMode // "DISABLED"')
 if [ "$BINAUTH_CONFIG" != "DISABLED" ]; then
     echo "[PASS] Binary Authorization is ENABLED ($BINAUTH_CONFIG)"
 else
@@ -49,7 +49,7 @@ else
 fi
 
 # Check Private Cluster
-PRIVATE_CLUSTER=$(echo "$CLUSTER_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin).get('privateClusterConfig', {}).get('enablePrivateNodes', 'FALSE'))")
+PRIVATE_CLUSTER=$(echo "$CLUSTER_JSON" | jq -r '.privateClusterConfig.enablePrivateNodes // "FALSE"')
 if [ "$PRIVATE_CLUSTER" == "True" ] || [ "$PRIVATE_CLUSTER" == "true" ]; then
     echo "[PASS] Private Cluster (Nodes) is ENABLED"
 else
