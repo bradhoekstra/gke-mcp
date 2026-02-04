@@ -16,32 +16,43 @@ echo "---------------------------------------------------"
 # Get Cluster Details
 CLUSTER_JSON=$(gcloud container clusters describe "$CLUSTER_NAME" --region "$REGION" --project "$PROJECT_ID" --format=json)
 
+# Extract all configurations in one pass for performance
+# Output format: TSV (Tab Separated Values)
+VALUES=$(echo "$CLUSTER_JSON" | jq -r '
+  [
+    (.workloadIdentityConfig.workloadPool // "DISABLED"),
+    (.networkPolicy.enabled // "FALSE" | tostring),
+    (.networkConfig.datapathProvider // "LEGACY"),
+    (.shieldedNodes.enabled // "FALSE" | tostring),
+    (.binaryAuthorization.evaluationMode // "DISABLED"),
+    (.privateClusterConfig.enablePrivateNodes // "FALSE" | tostring)
+  ] | @tsv
+')
+
+read -r WI_CONFIG NETPOL_ENABLED DATAPATH_PROVIDER SHIELDED_NODES BINAUTH_CONFIG PRIVATE_NODES <<< "$VALUES"
+
 # Check Workload Identity
-WI_CONFIG=$(echo "$CLUSTER_JSON" | jq -r '.workloadIdentityConfig.workloadPool // "DISABLED"')
 if [ "$WI_CONFIG" != "DISABLED" ]; then
     echo "[PASS] Workload Identity is ENABLED ($WI_CONFIG)"
 else
     echo "[FAIL] Workload Identity is DISABLED"
 fi
 
-# Check Network Policy
-NETPOL_CONFIG=$(echo "$CLUSTER_JSON" | jq -r '.networkPolicy.enabled // "FALSE"')
-if [ "$NETPOL_CONFIG" == "True" ] || [ "$NETPOL_CONFIG" == "true" ]; then
-    echo "[PASS] Network Policy is ENABLED"
+# Check Network Policy (Explicit or DPv2)
+if [ "$NETPOL_ENABLED" == "true" ] || [ "$DATAPATH_PROVIDER" == "ADVANCED_DATAPATH" ]; then
+    echo "[PASS] Network Policy is ENABLED (Provider: $DATAPATH_PROVIDER)"
 else
     echo "[FAIL] Network Policy is DISABLED"
 fi
 
 # Check Shielded Nodes
-SHIELDED_NODES=$(echo "$CLUSTER_JSON" | jq -r '.shieldedNodes.enabled // "FALSE"')
-if [ "$SHIELDED_NODES" == "True" ] || [ "$SHIELDED_NODES" == "true" ]; then
+if [ "$SHIELDED_NODES" == "true" ]; then
     echo "[PASS] Shielded Nodes are ENABLED"
 else
     echo "[FAIL] Shielded Nodes are DISABLED"
 fi
 
 # Check Binary Authorization
-BINAUTH_CONFIG=$(echo "$CLUSTER_JSON" | jq -r '.binaryAuthorization.evaluationMode // "DISABLED"')
 if [ "$BINAUTH_CONFIG" != "DISABLED" ]; then
     echo "[PASS] Binary Authorization is ENABLED ($BINAUTH_CONFIG)"
 else
@@ -49,8 +60,7 @@ else
 fi
 
 # Check Private Cluster
-PRIVATE_CLUSTER=$(echo "$CLUSTER_JSON" | jq -r '.privateClusterConfig.enablePrivateNodes // "FALSE"')
-if [ "$PRIVATE_CLUSTER" == "True" ] || [ "$PRIVATE_CLUSTER" == "true" ]; then
+if [ "$PRIVATE_NODES" == "true" ]; then
     echo "[PASS] Private Cluster (Nodes) is ENABLED"
 else
     echo "[WARN] Private Cluster (Nodes) is DISABLED"

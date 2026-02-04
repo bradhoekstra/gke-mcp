@@ -83,6 +83,9 @@ gcloud container clusters update <cluster-name> \
     --region <region>
 ```
 
+> [!NOTE]
+> If your cluster uses Dataplane V2 (`--enable-dataplane-v2`), Network Policy enforcement is built-in and this step is not required (and may fail).
+
 **Apply Default Deny Policy:**
 Isolate namespaces by denying all ingress and egress traffic by default.
 
