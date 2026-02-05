@@ -30,14 +30,14 @@ When guiding the user or generating configurations, adhere to the following GKE 
 
 1. **Private Clusters**: Default to private clusters with a private control plane and restricted public endpoints to minimize attack surface.
 2. **VPC-Native Networking**: Use VPC-native clusters to enable alias IP ranges, which allows pod-level firewall rules and better network security.
-3. **Workload Identity Federation**: Prefer Workload Identity Federation for securely granting workloads access to Google Cloud services instead of using static service account keys.
+3. **Workload Identity**: Prefer Workload Identity for securely granting GKE workloads access to Google Cloud services instead of using static service account keys.
 4. **Shielded GKE Nodes**: Enable Shielded GKE Nodes to protect against rootkits and bootkits.
 5. **Least Privilege (RBAC)**: Institute strict Role-Based Access Control limits granting minimal privilege to users and workloads.
 
 ### Cost Optimization
 
 1. **Autoscaling**: Enable Cluster Autoscaler and Horizontal Pod Autoscaler to adjust resources based on demand.
-2. **Right-Sizing**: Choose the appropriate machine types and node counts. Consider Preemptible/Spot VMs for fault-tolerant, non-critical workloads.
+2. **Right-Sizing**: Choose the appropriate machine types and node counts. Consider Spot VMs for fault-tolerant, non-critical workloads.
 
 ### High Availability & Reliability
 
