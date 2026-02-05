@@ -43,6 +43,7 @@ When guiding the user or generating configurations, adhere to the following GKE 
 
 1. **Regional Clusters**: Use Regional Clusters for production environments to ensure control plane replication across multiple zones. (Note: standard regional creates nodes across 3 zones by default).
 2. **Pod Disruption Budgets**: Recommend setting Pod Disruption Budgets for application stability during node maintenance.
+3. **Release Channels**: Subscribe to a release channel (e.g., Regular or Stable) for automated and safer cluster upgrades.
 
 ## templates
 
