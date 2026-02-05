@@ -22,6 +22,28 @@ This skill helps users create Google Kubernetes Engine (GKE) clusters by providi
 4. **Execution**:
    - Call the `create_cluster` MCP tool with the final configuration.
 
+## best_practices
+
+When guiding the user or generating configurations, adhere to the following GKE cluster creation best practices:
+
+### Security
+
+1. **Private Clusters**: Default to private clusters with a private control plane and restricted public endpoints to minimize attack surface.
+2. **VPC-Native Networking**: Use VPC-native clusters to enable alias IP ranges, which allows pod-level firewall rules and better network security.
+3. **Workload Identity Federation**: Prefer Workload Identity Federation for securely granting workloads access to Google Cloud services instead of using static service account keys.
+4. **Shielded GKE Nodes**: Enable Shielded GKE Nodes to protect against rootkits and bootkits.
+5. **Least Privilege (RBAC)**: Institute strict Role-Based Access Control limits granting minimal privilege to users and workloads.
+
+### Cost Optimization
+
+1. **Autoscaling**: Enable Cluster Autoscaler and Horizontal Pod Autoscaler to adjust resources based on demand.
+2. **Right-Sizing**: Choose the appropriate machine types and node counts. Consider Preemptible/Spot VMs for fault-tolerant, non-critical workloads.
+
+### High Availability & Reliability
+
+1. **Regional Clusters**: Use Regional Clusters for production environments to ensure control plane replication across multiple zones. (Note: standard regional creates nodes across 3 zones by default).
+2. **Pod Disruption Budgets**: Recommend setting Pod Disruption Budgets for application stability during node maintenance.
+
 ## templates
 
 ### 1. Standard Zonal (Cost-Effective Dev/Test)
