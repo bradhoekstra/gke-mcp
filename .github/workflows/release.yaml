@@ -33,14 +33,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract version from tag
-        id: get_version
-        run: echo "VERSION=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')" >> "$GITHUB_OUTPUT"
-
-      - name: Update version in file
-        run: |
-          sed "s/\"version\": .*/\"version\": \"${{ steps.get_version.outputs.VERSION }}\"/g;s/: \"v/: \"/g" gemini-extension.json > gemini-extension.json.out
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
