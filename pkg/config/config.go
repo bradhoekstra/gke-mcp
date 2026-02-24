@@ -74,6 +74,7 @@ func getDefaultLocation() string {
 }
 
 func getGcloudConfig(key string) (string, error) {
+	// #nosec G204
 	out, err := exec.Command("gcloud", "config", "get", key).Output()
 	if err != nil {
 		return "", err
