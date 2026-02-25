@@ -55,4 +55,4 @@ docker-build: ## Build the docker image
 
 docker-run: docker-build ## Build and run the docker image
 	@echo "Running docker image $(DOCKER_IMAGE)..."
-	docker run -it --rm -p 8080:8080 $(DOCKER_IMAGE) gke-mcp --server-mode http --server-host 0.0.0.0
+	docker run -it --rm -p 8080:8080 $(DOCKER_IMAGE) --server-mode http --server-host 0.0.0.0
