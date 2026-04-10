@@ -16,6 +16,7 @@ The Gateway API is the modern way to manage routing in Kubernetes.
 **Prerequisites**: Gateway API must be enabled on the cluster (enabled by default in GKE 1.24+).
 
 **Example Gateway Manifest:**
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
@@ -25,12 +26,13 @@ metadata:
 spec:
   gatewayClassName: gke-l7-gxlb # GKE managed external L7 load balancer
   listeners:
-  - name: http
-    protocol: HTTP
-    port: 80
+    - name: http
+      protocol: HTTP
+      port: 80
 ```
 
 **Example HTTPRoute Manifest:**
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -39,15 +41,15 @@ metadata:
   namespace: my-namespace
 spec:
   parentRefs:
-  - name: my-gateway
+    - name: my-gateway
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    backendRefs:
-    - name: my-service
-      port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: my-service
+          port: 80
 ```
 
 ### 2. Configure Standard GKE Ingress
@@ -55,6 +57,7 @@ spec:
 Use standard Ingress for simpler use cases or legacy setups.
 
 **Example Ingress Manifest:**
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -65,15 +68,15 @@ metadata:
     kubernetes.io/ingress.class: "gce"
 spec:
   rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: my-service
-            port:
-              number: 80
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-service
+                port:
+                  number: 80
 ```
 
 ### 3. Secure with Cloud Armor
@@ -81,10 +84,12 @@ spec:
 Cloud Armor provides WAF and DDoS protection.
 
 **Enable Cloud Armor via BackendConfig:**
+
 1. Create a Security Policy in Cloud Armor (usually via gcloud or Terraform).
 2. Reference it in a `BackendConfig` in GKE.
 
 **Example BackendConfig:**
+
 ```yaml
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
@@ -103,6 +108,7 @@ spec:
 Automatically provision and renew SSL certificates.
 
 **Example ManagedCertificate (Legacy Ingress):**
+
 ```yaml
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
@@ -110,7 +116,7 @@ metadata:
   name: my-certificate
 spec:
   domains:
-  - example.com
+    - example.com
 ```
 
 Reference it in Ingress annotations: `networking.gke.io/managed-certificates: my-certificate`.
@@ -125,10 +131,12 @@ Container-native load balancing allows load balancers to target Kubernetes Pods 
 **Prerequisites**: Cluster must be VPC-native.
 
 **How it works**:
+
 - For GKE Ingress and Gateway API, container-native load balancing is enabled by default via Network Endpoint Groups (NEGs).
 - To verify or explicitly enable it for a Service, use the `cloud.google.com/neg` annotation.
 
 **Example Service Manifest:**
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -138,9 +146,9 @@ metadata:
     cloud.google.com/neg: '{"ingress": true}' # Enabled for Ingress
 spec:
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 8080
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
   selector:
     app: my-app
   type: ClusterIP
@@ -151,10 +159,12 @@ spec:
 Private Service Connect allows you to expose services in one VPC to consumers in another VPC securely, without VPC peering.
 
 **Steps:**
+
 1. Create an internal load balancer for your service.
 2. Create a `ServiceAttachment` referencing the load balancer.
 
 **Example ServiceAttachment Manifest:**
+
 ```yaml
 apiVersion: networking.gke.io/v1
 kind: ServiceAttachment
@@ -164,7 +174,7 @@ metadata:
 spec:
   connectionPreference: ACCEPT_AUTOMATIC
   natSubnets:
-  - my-psc-nat-subnet # Subnet dedicated for PSC NAT
+    - my-psc-nat-subnet # Subnet dedicated for PSC NAT
   targetService:
     name: my-service
     namespace: my-namespace
@@ -178,4 +188,3 @@ Share the `ServiceAttachment` URI with consumers to create a PSC endpoint in the
 2. **Enable Cloud Armor**: Always protect public-facing endpoints with Cloud Armor.
 3. **Use Managed Certificates**: Avoid managing certificate renewals manually.
 4. **Use Container-Native Load Balancing**: Always use NEGs for HTTP(S) load balancing to reduce latency and improve traffic distribution.
-

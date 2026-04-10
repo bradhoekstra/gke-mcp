@@ -13,9 +13,11 @@ Multi-tenancy allows you to share a single GKE cluster among multiple teams or a
 Namespaces provide a scope for names and are the primary unit of isolation in Kubernetes.
 
 **Steps:**
+
 1. Create a namespace for each tenant.
 
 **Example Namespace Manifest:**
+
 ```yaml
 apiVersion: v1
 kind: Namespace
@@ -30,10 +32,12 @@ metadata:
 Role-Based Access Control (RBAC) allows you to control who has access to what resources within a namespace.
 
 **Steps:**
+
 1. Define a `Role` with specific permissions.
 2. Bind the `Role` to a user or group using a `RoleBinding`.
 
 **Example Role and RoleBinding Manifest:**
+
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -41,9 +45,9 @@ metadata:
   namespace: tenant-a
   name: pod-reader
 rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources: ["pods"]
-  verbs: ["get", "watch", "list"]
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -51,9 +55,9 @@ metadata:
   name: read-pods
   namespace: tenant-a
 subjects:
-- kind: User
-  name: user@example.com # Name is case sensitive
-  apiGroup: rbac.authorization.k8s.io
+  - kind: User
+    name: user@example.com # Name is case sensitive
+    apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
   name: pod-reader
@@ -65,6 +69,7 @@ roleRef:
 Resource quotas prevent a single tenant from consuming all resources in the cluster.
 
 **Example ResourceQuota Manifest:**
+
 ```yaml
 apiVersion: v1
 kind: ResourceQuota

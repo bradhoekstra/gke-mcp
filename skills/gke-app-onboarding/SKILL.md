@@ -41,8 +41,8 @@ Build and store the container image:
 Generate Kubernetes manifests for the application:
 
 - **Deployment**: Create a `Deployment` manifest.
-    - Include resource requests and limits.
-    - Configure liveness and readiness probes.
+  - Include resource requests and limits.
+  - Configure liveness and readiness probes.
 - **Service**: Create a `Service` manifest (e.g., `ClusterIP` for internal apps, `LoadBalancer` or `Gateway` for external access).
 
 ### 5. Initial Deployment

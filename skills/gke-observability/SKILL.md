@@ -14,6 +14,7 @@ This skill provides workflows for ensuring your GKE cluster and workloads have a
 Check if Cloud Logging and Cloud Monitoring are enabled on the cluster.
 
 **Command:**
+
 ```bash
 gcloud container clusters describe <cluster-name> --region <region> --project <project-id> --format="json(loggingConfig, monitoringConfig)"
 ```
@@ -25,6 +26,7 @@ Look for `loggingService` and `monitoringService` to be set to something other t
 Google Cloud Managed Service for Prometheus is the recommended way to collect metrics from your applications.
 
 **Command to enable:**
+
 ```bash
 gcloud container clusters update <cluster-name> \
     --enable-managed-prometheus \
@@ -32,6 +34,7 @@ gcloud container clusters update <cluster-name> \
 ```
 
 **Verify installation:**
+
 ```bash
 kubectl get pods -n gmp-system
 ```
@@ -41,6 +44,7 @@ kubectl get pods -n gmp-system
 Ensure your workloads are logging to standard output, which Cloud Logging collects automatically.
 
 **Check workload logs:**
+
 ```bash
 kubectl logs <pod-name> -n <namespace>
 ```
@@ -50,6 +54,7 @@ Ensure logs are in a structured format (like JSON) if possible, for easier query
 ### 4. Dashboards and Alerts
 
 Recommend creating dashboards in Cloud Monitoring for key metrics:
+
 - CPU Utilization
 - Memory Utilization
 - Request Latency
@@ -76,14 +81,15 @@ Use continuous profiling to analyze application performance in production with l
 Use Logging Query Language (LQL) in Cloud Logging to find specific logs.
 
 **Example LQL Queries:**
+
 - Find error logs for a specific container:
-  ```
+  ```text
   resource.type="k8s_container"
   resource.labels.container_name="my-app"
   severity>=ERROR
   ```
 - Find logs with a specific message:
-  ```
+  ```text
   resource.type="k8s_container"
   textPayload:"connection refused"
   ```
@@ -93,6 +99,7 @@ Use Logging Query Language (LQL) in Cloud Logging to find specific logs.
 For Standard clusters, you can enable collection of metrics from the Kubernetes API server, scheduler, and controller manager.
 
 **Command:**
+
 ```bash
 gcloud container clusters update <cluster-name> \
     --monitoring=SYSTEM,API_SERVER,SCHEDULER,CONTROLLER_MANAGER \
@@ -104,6 +111,7 @@ gcloud container clusters update <cluster-name> \
 If using GKE Dataplane V2, you can enable advanced L4 observability.
 
 **Command:**
+
 ```bash
 gcloud container clusters update <cluster-name> \
     --enable-dataplane-v2-observability \
@@ -118,5 +126,3 @@ This allows you to observe traffic flows and network metrics.
 2. **Custom Metrics**: Use Managed Service for Prometheus to expose and collect custom application metrics.
 3. **Full Pillars of Observability**: Implement Tracing and Profiling in addition to Logs and Metrics for complete visibility.
 4. **Control Plane Metrics**: Enable control plane metrics (if using Standard) to monitor the health of the API server and scheduler.
-
-

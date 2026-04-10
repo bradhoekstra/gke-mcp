@@ -12,11 +12,12 @@ Managing cluster upgrades is crucial for security and access to new features. GK
 
 Release channels allow you to choose the balance between stability and feature availability.
 
-*   **Rapid**: Newest features, less tested.
-*   **Regular** (Default): Good balance.
-*   **Stable**: Most tested, best for critical production workloads.
+- **Rapid**: Newest features, less tested.
+- **Regular** (Default): Good balance.
+- **Stable**: Most tested, best for critical production workloads.
 
 **Command to set release channel:**
+
 ```bash
 gcloud container clusters update <cluster-name> \
     --release-channel=stable \
@@ -28,6 +29,7 @@ gcloud container clusters update <cluster-name> \
 Surge upgrades allow you to specify how many nodes can be created above the target size during an upgrade, minimizing disruption.
 
 **Example configuration:**
+
 ```bash
 gcloud container node-pools update <pool-name> \
     --cluster=<cluster-name> \
@@ -35,6 +37,7 @@ gcloud container node-pools update <pool-name> \
     --max-unavailable-upgrade=0 \
     --region <region>
 ```
+
 Setting `max-unavailable-upgrade=0` ensures that no nodes are taken offline before new ones are ready.
 
 ### 3. Implement Blue/Green Node Pool Upgrades
@@ -42,6 +45,7 @@ Setting `max-unavailable-upgrade=0` ensures that no nodes are taken offline befo
 For high-risk upgrades, you can create a new node pool (Green) with the new version, test it, and then migrate workloads from the old node pool (Blue).
 
 **Steps:**
+
 1. Create a new node pool with the new version.
 2. Taint the new node pool to prevent automatic scheduling.
 3. Cordon and drain the old node pool gradually.

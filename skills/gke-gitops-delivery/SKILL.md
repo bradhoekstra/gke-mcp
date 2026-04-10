@@ -16,6 +16,7 @@ Config Sync is Google's managed GitOps solution.
 **Prerequisites**: Config Sync must be enabled on the cluster.
 
 **Enable Config Sync:**
+
 ```bash
 gcloud container clusters update <cluster-name> \
     --enable-config-sync \
@@ -26,6 +27,7 @@ gcloud container clusters update <cluster-name> \
 A `RootSync` object tells Config Sync where to pull cluster-wide configuration from.
 
 **Example RootSync:**
+
 ```yaml
 apiVersion: configsync.gke.io/v1beta1
 kind: RootSync
@@ -48,15 +50,17 @@ spec:
 ArgoCD is a popular open-source GitOps tool.
 
 **Install ArgoCD:**
+
 ```bash
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
 **Create an Application in ArgoCD:**
-An Application resource defines the source repo and the target cluster/namespace.
+An Application resource defines the source repository and the target cluster/namespace.
 
 **Example Application:**
+
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -85,6 +89,7 @@ Config Sync is ideal for managing multiple clusters from a single repository.
 **ClusterSelectors**: You can use `ClusterSelector` to apply resources only to specific clusters based on labels.
 
 **Example ClusterSelector:**
+
 ```yaml
 apiVersion: configsync.gke.io/v1beta1
 kind: ClusterSelector
@@ -105,4 +110,3 @@ Reference it in your resource manifests to restrict where they are applied.
 3. **Pruning**: Enable pruning (deleting resources in K8s that are no longer in Git) to avoid resource drift.
 4. **Automated Sync**: Use automated sync with self-healing to ensure the cluster always matches Git.
 5. **Multi-Cluster Consistency**: Use GitOps to ensure consistent configuration across multiple clusters, reducing snowflake environments.
-

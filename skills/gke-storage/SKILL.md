@@ -13,6 +13,7 @@ GKE supports various storage options, from Persistent Disks to Cloud Storage. Ch
 StorageClasses allow you to describe the "classes" of storage you offer. Different classes might map to quality-of-service levels, or to backup policies.
 
 **Example StorageClass Manifest:**
+
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -25,17 +26,19 @@ parameters:
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 ```
+
 Setting `allowVolumeExpansion: true` is highly recommended for production.
 
 ### 2. Use CSI Drivers
 
 GKE includes container storage interface (CSI) drivers for dynamic provisioning of storage.
 
-*   **Compute Engine Persistent Disk CSI Driver**: Default for block storage.
-*   **Google Cloud Filestore CSI Driver**: For managed NFS (ReadWriteMany).
-*   **Cloud Storage FUSE CSI Driver**: For mounting GCS buckets as volumes.
+- **Compute Engine Persistent Disk CSI Driver**: Default for block storage.
+- **Google Cloud Filestore CSI Driver**: For managed NFS (ReadWriteMany).
+- **Cloud Storage FUSE CSI Driver**: For mounting GCS buckets as volumes.
 
 **Example using Filestore CSI Driver:**
+
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -43,7 +46,7 @@ metadata:
   name: filestore-pvc
 spec:
   accessModes:
-  - ReadWriteMany
+    - ReadWriteMany
   storageClassName: standard-rwm # Pre-defined for Filestore
   resources:
     requests:
@@ -55,6 +58,7 @@ spec:
 If `allowVolumeExpansion` is true in the StorageClass, you can resize a volume by updating the PVC manifest.
 
 **Steps:**
+
 1. Edit the PVC manifest and increase the storage request.
 2. Apply the changes.
 

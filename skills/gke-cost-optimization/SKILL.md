@@ -13,9 +13,11 @@ Cost optimization in GKE involves tracking costs, setting limits to prevent wast
 GKE cost allocation allows you to see the cost of your GKE resources in Cloud Billing, broken down by namespace and cluster labels.
 
 **Steps:**
+
 1. Enable GKE cost allocation in the cluster settings.
 
 **Command:**
+
 ```bash
 gcloud container clusters update <cluster-name> \
     --enable-cost-allocation \
@@ -29,6 +31,7 @@ gcloud container clusters update <cluster-name> \
 Resource quotas restrict the total resource consumption in a namespace, preventing any single tenant from consuming all cluster resources.
 
 **Example ResourceQuota Manifest:**
+
 ```yaml
 apiVersion: v1
 kind: ResourceQuota
@@ -47,9 +50,9 @@ spec:
 
 Rightsizing involves adjusting the requested resources of your workloads to match their actual utilization.
 
-*   **Use VPA in Recommender Mode**: Let VPA observe usage and recommend CPU and memory requests.
-*   **Use MPA**: Reconcile HPA and VPA to avoid conflicts.
-*   **Review Cost Recommendations**: Check the Google Cloud Console for GKE cost optimization recommendations.
+- **Use VPA in Recommender Mode**: Let VPA observe usage and recommend CPU and memory requests.
+- **Use MPA**: Reconcile HPA and VPA to avoid conflicts.
+- **Review Cost Recommendations**: Check the Google Cloud Console for GKE cost optimization recommendations.
 
 ## Best Practices
 
