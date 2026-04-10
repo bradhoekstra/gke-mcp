@@ -129,7 +129,7 @@ Enforce security policies on namespaces using labels.
 ```bash
 kubectl label --overwrite ns <namespace> \
     pod-security.kubernetes.io/enforce=restricted \
-    pod-security.kubernetes.io/enforce-version=latest
+    pod-security.kubernetes.io/enforce-version=v1.30
 ```
 
 ### 7. Secret Manager Integration (CSI Driver)
