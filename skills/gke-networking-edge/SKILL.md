@@ -24,7 +24,7 @@ metadata:
   name: my-gateway
   namespace: my-namespace
 spec:
-  gatewayClassName: gke-l7-gxlb # GKE managed external L7 load balancer
+  gatewayClassName: gke-l7-global-external-managed # GKE managed external L7 load balancer
   listeners:
     - name: http
       protocol: HTTP

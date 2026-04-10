@@ -25,7 +25,7 @@ Before making recommendations, discover the current state of the environment.
 
 Run these commands to understand the cluster setup:
 
-- Check cluster details: `gcloud container clusters describe <cluster-name> --zone <zone> --project <project>` (or `--region`).
+- Check cluster details: `gcloud container clusters describe <cluster-name> --location <location> --project <project>`
 - Check for Autopilot vs Standard: Look for `autopilot: true` in the describe output.
 - Check release channel: Look for `releaseChannel`.
 

@@ -46,10 +46,9 @@ For high-risk upgrades, you can create a new node pool (Green) with the new vers
 
 **Steps:**
 
-1. Create a new node pool with the new version.
-2. Taint the new node pool to prevent automatic scheduling.
-3. Cordon and drain the old node pool gradually.
-4. Delete the old node pool once empty.
+1. Create a new node pool with the new version and appropriate taints (using --node-taints).
+2. Cordon and drain the old node pool gradually.
+3. Delete the old node pool once empty.
 
 ## Best Practices
 

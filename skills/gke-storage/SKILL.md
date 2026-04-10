@@ -22,7 +22,7 @@ metadata:
 provisioner: pd.csi.storage.gke.io
 parameters:
   type: pd-ssd
-  replication-type: none
+  replication-type: regional-pd
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 ```
