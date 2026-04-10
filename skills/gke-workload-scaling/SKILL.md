@@ -42,8 +42,8 @@ See [assets/hpa-example.yaml](assets/hpa-example.yaml) for a template.
 kubectl apply -f assets/hpa-example.yaml
 ```
 
-**Custom Metrics:**
-To scale based on custom metrics (e.g., Pub/Sub queue length, HTTP requests per second), you must deploy the **Custom Metrics Adapter for Cloud Monitoring** or use **Prometheus** with the Prometheus Adapter. This allows HPA to query external or custom metrics.
+**Custom Metrics & External Metrics:**
+For GKE, the modern and recommended approach for scaling based on Cloud Monitoring metrics (e.g., Pub/Sub queue length) is to use the **External** metric type, which is natively supported by the GKE control plane without requiring the Custom Metrics Adapter. For application-specific metrics exposed via Prometheus, you can use **Google Cloud Managed Service for Prometheus** or the Prometheus Adapter.
 
 ### 3. Vertical Pod Autoscaling (VPA)
 

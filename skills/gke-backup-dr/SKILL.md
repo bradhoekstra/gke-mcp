@@ -33,8 +33,11 @@ gcloud container backup-restore backup-plans create <plan-name> \
     --region=<region> \
     --retention-days=<days> \
     --cron-schedule="<cron-expression>" \
-    --all-namespaces # or specify --included-namespaces
+    --all-namespaces
 ```
+
+> [!NOTE]
+> You can replace `--all-namespaces` with `--included-namespaces=<namespace1>,<namespace2>` to back up specific namespaces instead of all of them.
 
 **Encryption Note**: You can specify a Customer-Managed Encryption Key (CMEK) to encrypt backups. Add `--backup-encryption-key=<key-resource-name>` to the `create` command.
 
