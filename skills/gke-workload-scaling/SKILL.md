@@ -86,40 +86,6 @@ gcloud container clusters update <cluster-name> \
     --zone <zone>
 ```
 
-### 5. Multidimensional Pod Autoscaler (MPA)
-
-MPA allows you to use both horizontal and vertical scaling for the same workload. It is useful when you want to scale horizontally based on a metric like CPU, and vertically based on a metric like Memory.
-
-**Example MPA Manifest:**
-
-```yaml
-apiVersion: autoscaling.gke.io/v1beta1
-kind: MultidimensionalPodAutoscaler
-metadata:
-  name: my-mpa
-  namespace: my-namespace
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: my-deployment
-  goals:
-    metrics:
-      - type: Resource
-        resource:
-          name: cpu
-          target:
-            type: Utilization
-            averageUtilization: 60
-  constraints:
-    global:
-      minReplicas: 2
-      maxReplicas: 10
-    containerConstraints:
-      - containerName: my-container
-        mode: Auto
-```
-
 ## Best Practices
 
 1. **Define Resource Requests:** HPA and VPA rely on accurate resource requests. Always define them in your container specs.
