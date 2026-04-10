@@ -43,7 +43,7 @@ Generate Kubernetes manifests for the application:
 - **Deployment**: Create a `Deployment` manifest.
   - Include resource requests and limits.
   - Configure liveness and readiness probes.
-- **Service**: Create a `Service` manifest (e.g., `ClusterIP` for internal apps, `LoadBalancer` or `Gateway` for external access).
+- **Service**: Create a Service manifest (e.g., ClusterIP for internal apps, LoadBalancer for external access). For advanced L7 routing, consider using the [Gateway API](../gke-networking-edge/SKILL.md).
 
 ### 5. Initial Deployment
 

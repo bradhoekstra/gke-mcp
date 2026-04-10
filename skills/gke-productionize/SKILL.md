@@ -94,7 +94,7 @@ Adopt modern deployment practices.
 
 Ensure efficient use of resources.
 
-- **Action**: Assess if workloads can use **Spot VMs** for non-critical components, check for over-provisioning, and consider **Autopilot** for managed cost efficiency.
+- **Action**: Delegate to [gke-cost-optimization](../gke-cost-optimization/SKILL.md) for strategies on rightsizing, quotas, and Spot VMs.
 
 ### 3. Production Readiness Scoring
 
