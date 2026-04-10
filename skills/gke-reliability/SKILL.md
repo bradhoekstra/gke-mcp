@@ -90,7 +90,7 @@ Configure when GKE can perform automated upgrades to avoid peak hours.
 ```bash
 gcloud container clusters update <cluster-name> \
     --region <region> \
-    --maintenance-window <start-time> \
+    --maintenance-window-start <start-time> \
     --maintenance-window-recurrence "FREQ=DAILY"
 ```
 
