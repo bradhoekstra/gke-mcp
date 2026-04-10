@@ -17,43 +17,9 @@ This skill is adaptable to:
 
 ## Workflow
 
-### 0. Pre-Kubernetes Phase (If applicable)
-
-If the application has not been deployed to GKE or Kubernetes yet, and may lack a container image or YAML files, follow these steps:
-
-#### App Assessment
-
-- Identify the language, framework, and dependencies.
-- Determine configuration methods (e.g., environment variables).
-- Identify stateful needs (databases, file storage).
-- Determine port mapping and protocol (HTTP, TCP, etc.).
-
-#### Containerization
-
-- Create a `Dockerfile` suitable for the application.
-- Recommend multi-stage builds for smaller, more secure images.
-- Ensure the app logs to `stdout`/`stderr`.
-
-#### Image Management
-
-- Build the container image.
-- Push the image to Google Artifact Registry.
-
-#### Manifest Generation
-
-- Generate a basic `Deployment` manifest with resource requests/limits and health probes.
-- Generate a `Service` manifest (ClusterIP or LoadBalancer as needed).
-
-#### Initial Deployment
-
-- Apply the manifests to the target GKE cluster.
-- Verify the app is running and accessible.
-
-Once deployed, proceed to the standard **Discovery Phase** and **Production Readiness Checklist**.
-
 ### 1. Discovery Phase
 
-Before making recommendations, you must discover the current state of the environment.
+Before making recommendations, discover the current state of the environment.
 
 #### Cluster Discovery
 
@@ -74,72 +40,68 @@ If a specific application is targeted, discover its configuration:
 - Check for PDB: `kubectl get pdb -n <namespace>`
 - Check for NetworkPolicies: `kubectl get networkpolicy -n <namespace>`
 
-### 2. Production Readiness Checklist
+### 2. Production Readiness Assessment
 
-Go through these areas and assess readiness.
+Go through these areas and assess readiness. Delegate detailed implementation to domain-specific skills.
 
-#### A. Scalability & Resource Management
+#### A. App Onboarding (Pre-Kubernetes)
 
-- **Resource Requests & Limits**: Ensure all production containers have explicit CPU and memory requests and limits.
-- **Horizontal Pod Autoscaling (HPA)**: Recommend HPA for workloads that experience variable load.
-- **Vertical Pod Autoscaling (VPA)**: Recommend VPA for workloads that are hard to size or for optimizing requests.
-- **Cluster Autoscaler**: Ensure Cluster Autoscaler is enabled (automatic in Autopilot).
-- **ComputeClasses (Autopilot)**: Recommend appropriate ComputeClasses if applicable.
+If the application is not yet running on GKE, delegate to the [gke-app-onboarding](../gke-app-onboarding/SKILL.md) skill for containerization and initial deployment.
 
-> [!NOTE]
-> For detailed implementation of scaling strategies, refer to the [gke-workload-scaling](../gke-workload-scaling/SKILL.md) skill.
+#### B. Scalability & Resource Management
 
-#### B. Observability
+Ensure workloads have appropriate resources and autoscaling.
 
-- **Logging**: Verify Cloud Logging is enabled. Check if workloads are logging to stdout/stderr.
-- **Monitoring**: Verify Cloud Monitoring is enabled.
-- **Managed Service for Prometheus**: Recommend setting up Managed Service for Prometheus for application metrics.
-- **Dashboards & Alerts**: Suggest creating dashboards for key metrics (CPU, Memory, Latency) and setting up alerts.
+- **Action**: Delegate to [gke-workload-scaling](../gke-workload-scaling/SKILL.md) for configuring HPA, VPA, and resource limits.
 
-#### C. Reliability
+#### C. Observability
 
-- **Multi-Zonal/Regional**: Recommend regional clusters for high availability.
-- **Pod Disruption Budgets (PDB)**: Ensure production workloads have PDBs configured to prevent downtime during maintenance.
-- **Health Probes**: Ensure Liveness and Readiness probes are configured correctly. Startup probes should be used for slow-starting apps.
-- **Termination Grace Period**: Ensure appropriate `terminationGracePeriodSeconds` is set for graceful shutdown.
+Ensure adequate logging and monitoring are in place.
 
-#### D. Security
+- **Action**: Delegate to [gke-observability](../gke-observability/SKILL.md) for setting up Cloud Logging, Monitoring, and Managed Prometheus.
 
-- **Workload Identity**: Recommend using Workload Identity instead of service account keys for accessing Google Cloud APIs.
-- **Namespace Isolation**: Ensure workloads are separated by namespaces.
-- **Network Policies**: Recommend using Network Policies to restrict traffic between pods.
-- **Pod Security Admission**: Ensure appropriate security standards are enforced (e.g., baseline or restricted).
-- **Secrets Management**: Recommend using **Google Cloud Secret Manager** integrated via the Secret Provider Class (CSI driver) or External Secrets Operator.
-- **Cluster Network Security**: Recommend **Private Clusters**, **Master Authorized Networks**, and **Cloud NAT** for outbound internet access.
-- **Vulnerability Scanning**: Recommend enabling vulnerability scanning in Artifact Registry and policies to block high-risk images.
+#### D. Reliability
 
-> [!NOTE]
-> For detailed implementation of workload security and network policies, refer to the [gke-workload-security](../gke-workload-security/SKILL.md) skill.
+Ensure high availability and graceful degradation.
 
-#### E. Backup & Disaster Recovery
+- **Action**: Delegate to [gke-reliability](../gke-reliability/SKILL.md) for configuring regional clusters, PDBs, and health probes.
 
-- **Backup for GKE**: Recommend enabling and configuring Backup for GKE for stateful workloads.
-- **Disaster Recovery**: Ensure backups are tested and recovery procedures are documented.
+#### E. Security
 
-#### F. Cost Optimization
+Harden the cluster and workloads.
 
-- **Autopilot / Rightsizing**: Leverage Autopilot for automatic rightsizing or use VPA for Standard clusters.
-- **Spot VMs**: Consider Spot VMs for fault-tolerant or non-critical workloads.
-- **Resource Profiling**: Regularly review resource requests and limits to avoid over-provisioning.
+- **Action**: Delegate to [gke-workload-security](../gke-workload-security/SKILL.md) for Workload Identity, Network Policies, and Shielded Nodes.
+
+#### F. Backup & Disaster Recovery
+
+Ensure stateful data is protected.
+
+- **Action**: Delegate to [gke-backup-dr](../gke-backup-dr/SKILL.md) for configuring Backup for GKE and restore procedures.
 
 #### G. Edge Security & Ingress
 
-- **Gateway API / Ingress**: Recommend Gateway API or GKE Ingress for exposing services.
-- **Cloud Armor**: Recommend using Cloud Armor for WAF and DDoS protection.
-- **SSL Certificates**: Use Google-managed SSL certificates for HTTPS.
+Secure external access.
+
+- **Action**: Delegate to [gke-networking-edge](../gke-networking-edge/SKILL.md) for Gateway API, Ingress, and Cloud Armor.
 
 #### H. Deployment & GitOps
 
-- **GitOps Practice**: Discourage direct `kubectl apply` for production. Recommend GitOps tools like **Config Sync** or ArgoCD.
+Adopt modern deployment practices.
 
+- **Action**: Delegate to [gke-gitops-delivery](../gke-gitops-delivery/SKILL.md) for Config Sync or ArgoCD.
+
+#### I. Cost Optimization
+
+Ensure efficient use of resources.
+
+- **Action**: Assess if workloads can use **Spot VMs** for non-critical components, check for over-provisioning, and consider **Autopilot** for managed cost efficiency.
+
+### 3. Production Readiness Scoring
+
+After the assessment, provide a summary report with a RAG (Red, Amber, Green) status for each area and an overall readiness score. This helps prioritize remediation efforts.
 
 ## Adaptability Guidelines
 
 - **Single App**: Focus on Health Probes, HPA, Resource Limits, PDB, and Workload Identity for that specific app.
 - **Cluster Wide**: Focus on Cluster Autoscaler, Multi-zonal setup, Release Channels, Maintenance Windows, and default Network Policies.
-- **Interactive Approach**: Always ask the user for confirmation or missing info (e.g., "What are the typical traffic patterns for this app?" to recommend HPA settings).
+- **Interactive Approach**: Always ask the user for confirmation or missing info before proceeding with recommendations.

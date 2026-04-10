@@ -42,6 +42,9 @@ See [assets/hpa-example.yaml](assets/hpa-example.yaml) for a template.
 kubectl apply -f assets/hpa-example.yaml
 ```
 
+**Custom Metrics:**
+To scale based on custom metrics (e.g., Pub/Sub queue length, HTTP requests per second), you must deploy the **Custom Metrics Stackdriver Adapter** or use **Prometheus** with the Prometheus Adapter. This allows HPA to query external or custom metrics.
+
 ### 3. Vertical Pod Autoscaling (VPA)
 
 Automatically adjust the CPU and memory reservations for your pods to match actual usage. This is critical for right-sizing workloads.
@@ -81,6 +84,40 @@ gcloud container clusters update <cluster-name> \
     --min-nodes <min> \
     --max-nodes <max> \
     --zone <zone>
+```
+
+### 5. Multidimensional Pod Autoscaler (MPA)
+
+MPA allows you to use both horizontal and vertical scaling for the same workload. It is useful when you want to scale horizontally based on a metric like CPU, and vertically based on a metric like Memory.
+
+**Example MPA Manifest:**
+
+```yaml
+apiVersion: autoscaling.gke.io/v1beta1
+kind: MultidimensionalPodAutoscaler
+metadata:
+  name: my-mpa
+  namespace: my-namespace
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-deployment
+  goals:
+    metrics:
+      - type: Resource
+        resource:
+          name: cpu
+          target:
+            type: Utilization
+            averageUtilization: 60
+  constraints:
+    global:
+      minReplicas: 2
+      maxReplicas: 10
+    containerConstraints:
+      - containerName: my-container
+        mode: Auto
 ```
 
 ## Best Practices
