@@ -34,9 +34,9 @@ gcloud container backup-restore backup-plans create <plan-name> \
     --retention-days=<days> \
     --cron-schedule="<cron-expression>" \
     --all-namespaces # or specify --included-namespaces
+```
 
 **Encryption Note**: You can specify a Customer-Managed Encryption Key (CMEK) to encrypt backups. Add `--backup-encryption-key=<key-resource-name>` to the `create` command.
-```
 
 ### 3. Create a Manual Backup
 

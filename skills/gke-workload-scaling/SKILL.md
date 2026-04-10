@@ -43,7 +43,7 @@ kubectl apply -f assets/hpa-example.yaml
 ```
 
 **Custom Metrics:**
-To scale based on custom metrics (e.g., Pub/Sub queue length, HTTP requests per second), you must deploy the **Custom Metrics Stackdriver Adapter** or use **Prometheus** with the Prometheus Adapter. This allows HPA to query external or custom metrics.
+To scale based on custom metrics (e.g., Pub/Sub queue length, HTTP requests per second), you must deploy the **Custom Metrics Adapter for Cloud Monitoring** or use **Prometheus** with the Prometheus Adapter. This allows HPA to query external or custom metrics.
 
 ### 3. Vertical Pod Autoscaling (VPA)
 
