@@ -53,11 +53,13 @@ for skill_dir in skills/*; do
                 failed=1
             fi
 
-            skill_name=$(echo "$fm_content" | grep "^name:" | sed 's/^name:[[:space:]]*//')
-            dir_name=$(basename "$skill_dir")
-            if [ "$skill_name" != "$dir_name" ]; then
-                echo "Error: Skill name '$skill_name' does not match directory name '$dir_name' in $skill_file"
-                failed=1
+            if echo "$fm_content" | grep -q "^name:"; then
+                skill_name=$(echo "$fm_content" | grep "^name:" | sed 's/^name:[[:space:]]*//' | xargs)
+                dir_name=$(basename "$skill_dir")
+                if [ "$skill_name" != "$dir_name" ]; then
+                    echo "Error: Skill name '$skill_name' does not match directory name '$dir_name' in $skill_file"
+                    failed=1
+                fi
             fi
             
             if ! echo "$fm_content" | grep -q "^description:[[:space:]]*[^[:space:]]"; then
