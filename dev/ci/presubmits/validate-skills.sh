@@ -48,8 +48,8 @@ for skill_dir in skills/*; do
                 continue
             fi
             
-            if ! echo "$fm_content" | grep -q "^name:"; then
-                echo "Error: $skill_file is missing 'name' in frontmatter"
+            if ! echo "$fm_content" | grep -q "^name:[[:space:]]*[^[:space:]]"; then
+                echo "Error: $skill_file is missing a non-empty 'name' in frontmatter"
                 failed=1
             fi
             
