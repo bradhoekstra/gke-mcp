@@ -1,3 +1,8 @@
+---
+name: gke-multi-tenancy
+description: Guidance on implementing multi-tenancy and governance in Google Kubernetes Engine (GKE) clusters.
+---
+
 # GKE Multi-tenancy and Governance
 
 This skill provides guidance on implementing multi-tenancy and governance in Google Kubernetes Engine (GKE) clusters.

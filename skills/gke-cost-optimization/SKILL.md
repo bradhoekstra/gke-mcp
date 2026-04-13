@@ -1,3 +1,8 @@
+---
+name: gke-cost-optimization
+description: Guidance on optimizing costs for Google Kubernetes Engine (GKE) clusters.
+---
+
 # GKE Cost Optimization
 
 This skill provides guidance on optimizing costs for Google Kubernetes Engine (GKE) clusters.

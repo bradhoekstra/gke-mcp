@@ -1,3 +1,8 @@
+---
+name: gke-cluster-lifecycle
+description: Guidance on managing the lifecycle and upgrades of Google Kubernetes Engine (GKE) clusters.
+---
+
 # GKE Cluster Lifecycle and Upgrades
 
 This skill provides guidance on managing the lifecycle and upgrades of Google Kubernetes Engine (GKE) clusters.
