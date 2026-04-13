@@ -53,8 +53,8 @@ for skill_dir in skills/*; do
                 failed=1
             fi
             
-            if ! echo "$fm_content" | grep -q "^description:"; then
-                echo "Error: $skill_file is missing 'description' in frontmatter"
+            if ! echo "$fm_content" | grep -q "^description:[[:space:]]*[^[:space:]]"; then
+                echo "Error: $skill_file is missing a non-empty 'description' in frontmatter"
                 failed=1
             fi
             
