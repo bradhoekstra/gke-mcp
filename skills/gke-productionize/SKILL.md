@@ -107,4 +107,4 @@ After the assessment, provide a summary report with a RAG (Red, Amber, Green) st
 
 - **Single App**: Focus on Health Probes, HPA, Resource Limits, PDB, and Workload Identity for that specific app.
 - **Cluster Wide**: Focus on Cluster Autoscaler, Multi-zonal setup, Release Channels, Maintenance Windows, and default Network Policies.
-- **Proactive Execution**: Automatically execute all relevant skills (e.g., observability, security, scaling, reliability) to fully productionize the environment.
+- **Proactive Execution**: Proactively execute relevant skills (e.g., observability, security, scaling, reliability) to assess and propose improvements, seeking user confirmation before applying state-changing implementations.
