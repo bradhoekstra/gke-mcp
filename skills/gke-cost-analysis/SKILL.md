@@ -38,17 +38,15 @@ Use these queries as templates to answer questions. All parameters (dataset, tab
 bq query --nouse_legacy_sql '
 SELECT
   SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,
-  SUM(cost) AS cost_before_credits,
+  SUM(cost) AS cost_before_credits
 FROM {{.BQDatasetProjectID}}.{{.BQDatasetName}}.gcp_billing_export_resource_v1_XXXXXX_XXXXXX_XXXXXX AS bqe
-WHERE _PARTITIONTIME >= "2025-06-01"
+WHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
   AND project.id = "sample-project-id"
   AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-location" AND l.value = "us-central1")
   AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-name" AND l.value = "sample-cluster-name")
   AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "k8s-namespace" AND l.value = "sample-namespace")
   AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "k8s-workload-type" AND l.value = "apps/v1-Deployment")
   AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "k8s-workload-name" AND l.value = "sample-workload-name")
-ORDER BY 1 DESC
-LIMIT 10
 ;
 '
 ```
@@ -65,9 +63,9 @@ SELECT
   (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-workload-type") AS k8s_workload_type,
   (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-workload-name") AS k8s_workload_name,
   SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,
-  SUM(cost) AS cost_before_credits,
+  SUM(cost) AS cost_before_credits
 FROM {{.BQDatasetProjectID}}.{{.BQDatasetName}}.gcp_billing_export_resource_v1_XXXXXX_XXXXXX_XXXXXX AS bqe
-WHERE _PARTITIONTIME >= "2025-06-01"
+WHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
   AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-name")
 GROUP BY 1, 2, 3, 4, 5, 6
 ORDER BY 7 DESC
