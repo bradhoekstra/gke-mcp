@@ -25,7 +25,7 @@ When handling a cost-related question:
 
 - **Data Source**: GKE costs come from GCP Billing Detailed BigQuery Export. The user must provide the full path to their BigQuery table (dataset name and table name containing Billing Account ID).
 - **Granularity**: GKE Cost Allocation must be enabled for namespace and workload-level cost data.
-- **Tools**: BigQuery CLI (`bq`) is preferred. Use dot (`.`) instead of colon (`:`) to separate project and dataset in `bq` CLI.
+- **Tools**: BigQuery CLI (`bq`) is preferred. When writing Standard SQL queries, use a dot (`.`) instead of a colon (`:`) to separate the project ID and dataset name.
 - **Defaults**: Assume last 30 days, row limit 10, ordering by cost descending, unless specified otherwise.
 
 ## Example BigQuery Queries
@@ -57,11 +57,11 @@ WHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
 bq query --nouse_legacy_sql '
 SELECT
   project.id AS project_id,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-location") AS cluster_location,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-name") AS cluster_name,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-namespace") AS k8s_namespace,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-workload-type") AS k8s_workload_type,
-  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-workload-name") AS k8s_workload_name,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-location" LIMIT 1) AS cluster_location,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "goog-k8s-cluster-name" LIMIT 1) AS cluster_name,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-namespace" LIMIT 1) AS k8s_namespace,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-workload-type" LIMIT 1) AS k8s_workload_type,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = "k8s-workload-name" LIMIT 1) AS k8s_workload_name,
   SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,
   SUM(cost) AS cost_before_credits
 FROM {{.BQDatasetProjectID}}.{{.BQDatasetName}}.gcp_billing_export_resource_v1_XXXXXX_XXXXXX_XXXXXX AS bqe
