@@ -45,7 +45,7 @@ If a specific application is targeted, discover its configuration:
 
 ### 2. Production Readiness Assessment
 
-Go through these areas and assess readiness. **You MUST execute all of the referenced specialized skills to perform the detailed assessment and implementation for each domain.** Proactively run them to ensure comprehensive production readiness.
+Go through these areas and assess readiness. **You should proactively execute the relevant specialized skills to perform the detailed assessment and implementation for each domain.**
 
 #### A. App Onboarding (Pre-Kubernetes)
 
