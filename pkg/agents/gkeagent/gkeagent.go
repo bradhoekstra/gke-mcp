@@ -170,8 +170,6 @@ func (a *Agent) adkRun(ctx agent.InvocationContext) iter.Seq2[*session.Event, er
 	}
 }
 
-// InvokeSkill simulates invoking a specific skill as a sub-agent.
-
 func (a *Agent) listSkills() ([]string, error) {
 	entries, err := os.ReadDir(a.skillsDir)
 	if err != nil {

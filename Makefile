@@ -8,6 +8,7 @@
 
 # Variables
 BINARY_NAME := gke-mcp
+AGENT_BINARY_NAME := gke-agent
 DOCKER_IMAGE := $(BINARY_NAME)
 UI_DIR := ui
 
@@ -16,10 +17,15 @@ help: ## Display available commands
 	@echo ""
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make \033[36m<target>\033[0m\n\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-build: build-ui ## Build the binary
+build: build-ui build-agent ## Build both binaries
 	@echo "Building $(BINARY_NAME)..."
 	go build -o $(BINARY_NAME) .
 	@echo "✓ Built $(BINARY_NAME)"
+
+build-agent: ## Build the gke-agent binary
+	@echo "Building $(AGENT_BINARY_NAME)..."
+	go build -o $(AGENT_BINARY_NAME) ./cmd/gke-agent
+	@echo "✓ Built $(AGENT_BINARY_NAME)"
 
 build-ui: ## Build the UI TypeScript code
 	@echo "Building UI..."
