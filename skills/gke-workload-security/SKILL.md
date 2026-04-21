@@ -67,7 +67,7 @@ access Google Cloud APIs.
    configuration. Update the `<ksa-name>` in the file first.
 
    ```bash
-   kubectl apply -f ./assets/workload-identity-pod.yaml
+   kubectl apply -f ./assets/workload-identity-pod.yaml -n workload-identity-test-ns
    ```
 
 ### 3. Implement Network Policies
