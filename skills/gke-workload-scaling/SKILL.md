@@ -9,6 +9,8 @@ This skill provides workflows and best practices for scaling applications on Goo
 
 ## Workflows
 
+**MANDATORY**: Before scaling a deployment or enabling autoscaling (HPA/VPA/CA), present the proposed command or YAML manifest to the user and wait for explicit approval.
+
 ### 1. Manual Scaling
 
 Quickly scale a deployment to a fixed number of replicas. Useful for immediate manual intervention or testing.

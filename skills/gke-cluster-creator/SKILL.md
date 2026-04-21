@@ -16,9 +16,11 @@ This skill helps users create Google Kubernetes Engine (GKE) clusters by providi
    - Once a template is selected, present the default configuration (JSON/YAML).
    - Ask the user for essential missing information: `project_id`, `location`, `cluster_name`.
    - Ask if they want to modify optional fields (e.g., `machineType`, `nodeCount`, `network`).
-3. **Validation**:
+3. **Validation & Dry Run**:
    - Ensure `project_id`, `location`, and `cluster_name` are set.
    - Ensure the configuration matches the `create_cluster` MCP tool schema.
+   - **MANDATORY**: Present the final JSON configuration to the user.
+   - **MANDATORY**: Wait for explicit user approval before proceeding.
 4. **Execution**:
    - Call the `create_cluster` MCP tool with the final configuration.
 

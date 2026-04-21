@@ -45,7 +45,14 @@ Generate Kubernetes manifests for the application:
   - Configure liveness and readiness probes.
 - **Service**: Create a Service manifest (e.g., ClusterIP for internal apps, LoadBalancer for external access). For advanced L7 routing, consider using the [Gateway API](../gke-networking-edge/SKILL.md).
 
-### 5. Initial Deployment
+### 5. Manifest Review (Dry Run)
+
+Before applying the manifests, review them with the user:
+
+- **Review**: Present the generated `Deployment`, `Service`, and any other manifests (YAML) to the user.
+- **Approval**: **MANDATORY**: Wait for explicit user approval before proceeding to deployment.
+
+### 6. Initial Deployment
 
 Apply the manifests and verify the deployment:
 

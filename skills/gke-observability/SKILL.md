@@ -9,6 +9,8 @@ This skill provides workflows for ensuring your GKE cluster and workloads have a
 
 ## Workflows
 
+**MANDATORY**: Before running any `gcloud container clusters update` command to enable observability features, present the command to the user and wait for explicit approval.
+
 ### 1. Audit Cluster Observability
 
 Check if Cloud Logging and Cloud Monitoring are enabled on the cluster.

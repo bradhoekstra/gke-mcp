@@ -13,6 +13,8 @@ GKE supports various storage options, from Persistent Disks to Cloud Storage. Ch
 
 ## Workflows
 
+**MANDATORY**: Before creating StorageClasses or PersistentVolumeClaims, present the generated YAML manifest to the user and wait for explicit approval.
+
 ### 1. Configure Storage Classes
 
 StorageClasses allow you to describe the "classes" of storage you offer. Different classes might map to quality-of-service levels, or to backup policies.

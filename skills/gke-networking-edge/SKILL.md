@@ -9,6 +9,8 @@ This skill provides workflows for exposing applications running on GKE securely 
 
 ## Workflows
 
+**MANDATORY**: Before applying any networking configuration (Gateway, Ingress, BackendConfig, etc.), present the final YAML manifest to the user and wait for explicit approval.
+
 ### 1. Configure Gateway API (Recommended)
 
 The Gateway API is the modern way to manage routing in Kubernetes.

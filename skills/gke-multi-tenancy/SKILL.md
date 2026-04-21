@@ -13,6 +13,8 @@ Multi-tenancy allows you to share a single GKE cluster among multiple teams or a
 
 ## Workflows
 
+**MANDATORY**: Before creating namespaces, applying RBAC roles, or enforcing resource quotas, present the proposed YAML manifests to the user and wait for explicit approval.
+
 ### 1. Create Namespaces for Isolation
 
 Namespaces provide a scope for names and are the primary unit of isolation in Kubernetes.

@@ -13,6 +13,8 @@ Managing cluster upgrades is crucial for security and access to new features. GK
 
 ## Workflows
 
+**MANDATORY**: Before updating release channels, modifying node pool surge settings, or implementing blue/green upgrades, present the proposed command or manifest to the user and wait for explicit approval.
+
 ### 1. Select Release Channels
 
 Release channels allow you to choose the balance between stability and feature availability.

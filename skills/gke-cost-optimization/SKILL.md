@@ -13,6 +13,8 @@ Cost optimization in GKE involves tracking costs, setting limits to prevent wast
 
 ## Workflows
 
+**MANDATORY**: Before running any `gcloud container clusters update` command to enable cost allocation or applying ResourceQuota manifests, present the proposed command or YAML to the user and wait for explicit approval.
+
 ### 1. Enable GKE Cost Allocation
 
 GKE cost allocation allows you to see the cost of your GKE resources in Cloud Billing, broken down by namespace and cluster labels.

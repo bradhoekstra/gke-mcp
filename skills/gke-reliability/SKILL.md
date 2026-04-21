@@ -9,6 +9,8 @@ This skill provides workflows for configuring your GKE cluster and workloads for
 
 ## Workflows
 
+**MANDATORY**: Before applying PDBs, Topology Spread Constraints, or updating Maintenance Windows, present the final manifest or command to the user and wait for explicit approval.
+
 ### 1. Verify Cluster High Availability
 
 Check if the cluster is regional or has multi-zonal node pools.

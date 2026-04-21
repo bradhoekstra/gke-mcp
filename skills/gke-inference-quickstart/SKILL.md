@@ -70,9 +70,9 @@ gcloud container ai profiles manifests create \
 ### 3. Review and Deploy
 
 1. **Save:** The example command above saves output to `inference-workload.yaml`. Ensure you have this file.
-2. **Review:** Check for any placeholders or specific requirements (like PVCs or secrets).
-   - _Note: Some models require Hugging Face tokens. Ensure query instructions for secrets are followed._
-3. **Deploy:**
+2. **Review:** **MANDATORY**: Present the contents of `inference-workload.yaml` to the user. Explain any requirements like PVCs, secrets, or Hugging Face tokens.
+3. **Approval**: **MANDATORY**: Wait for explicit user approval before proceeding to deployment.
+4. **Deploy**:
    ```bash
    kubectl apply -f inference-workload.yaml
    ```

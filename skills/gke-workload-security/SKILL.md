@@ -75,6 +75,8 @@ access Google Cloud APIs.
 Control traffic flow between Pods using Network Policies. By default, all
 traffic is allowed.
 
+**MANDATORY**: Before applying policies or updating cluster addons, present the intended changes (commands or manifests) to the user and wait for explicit approval.
+
 **Enable Network Policy Enforcement:**
 
 ```bash
@@ -98,6 +100,8 @@ kubectl apply -f ./assets/default-deny-netpol.yaml -n <target-namespace>
 ### 4. Enable Shielded Nodes
 
 Ensure nodes are running with verifiable integrity.
+
+**MANDATORY**: Present the update command to the user and wait for explicit approval before proceeding.
 
 **Command:**
 

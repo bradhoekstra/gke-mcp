@@ -9,6 +9,8 @@ This skill provides workflows for protecting your stateful workloads on GKE usin
 
 ## Workflows
 
+**MANDATORY**: Before enabling Backup for GKE, creating backup plans, or initiating restores, present the proposed command or manifest to the user and wait for explicit approval.
+
 ### 1. Enable Backup for GKE
 
 Backup for GKE must be enabled on the cluster level.
