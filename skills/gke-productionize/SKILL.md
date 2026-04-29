@@ -38,7 +38,7 @@ If a specific application is targeted, discover its configuration:
 
 - Get deployment/statefulset details: `kubectl get deployment <app-name> -n <namespace> -o yaml`
 - Check for dedicated namespace and labels: `kubectl get namespace <namespace> -o yaml` (Look for Pod Security Standards labels).
-- Check for dedicated service account: `kubectl get serviceaccount -n <namespace>`
+- Check for dedicated service account usage: `kubectl get pods -n <namespace> -o jsonpath='{.items[*].spec.serviceAccountName}'`
 - Check for resource requests and limits.
 - Check for liveness, readiness, and startup probes.
 - Check for HPA: `kubectl get hpa -n <namespace>`
