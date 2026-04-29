@@ -51,7 +51,7 @@ If a specific application is targeted, discover its configuration:
 
 #### A. App Onboarding (Pre-Kubernetes)
 
-If the application is not yet running on GKE, you MUST run the `gke-app-onboarding` skill to plan containerization, image building and basic deployment.
+If the application is not yet running on GKE, you MUST run the `gke-app-onboarding` skill for planning containerization, image building, and basic deployment.
 
 #### B. Scalability & Resource Management
 
