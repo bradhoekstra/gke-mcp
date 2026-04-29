@@ -1,0 +1,1 @@
+../../gke-app-onboarding/SKILL.md

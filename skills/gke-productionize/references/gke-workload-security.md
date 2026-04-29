@@ -1,0 +1,1 @@
+../../gke-workload-security/SKILL.md

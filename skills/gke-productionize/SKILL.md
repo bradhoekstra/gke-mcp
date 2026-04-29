@@ -49,49 +49,49 @@ If a specific application is targeted, discover its configuration:
 
 #### A. App Onboarding (Pre-Kubernetes)
 
-If the application is not yet running on GKE, delegate to the [gke-app-onboarding](../gke-app-onboarding/SKILL.md) skill for containerization and initial deployment.
+If the application is not yet running on GKE, delegate to the [gke-app-onboarding](references/gke-app-onboarding.md) skill for containerization and initial deployment.
 
 #### B. Scalability & Resource Management
 
 Ensure workloads have appropriate resources and autoscaling.
 
-- **Action**: You MUST activate [gke-workload-scaling](../gke-workload-scaling/SKILL.md) for configuring HPA, VPA, and resource limits.
+- **Action**: You MUST activate [gke-workload-scaling](references/gke-workload-scaling.md) for configuring HPA, VPA, and resource limits.
 
 #### C. Observability
 
 Ensure adequate logging and monitoring are in place.
 
-- **Action**: You MUST activate [gke-observability](../gke-observability/SKILL.md) for setting up Cloud Logging, Monitoring, and Managed Prometheus.
+- **Action**: You MUST activate [gke-observability](references/gke-observability.md) for setting up Cloud Logging, Monitoring, and Managed Prometheus.
 
 #### D. Reliability
 
 Ensure high availability and graceful degradation.
 
-- **Action**: You MUST activate [gke-reliability](../gke-reliability/SKILL.md) for configuring regional clusters, PDBs, and health probes.
+- **Action**: You MUST activate [gke-reliability](references/gke-reliability.md) for configuring regional clusters, PDBs, and health probes.
 
 #### E. Security
 
 Harden the cluster and workloads.
 
-- **Action**: You MUST activate [gke-workload-security](../gke-workload-security/SKILL.md) for Workload Identity, Network Policies, and Shielded Nodes.
+- **Action**: You MUST activate [gke-workload-security](references/gke-workload-security.md) for Workload Identity, Network Policies, and Shielded Nodes.
 
 #### F. Backup & Disaster Recovery
 
 Ensure stateful data is protected.
 
-- **Action**: You MUST activate [gke-backup-dr](../gke-backup-dr/SKILL.md) for configuring Backup for GKE and restore procedures.
+- **Action**: You MUST activate [gke-backup-dr](references/gke-backup-dr.md) for configuring Backup for GKE and restore procedures.
 
 #### G. Edge Security & Ingress
 
 Secure external access.
 
-- **Action**: You MUST activate [gke-networking-edge](../gke-networking-edge/SKILL.md) for Gateway API, Ingress, and Cloud Armor.
+- **Action**: You MUST activate [gke-networking-edge](references/gke-networking-edge.md) for Gateway API, Ingress, and Cloud Armor.
 
 #### H. Cost Optimization
 
 Ensure efficient use of resources.
 
-- **Action**: You MUST activate [gke-cost-optimization](../gke-cost-optimization/SKILL.md) for strategies on rightsizing, quotas, and Spot VMs.
+- **Action**: You MUST activate [gke-cost-optimization](references/gke-cost-optimization.md) for strategies on rightsizing, quotas, and Spot VMs.
 
 ### 3. Production Readiness Scoring
 

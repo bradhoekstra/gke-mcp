@@ -1,0 +1,1 @@
+../../gke-networking-edge/SKILL.md
