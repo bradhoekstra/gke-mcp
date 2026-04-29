@@ -41,7 +41,7 @@ Build and store the container image:
 Generate Kubernetes manifests for the application:
 
 - **Namespace**: Create a dedicated `Namespace` for the application to isolate resources.
-  - **Security**: Label the namespace to enforce Pod Security Standards (e.g., `pod-security.kubernetes.io/enforce: restricted`).
+  - **Security**: Label the namespace to enforce Pod Security Standards (e.g., `pod-security.kubernetes.io/enforce: restricted` and `pod-security.kubernetes.io/enforce-version: latest`).
 - **ServiceAccount**: Create a dedicated `ServiceAccount` for the application. Avoid using the `default` ServiceAccount to follow the principle of least privilege.
 - **Deployment**: Create a `Deployment` manifest.
   - Include resource requests and limits.
