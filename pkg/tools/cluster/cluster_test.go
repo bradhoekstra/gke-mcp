@@ -206,5 +206,4 @@ func TestDeleteClusterArgs_Fields(t *testing.T) {
 	if args.ClusterName != "my-cluster" {
 		t.Errorf("ClusterName = %s, want my-cluster", args.ClusterName)
 	}
-	}
 }
