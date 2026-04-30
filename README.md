@@ -20,27 +20,30 @@ gemini extensions install https://github.com/GoogleCloudPlatform/gke-mcp.git
 
 ### Use in MCP Clients / Other AIs
 
-#### Quick Install (Linux & macOS only)
-
-```sh
-curl -sSL https://raw.githubusercontent.com/GoogleCloudPlatform/gke-mcp/main/install.sh | bash
-```
-
+#
 #### Manual Install
 
-If you haven't already installed Go, follow [these instructions](https://go.dev/doc/install).
+If you haven't already installed Node.js (version 22 or later), follow [these instructions](https://nodejs.org/).
 
-Once Go is installed, run the following command to install gke-mcp:
+Once Node.js is installed, clone the repository and install dependencies:
 
 ```sh
-go install github.com/GoogleCloudPlatform/gke-mcp@latest
+git clone https://github.com/GoogleCloudPlatform/gke-mcp.git
+cd gke-mcp
+npm install
 ```
 
-The `gke-mcp` binary will be installed in the directory specified by the `GOBIN` environment variable. If `GOBIN` is not set, it defaults to `$GOPATH/bin` and, if `GOPATH` is also not set, it falls back to `$HOME/go/bin`.
+Build the project:
 
-You can find the exact location by running `go env GOBIN`. If the command returns an empty value, run `go env GOPATH` to find the installation directory.
+```sh
+npm run build
+```
 
-For additional help, refer to the troubleshoot section: [gke-mcp: command not found](TROUBLESHOOTING.md#gke-mcp-command-not-found-on-macos-or-linux).
+Run the server:
+
+```sh
+npm start
+```
 
 ### Add the MCP Server to your AI
 
@@ -139,7 +142,7 @@ There are several ways to install these skills:
 
 ## Development
 
-To compile the binary and update the `gemini-cli` extension with your local changes, follow these steps:
+To build the project and update the `gemini-cli` extension with your local changes, follow these steps:
 
 1. Remove the global gke-mcp configuration
 
@@ -147,19 +150,19 @@ To compile the binary and update the `gemini-cli` extension with your local chan
    rm -rf ~/.gemini/extensions/gke-mcp
    ```
 
-1. Build the binary from the root of the project:
+1. Build the project from the root of the project:
 
    ```sh
-   go build -o gke-mcp .
+   npm run build
    ```
 
 1. Run the installation command to update the extension manifest:
 
    ```sh
-   ./gke-mcp install gemini-cli --developer
+   node dist/index.js install gemini-cli --developer
    ```
 
-   This will make `gemini-cli` use your locally compiled binary.
+   This will make `gemini-cli` use your local build.
 
 ## Disclaimers
 

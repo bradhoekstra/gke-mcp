@@ -23,38 +23,23 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-function run_task() {
-    local task_path=$1
-    echo -e "${BLUE}Running ${task_path}...${NC}"
-    if "${task_path}"; then
-        echo -e "${GREEN}✓ ${task_path} passed.${NC}"
-    else
-        echo -e "${RED}✗ ${task_path} failed.${NC}"
-        return 1
-    fi
-}
-
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "${REPO_ROOT}"
 
-run_task "./dev/ci/presubmits/ui-build.sh"
-run_task "./dev/ci/presubmits/ui-test.sh"
-run_task "./dev/ci/presubmits/go-build.sh"
-run_task "./dev/ci/presubmits/go-test.sh"
-run_task "./dev/ci/presubmits/go-vet.sh"
-run_task "./dev/ci/presubmits/docker-build.sh"
-run_task "./dev/ci/presubmits/validate-skills.sh"
-
-# Run golangci-lint if available
-if command -v golangci-lint &> /dev/null; then
-    run_task "./dev/ci/presubmits/golangci-lint.sh"
+echo -e "${BLUE}Running build...${NC}"
+if npm run build; then
+    echo -e "${GREEN}✓ Build passed.${NC}"
 else
-    echo "Warning: golangci-lint not found. Install it with:"
-    echo "  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin"
+    echo -e "${RED}✗ Build failed.${NC}"
+    exit 1
 fi
 
-run_task "./dev/tasks/format.sh"
-run_task "./dev/tasks/gomod.sh"
-run_task "./dev/tasks/super-linter.sh"
+echo -e "${BLUE}Running tests...${NC}"
+if npm run test; then
+    echo -e "${GREEN}✓ Tests passed.${NC}"
+else
+    echo -e "${RED}✗ Tests failed.${NC}"
+    exit 1
+fi
 
-echo -e "${GREEN}Local presubmit checks complete, commit any changed files.${NC}"
+echo -e "${GREEN}Local presubmit checks complete.${NC}"
