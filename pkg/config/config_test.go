@@ -33,7 +33,7 @@ func TestNew(t *testing.T) {
 	}
 	if cfg.EnableDeleteTools() {
 		t.Error("Expected EnableDeleteTools to be false")
-  }
+	}
 }
 
 func TestNewWithEnvVars(t *testing.T) {
@@ -41,7 +41,7 @@ func TestNewWithEnvVars(t *testing.T) {
 	t.Setenv("GKE_MCP_MODEL", "custom-model")
 
 	version := "1.0.0"
-	cfg := New(version)
+	cfg := New(version, false)
 
 	if cfg.AgentProvider() != "custom-provider" {
 		t.Errorf("AgentProvider() = %s, want custom-provider", cfg.AgentProvider())

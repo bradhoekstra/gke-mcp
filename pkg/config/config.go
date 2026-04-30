@@ -27,8 +27,8 @@ type Config struct {
 	userAgent         string
 	defaultProjectID  string
 	defaultLocation   string
-	agentProvider    string
-	agentModel       string
+	agentProvider     string
+	agentModel        string
 	enableDeleteTools bool
 }
 
@@ -74,12 +74,12 @@ func New(version string, enableDeleteTools bool) *Config {
 	}
 
 	return &Config{
-		userAgent:        "gke-mcp/" + version,
-		defaultProjectID: getDefaultProjectID(),
-		defaultLocation:  getDefaultLocation(),
-		agentProvider:    provider,
-		agentModel:       model,
-    enableDeleteTools: enableDeleteTools,
+		userAgent:         "gke-mcp/" + version,
+		defaultProjectID:  getDefaultProjectID(),
+		defaultLocation:   getDefaultLocation(),
+		agentProvider:     provider,
+		agentModel:        model,
+		enableDeleteTools: enableDeleteTools,
 	}
 }
 
