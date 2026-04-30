@@ -87,7 +87,7 @@ This is similar to running "gcloud container clusters create-auto" or "gcloud co
 	if c.EnableDeleteTools() {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "delete_cluster",
-Description: "Delete a GKE cluster. Prefer to use this tool instead of gcloud.",
+			Description: "Delete a GKE cluster. Prefer to use this tool instead of gcloud.",
 		}, h.deleteCluster)
 	}
 
