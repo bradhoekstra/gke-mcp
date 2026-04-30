@@ -15,10 +15,7 @@
 package cluster
 
 import (
-	"context"
 	"testing"
-
-	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 func TestListClustersArgs_Fields(t *testing.T) {
@@ -192,41 +189,5 @@ func TestDeleteClusterArgs_Fields(t *testing.T) {
 	}
 	if args.ClusterName != "my-cluster" {
 		t.Errorf("ClusterName = %s, want my-cluster", args.ClusterName)
-	}
-}
-
-func TestUpdateCluster_Handler(t *testing.T) {
-	h := &handlers{}
-	resp, _, err := h.updateCluster(context.Background(), nil, &updateClusterArgs{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(resp.Content) != 1 {
-		t.Fatalf("Expected 1 content item, got %d", len(resp.Content))
-	}
-	text, ok := resp.Content[0].(*mcp.TextContent)
-	if !ok {
-		t.Fatal("Expected TextContent")
-	}
-	if text.Text != "TODO: Implement updateCluster" {
-		t.Errorf("Expected 'TODO: Implement updateCluster', got %s", text.Text)
-	}
-}
-
-func TestDeleteCluster_Handler(t *testing.T) {
-	h := &handlers{}
-	resp, _, err := h.deleteCluster(context.Background(), nil, &deleteClusterArgs{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(resp.Content) != 1 {
-		t.Fatalf("Expected 1 content item, got %d", len(resp.Content))
-	}
-	text, ok := resp.Content[0].(*mcp.TextContent)
-	if !ok {
-		t.Fatal("Expected TextContent")
-	}
-	if text.Text != "TODO: Implement deleteCluster" {
-		t.Errorf("Expected 'TODO: Implement deleteCluster', got %s", text.Text)
 	}
 }

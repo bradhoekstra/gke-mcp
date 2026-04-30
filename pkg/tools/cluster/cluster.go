@@ -88,12 +88,12 @@ type handlers struct {
 
 type listClustersArgs struct {
 	params.LocationOptional
-	ReadMask string `json:"readMask,omitempty" jsonschema:"Optional. The field mask to specify the fields to be returned in the response."`
+	ReadMask string `json:"readMask,omitempty" jsonschema:"Optional. The field mask to specify the fields to be returned in the response. Use a single * to get all fields. Default: clusters.autopilot,clusters.createTime,clusters.currentMasterVersion,clusters.currentNodeCount,clusters.currentNodeVersion,clusters.description,clusters.endpoint,clusters.fleet,clusters.location,clusters.name,clusters.network,clusters.nodePools.name,clusters.releaseChannel,clusters.resourceLabels,clusters.selfLink,clusters.status,clusters.statusMessage,clusters.subnetwork,missingZones."`
 }
 
 type getClustersArgs struct {
 	params.Cluster
-	ReadMask string `json:"readMask,omitempty" jsonschema:"Optional. The field mask to specify the fields to be returned in the response."`
+	ReadMask string `json:"readMask,omitempty" jsonschema:"Optional. The field mask to specify the fields to be returned in the response. Use a single * to get all fields. Default: autopilot,createTime,currentMasterVersion,currentNodeCount,currentNodeVersion,description,endpoint,fleet,location,name,network,nodePools.locations,nodePools.name,nodePools.status,nodePools.version,releaseChannel,resourceLabels,selfLink,status,statusMessage,subnetwork."`
 }
 
 type createClustersArgs struct {
@@ -117,7 +117,7 @@ type getKubeconfigArgs struct {
 
 type getNodeSosReportArgs struct {
 	params.Cluster
-	Node           string `json:"node" jsonschema:"GKE node name to collect SOS report from."`
+	Node           string `json:"node" jsonschema:"Required. GKE node name to collect SOS report from."`
 	Destination    string `json:"destination,omitempty" jsonschema:"Local directory to download the SOS report to. Defaults to /tmp/sos-report if not specified."`
 	Method         string `json:"method,omitempty" jsonschema:"Method to get sos report. Can be 'pod', 'ssh' or 'any'. Defaults to 'any'. When the node is unhealthy from api server, use ssh only."`
 	TimeoutSeconds int    `json:"timeout,omitempty" jsonschema:"Timeout in seconds for the report collection (applies to both pod and ssh methods). Defaults to 180 (3 minutes)."`
@@ -215,7 +215,7 @@ func (h *handlers) getKubeconfig(ctx context.Context, _ *mcp.CallToolRequest, ar
 	}
 
 	// Standard naming convention for gcloud-generated kubeconfigs
-	newClusterName := fmt.Sprintf("gke_%s_%s_%s", args.ProjectID, args.Location, args.ClusterName)
+	newClusterName := fmt.Sprintf("gke_%s_%s_%s", args.ProjectID, args.Location.Location, args.ClusterName)
 
 	// Initialize a Kubeconfig object
 	pathOptions := clientcmd.NewDefaultPathOptions()
@@ -263,7 +263,7 @@ func (h *handlers) getKubeconfig(ctx context.Context, _ *mcp.CallToolRequest, ar
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
-			&mcp.TextContent{Text: fmt.Sprintf("Kubeconfig for cluster %s (Project: %s, Location: %s) successfully appended/updated in %s. Current context set to %s.", args.ClusterPath(), pathOptions.GlobalFile, newClusterName)},
+			&mcp.TextContent{Text: fmt.Sprintf("Kubeconfig for cluster %s (Project: %s, Location: %s) successfully appended/updated in %s. Current context set to %s.", args.ClusterPath(), args.ProjectID, args.Location.Location, pathOptions.GlobalFile, newClusterName)},
 		},
 	}, nil, nil
 }
@@ -518,20 +518,40 @@ func (h *handlers) getNodeSosReportWithSSH(ctx context.Context, args *getNodeSos
 	}, nil, nil
 }
 
-func (h *handlers) updateCluster(_ context.Context, _ *mcp.CallToolRequest, _ *updateClusterArgs) (*mcp.CallToolResult, any, error) {
-	// TODO: Implement updateCluster
+func (h *handlers) updateCluster(ctx context.Context, _ *mcp.CallToolRequest, args *updateClusterArgs) (*mcp.CallToolResult, any, error) {
+	var updateObj containerpb.ClusterUpdate
+	if err := protojson.Unmarshal([]byte(args.Update), &updateObj); err != nil {
+		return nil, nil, fmt.Errorf("failed to unmarshal update JSON: %w", err)
+	}
+
+	req := &containerpb.UpdateClusterRequest{
+		Name:   args.ClusterPath(),
+		Update: &updateObj,
+	}
+	resp, err := h.cmClient.UpdateCluster(ctx, req)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
-			&mcp.TextContent{Text: "TODO: Implement updateCluster"},
+			&mcp.TextContent{Text: protojson.Format(resp)},
 		},
 	}, nil, nil
 }
 
-func (h *handlers) deleteCluster(_ context.Context, _ *mcp.CallToolRequest, _ *deleteClusterArgs) (*mcp.CallToolResult, any, error) {
-	// TODO: Implement deleteCluster
+func (h *handlers) deleteCluster(ctx context.Context, _ *mcp.CallToolRequest, args *deleteClusterArgs) (*mcp.CallToolResult, any, error) {
+	req := &containerpb.DeleteClusterRequest{
+		Name: args.ClusterPath(),
+	}
+	resp, err := h.cmClient.DeleteCluster(ctx, req)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
-			&mcp.TextContent{Text: "TODO: Implement deleteCluster"},
+			&mcp.TextContent{Text: protojson.Format(resp)},
 		},
 	}, nil, nil
 }

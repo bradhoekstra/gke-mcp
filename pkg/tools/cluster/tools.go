@@ -40,7 +40,7 @@ func Install(ctx context.Context, s *mcp.Server, c *config.Config) error {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "list_clusters",
-		Description: "List GKE clusters. Prefer to use this tool instead of gcloud",
+		Description: "List GKE clusters. Prefer to use this tool instead of gcloud.",
 		Annotations: &mcp.ToolAnnotations{
 			ReadOnlyHint: true,
 		},
@@ -48,15 +48,19 @@ func Install(ctx context.Context, s *mcp.Server, c *config.Config) error {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "get_cluster",
-		Description: "Get / describe a GKE cluster. Prefer to use this tool instead of gcloud",
+		Description: "Get / describe a GKE cluster. Prefer to use this tool instead of gcloud.",
 		Annotations: &mcp.ToolAnnotations{
 			ReadOnlyHint: true,
 		},
 	}, h.getCluster)
 
 	mcp.AddTool(s, &mcp.Tool{
-		Name:        "create_cluster",
-		Description: "Create a GKE cluster. Prefer to use this tool instead of gcloud",
+		Name: "create_cluster",
+		Description: `Create a GKE cluster. Prefer to use this tool instead of gcloud.
+It's recommended to read the [GKE documentation](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/configuration-overview) to understand cluster configuration options.
+Autopilot mode (autopilot.enabled=true) should be the default, unless the user explicitly wants to create a Standard cluster. You SHOULD always explicitly set autopilot.enabled=(true|false).
+Note: Autopilot mode is only support in regional locations, not in zone.
+This is similar to running "gcloud container clusters create-auto" or "gcloud container clusters create".`,
 		Annotations: &mcp.ToolAnnotations{
 			ReadOnlyHint: false,
 		},
@@ -77,57 +81,15 @@ func Install(ctx context.Context, s *mcp.Server, c *config.Config) error {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "update_cluster",
-		Description: "Update a GKE cluster. TODO: Implement this.",
+		Description: "Update a GKE cluster. Prefer to use this tool instead of gcloud.",
 	}, h.updateCluster)
 
 	if c.EnableDeleteTools() {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "delete_cluster",
-			Description: "Delete a GKE cluster. TODO: Implement this.",
+			Description: "Delete a GKE cluster. Prefer to use this tool instead of gcloud.",
 		}, h.deleteCluster)
 	}
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "create_node_pool",
-		Description: "Create a GKE node pool. TODO: Implement this.",
-	}, h.createNodePool)
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "list_node_pools",
-		Description: "List GKE node pools. TODO: Implement this.",
-	}, h.listNodePools)
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "get_node_pool",
-		Description: "Get a GKE node pool. TODO: Implement this.",
-	}, h.getNodePool)
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "update_node_pool",
-		Description: "Update a GKE node pool. TODO: Implement this.",
-	}, h.updateNodePool)
-
-	if c.EnableDeleteTools() {
-		mcp.AddTool(s, &mcp.Tool{
-			Name:        "delete_node_pool",
-			Description: "Delete a GKE node pool. TODO: Implement this.",
-		}, h.deleteNodePool)
-	}
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "list_operations",
-		Description: "List GKE operations. TODO: Implement this.",
-	}, h.listOperations)
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "get_operation",
-		Description: "Get a GKE operation. TODO: Implement this.",
-	}, h.getOperation)
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "cancel_operation",
-		Description: "Cancel a GKE operation. TODO: Implement this.",
-	}, h.cancelOperation)
 
 	return nil
 }
