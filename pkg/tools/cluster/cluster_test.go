@@ -15,7 +15,6 @@
 package cluster
 
 import (
-	"context"
 	"testing"
 )
 

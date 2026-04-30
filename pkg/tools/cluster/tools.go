@@ -40,11 +40,7 @@ func Install(ctx context.Context, s *mcp.Server, c *config.Config) error {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "list_clusters",
-<<<<<<< HEAD
 		Description: "List GKE clusters. Prefer to use this tool instead of gcloud.",
-=======
-		Description: "List GKE clusters. Prefer to use this tool instead of gcloud",
->>>>>>> 9cdcd7d (feat: Refactor cluster tools and add common params package)
 		Annotations: &mcp.ToolAnnotations{
 			ReadOnlyHint: true,
 		},
@@ -113,7 +109,6 @@ This is similar to running "gcloud container clusters create-auto" or "gcloud co
 		Name:        "update_node_pool",
 		Description: "Update a GKE node pool.",
 	}, h.updateNodePool)
-
 	if c.EnableDeleteTools() {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "delete_cluster",
