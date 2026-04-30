@@ -17,28 +17,34 @@ package params
 
 import "fmt"
 
+// Project contains the GCP project ID.
 type Project struct {
 	ProjectID string `json:"project_id" jsonschema:"Required. GCP project ID."`
 }
 
+// ProjectIDPath returns the GCP project resource path.
 func (p *Project) ProjectIDPath() string {
 	return fmt.Sprintf("projects/%s", p.ProjectID)
 }
 
+// Location contains the project and GKE cluster location.
 type Location struct {
 	Project
 	Location string `json:"location" jsonschema:"Required. GKE cluster location."`
 }
 
+// LocationPath returns the GKE location resource path.
 func (l *Location) LocationPath() string {
 	return fmt.Sprintf("%s/locations/%s", l.ProjectIDPath(), l.Location)
 }
 
+// LocationOptional contains the project and an optional GKE cluster location.
 type LocationOptional struct {
 	Project
 	Location string `json:"location,omitempty" jsonschema:"Optional. GKE cluster location."`
 }
 
+// LocationPath returns the GKE location resource path, using "-" for all locations if empty.
 func (l *LocationOptional) LocationPath() string {
 	if l.Location == "" {
 		return fmt.Sprintf("%s/locations/-", l.ProjectIDPath())
@@ -46,11 +52,13 @@ func (l *LocationOptional) LocationPath() string {
 	return fmt.Sprintf("%s/locations/%s", l.ProjectIDPath(), l.Location)
 }
 
+// Cluster contains the location and GKE cluster name.
 type Cluster struct {
 	Location
 	ClusterName string `json:"cluster_name" jsonschema:"Required. GKE cluster name."`
 }
 
+// ClusterPath returns the full GKE cluster resource path.
 func (c *Cluster) ClusterPath() string {
 	return fmt.Sprintf("%s/clusters/%s", c.LocationPath(), c.ClusterName)
 }
