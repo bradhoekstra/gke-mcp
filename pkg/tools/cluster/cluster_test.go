@@ -15,6 +15,7 @@
 package cluster
 
 import (
+	"context"
 	"testing"
 )
 
@@ -24,11 +25,11 @@ func TestListClustersArgs_Fields(t *testing.T) {
 	args.Location = "us-central1"
 	args.ReadMask = "name,status"
 
-	if args.ProjectID != "test-project" {
-		t.Errorf("ProjectID = %s, want test-project", args.ProjectID)
+	if args.Parent != "projects/test-project/locations/us-central1" {
+		t.Errorf("Parent = %s, want projects/test-project/locations/us-central1", args.Parent)
 	}
-	if args.Location != "us-central1" {
-		t.Errorf("Location = %s, want us-central1", args.Location)
+	if args.ReadMask != "name,status" {
+		t.Errorf("ReadMask = %s, want name,status", args.ReadMask)
 	}
 	if args.ReadMask != "name,status" {
 		t.Errorf("ReadMask = %s, want name,status", args.ReadMask)
@@ -45,8 +46,8 @@ func TestGetClustersArgs_Fields(t *testing.T) {
 	args.ClusterName = "my-cluster"
 	args.ReadMask = "name,status"
 
-	if args.ProjectID != "test-project" {
-		t.Errorf("ProjectID = %s, want test-project", args.ProjectID)
+	if args.Name != "projects/test-project/locations/us-central1/clusters/my-cluster" {
+		t.Errorf("Name = %s, want projects/test-project/locations/us-central1/clusters/my-cluster", args.Name)
 	}
 	if args.Location != "us-central1" {
 		t.Errorf("Location = %s, want us-central1", args.Location)
@@ -54,7 +55,6 @@ func TestGetClustersArgs_Fields(t *testing.T) {
 	if args.ClusterName != "my-cluster" {
 		t.Errorf("ClusterName = %s, want my-cluster", args.ClusterName)
 	}
-
 	if args.ReadMask != "name,status" {
 		t.Errorf("ReadMask = %s, want name,status", args.ReadMask)
 	}
@@ -66,13 +66,12 @@ func TestCreateClustersArgs_Fields(t *testing.T) {
 	args.Location = "us-central1"
 	args.Cluster = `{"name": "my-cluster"}`
 
-	if args.ProjectID != "test-project" {
-		t.Errorf("ProjectID = %s, want test-project", args.ProjectID)
+	if args.Parent != "projects/test-project/locations/us-central1" {
+		t.Errorf("Parent = %s, want projects/test-project/locations/us-central1", args.Parent)
 	}
 	if args.Location != "us-central1" {
 		t.Errorf("Location = %s, want us-central1", args.Location)
 	}
-
 	if args.Cluster != `{"name": "my-cluster"}` {
 		t.Errorf("Cluster = %s, want {\"name\": \"my-cluster\"}", args.Cluster)
 	}
@@ -119,11 +118,11 @@ func TestGetNodeSosReportArgs_Fields(t *testing.T) {
 
 func TestListClustersArgs_Empty(t *testing.T) {
 	args := listClustersArgs{}
-	if args.ProjectID != "" {
-		t.Errorf("Expected empty ProjectID, got %s", args.ProjectID)
+	if args.Parent != "" {
+		t.Errorf("Expected empty Parent, got %s", args.Parent)
 	}
-	if args.Location != "" {
-		t.Errorf("Expected empty Location, got %s", args.Location)
+	if args.ReadMask != "" {
+		t.Errorf("Expected empty ReadMask, got %s", args.ReadMask)
 	}
 	if args.ReadMask != "" {
 		t.Errorf("Expected empty ReadMask, got %s", args.ReadMask)
@@ -135,7 +134,7 @@ func TestListClustersArgs_Empty(t *testing.T) {
 
 func TestGetClustersArgs_Empty(t *testing.T) {
 	args := getClustersArgs{}
-	if args.ProjectID != "" {
+if args.ProjectID != "" {
 		t.Errorf("Expected empty ProjectID, got %s", args.ProjectID)
 	}
 	if args.Location != "" {
