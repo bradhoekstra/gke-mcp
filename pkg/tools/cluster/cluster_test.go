@@ -158,13 +158,20 @@ func TestCreateClustersArgs_Empty(t *testing.T) {
 }
 
 func TestUpdateClusterArgs_Fields(t *testing.T) {
-	args := updateClusterArgs{
-		Name:   "projects/test-project/locations/us-central1/clusters/my-cluster",
-		Update: `{"description": "new description"}`,
-	}
+	args := updateClusterArgs{}
+	args.ProjectID = "test-project"
+	args.Location.Location = "us-central1"
+	args.ClusterName = "my-cluster"
+	args.Update = `{"description": "new description"}`
 
-	if args.Name != "projects/test-project/locations/us-central1/clusters/my-cluster" {
-		t.Errorf("Name = %s, want projects/test-project/locations/us-central1/clusters/my-cluster", args.Name)
+	if args.ProjectID != "test-project" {
+		t.Errorf("ProjectID = %s, want test-project", args.ProjectID)
+	}
+	if args.Location.Location != "us-central1" {
+		t.Errorf("Location = %s, want us-central1", args.Location.Location)
+	}
+	if args.ClusterName != "my-cluster" {
+		t.Errorf("ClusterName = %s, want my-cluster", args.ClusterName)
 	}
 	if args.Update != `{"description": "new description"}` {
 		t.Errorf("Update = %s, want {\"description\": \"new description\"}", args.Update)
@@ -172,12 +179,19 @@ func TestUpdateClusterArgs_Fields(t *testing.T) {
 }
 
 func TestDeleteClusterArgs_Fields(t *testing.T) {
-	args := deleteClusterArgs{
-		Name: "projects/test-project/locations/us-central1/clusters/my-cluster",
-	}
+	args := deleteClusterArgs{}
+	args.ProjectID = "test-project"
+	args.Location.Location = "us-central1"
+	args.ClusterName = "my-cluster"
 
-	if args.Name != "projects/test-project/locations/us-central1/clusters/my-cluster" {
-		t.Errorf("Name = %s, want projects/test-project/locations/us-central1/clusters/my-cluster", args.Name)
+	if args.ProjectID != "test-project" {
+		t.Errorf("ProjectID = %s, want test-project", args.ProjectID)
+	}
+	if args.Location.Location != "us-central1" {
+		t.Errorf("Location = %s, want us-central1", args.Location.Location)
+	}
+	if args.ClusterName != "my-cluster" {
+		t.Errorf("ClusterName = %s, want my-cluster", args.ClusterName)
 	}
 }
 
