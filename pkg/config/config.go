@@ -56,7 +56,6 @@ func (c *Config) AgentProvider() string {
 func (c *Config) AgentModel() string {
 	return c.agentModel
 }
-
 // EnableDeleteTools returns true if destructive delete tools are enabled.
 func (c *Config) EnableDeleteTools() bool {
 	return c.enableDeleteTools
@@ -72,7 +71,6 @@ func New(version string, enableDeleteTools bool) *Config {
 	if model == "" {
 		model = "gemini-2.5-pro"
 	}
-
 	return &Config{
 		userAgent:         "gke-mcp/" + version,
 		defaultProjectID:  getDefaultProjectID(),

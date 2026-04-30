@@ -87,9 +87,50 @@ This is similar to running "gcloud container clusters create-auto" or "gcloud co
 	if c.EnableDeleteTools() {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "delete_cluster",
-			Description: "Delete a GKE cluster. Prefer to use this tool instead of gcloud.",
+Description: "Delete a GKE cluster. Prefer to use this tool instead of gcloud.",
 		}, h.deleteCluster)
 	}
 
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "create_node_pool",
+		Description: "Create a GKE node pool. TODO: Implement this.",
+	}, h.createNodePool)
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "list_node_pools",
+		Description: "List GKE node pools. TODO: Implement this.",
+	}, h.listNodePools)
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_node_pool",
+		Description: "Get a GKE node pool. TODO: Implement this.",
+	}, h.getNodePool)
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "update_node_pool",
+		Description: "Update a GKE node pool. TODO: Implement this.",
+	}, h.updateNodePool)
+
+	if c.EnableDeleteTools() {
+		mcp.AddTool(s, &mcp.Tool{
+			Name:        "delete_node_pool",
+			Description: "Delete a GKE node pool. TODO: Implement this.",
+		}, h.deleteNodePool)
+	}
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "list_operations",
+		Description: "List GKE operations. TODO: Implement this.",
+	}, h.listOperations)
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_operation",
+		Description: "Get a GKE operation. TODO: Implement this.",
+	}, h.getOperation)
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "cancel_operation",
+		Description: "Cancel a GKE operation. TODO: Implement this.",
+	}, h.cancelOperation)
 	return nil
 }
