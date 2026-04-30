@@ -109,6 +109,7 @@ This is similar to running "gcloud container clusters create-auto" or "gcloud co
 		Name:        "update_node_pool",
 		Description: "Update a GKE node pool.",
 	}, h.updateNodePool)
+
 	if c.EnableDeleteTools() {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "delete_cluster",

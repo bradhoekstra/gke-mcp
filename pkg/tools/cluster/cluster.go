@@ -215,7 +215,7 @@ func (h *handlers) getKubeconfig(ctx context.Context, _ *mcp.CallToolRequest, ar
 	}
 
 	// Standard naming convention for gcloud-generated kubeconfigs
-	newClusterName := fmt.Sprintf("gke_%s_%s_%s", args.ProjectID, args.Location.Location, args.ClusterName)
+	newClusterName := fmt.Sprintf("gke_%s_%s_%s", args.ProjectID, args.Location, args.ClusterName)
 
 	// Initialize a Kubeconfig object
 	pathOptions := clientcmd.NewDefaultPathOptions()
