@@ -54,12 +54,7 @@ func TestGetClustersArgs_Fields(t *testing.T) {
 	if args.ClusterName != "my-cluster" {
 		t.Errorf("ClusterName = %s, want my-cluster", args.ClusterName)
 	}
-	if args.Location.Location != "us-central1" {
-		t.Errorf("Location = %s, want us-central1", args.Location.Location)
-	}
-	if args.ClusterName != "my-cluster" {
-		t.Errorf("ClusterName = %s, want my-cluster", args.ClusterName)
-	}
+
 	if args.ReadMask != "name,status" {
 		t.Errorf("ReadMask = %s, want name,status", args.ReadMask)
 	}
@@ -77,9 +72,7 @@ func TestCreateClustersArgs_Fields(t *testing.T) {
 	if args.Location != "us-central1" {
 		t.Errorf("Location = %s, want us-central1", args.Location)
 	}
-	if args.Location.Location != "us-central1" {
-		t.Errorf("Location = %s, want us-central1", args.Location.Location)
-	}
+
 	if args.Cluster != `{"name": "my-cluster"}` {
 		t.Errorf("Cluster = %s, want {\"name\": \"my-cluster\"}", args.Cluster)
 	}

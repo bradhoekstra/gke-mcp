@@ -122,6 +122,5 @@ This is similar to running "gcloud container clusters create-auto" or "gcloud co
 		}, h.deleteNodePool)
 	}
 
-
 	return nil
 }
