@@ -13,24 +13,34 @@ This skill provides workflows for configuring your GKE cluster and workloads for
 
 Check if the cluster is regional or has multi-zonal node pools.
 
-**Command:**
+**MCP Tool:**
 
-```bash
-gcloud container clusters describe <cluster-name> --region <region> --format="json(location, locations)"
-```
+Use the `get_cluster` tool.
 
-If `location` is a region (e.g., `us-central1`), the control plane is regional.
-If `locations` has multiple entries, nodes are spread across multiple zones.
+Arguments:
+
+- `project_id`: `<project_id>`
+- `location`: `<location>` (Region or Zone)
+- `cluster_name`: `<cluster_name>`
+
+If the response `location` is a region (e.g., `us-central1`), the control plane is regional.
+If `nodePools.locations` (or `locations` in the response) has multiple entries, nodes are spread across multiple zones.
 
 ### 2. Configure Pod Disruption Budgets (PDB)
 
 PDBs ensure that a minimum number of pods are available during voluntary disruptions (like node upgrades).
 
-**Check existing PDBs:**
+**MCP Tool:**
 
-```bash
-kubectl get pdb -n <namespace>
-```
+Use the `get_k8s_resource` tool to check existing PDBs.
+
+Arguments:
+
+- `project_id`: `<project_id>`
+- `location`: `<location>`
+- `cluster_name`: `<cluster_name>`
+- `resourceType`: `poddisruptionbudgets`
+- `namespace`: `<namespace>`
 
 **Example Manifest:**
 
@@ -54,11 +64,19 @@ Ensure all production containers have Liveness, Readiness, and optionally Startu
 - **Liveness Probe**: Determines when to restart a container.
 - **Startup Probe**: Disables liveness and readiness checks until the app has started up.
 
-**Check workload probes:**
+**MCP Tool:**
 
-```bash
-kubectl get deployment <app-name> -n <namespace> -o yaml | grep -E "livenessProbe|readinessProbe|startupProbe"
-```
+Use the `get_k8s_resource` tool to get the deployment configuration and inspect probes.
+
+Arguments:
+
+- `project_id`: `<project_id>`
+- `location`: `<location>`
+- `cluster_name`: `<cluster_name>`
+- `resourceType`: `deployments`
+- `name`: `<app-name>`
+- `namespace`: `<namespace>`
+- `outputFormat`: `YAML`
 
 ### 4. Graceful Shutdown
 
@@ -85,7 +103,7 @@ spec:
 
 Configure when GKE can perform automated upgrades to avoid peak hours.
 
-**Command to set maintenance window:**
+**Command:**
 
 ```bash
 gcloud container clusters update <cluster-name> \
@@ -93,6 +111,10 @@ gcloud container clusters update <cluster-name> \
     --maintenance-window-start <start-time> \
     --maintenance-window-recurrence "FREQ=DAILY"
 ```
+
+**Alternative (MCP Tool):**
+
+You can use the `update_cluster` tool, but the payload requires a specific JSON structure for `desiredMaintenancePolicy`. If unsure, the `gcloud` command above is a safe fallback.
 
 ## Best Practices
 
