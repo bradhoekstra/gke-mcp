@@ -799,17 +799,17 @@ func getK8sClient(c *params.Cluster) (*Clientset, *mcp.CallToolResult, error) {
 
 	restConfig, err := getRESTConfig(contextName)
 	if err != nil {
-		return nil, textResult("Failed to get client config: %w. Use the `get_kubeconfig` first to generate a kubeconfig for this cluster.", err), nil
+		return nil, textResult("Failed to get client config: %v. Use the `get_kubeconfig` first to generate a kubeconfig for this cluster.", err), nil
 	}
 
 	client, err := newClientset(restConfig)
 	if err != nil {
-		return nil, textResult("Failed to create client: %w", err), nil
+		return nil, textResult("Failed to create client: %v", err), nil
 	}
 
 	dynamic, err := newDynamicClient(restConfig)
 	if err != nil {
-		return nil, textResult("Failed to create dynamic client: %w", err), nil
+		return nil, textResult("Failed to create dynamic client: %v", err), nil
 	}
 
 	return &Clientset{
@@ -824,12 +824,12 @@ func getK8sDiscovery(c *params.Cluster) (*rest.Config, discovery.DiscoveryInterf
 
 	restConfig, err := getRESTConfig(contextName)
 	if err != nil {
-		return nil, nil, textResult("Failed to get client config: %w. Use the `get_kubeconfig` first to generate a kubeconfig for this cluster.", err), nil
+		return nil, nil, textResult("Failed to get client config: %v. Use the `get_kubeconfig` first to generate a kubeconfig for this cluster.", err), nil
 	}
 
 	client, err := newDiscoveryClient(restConfig)
 	if err != nil {
-		return nil, nil, textResult("Failed to create discovery client: %w", err), nil
+		return nil, nil, textResult("Failed to create discovery client: %v", err), nil
 	}
 
 	return restConfig, client, nil, nil

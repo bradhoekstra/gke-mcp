@@ -55,7 +55,7 @@ func (r *APIResource) IsNamespaced() bool {
 // process is case insensitive.
 // In case of multiple matches, the preferred group and version are used.
 // If a match is not found, a cmderror.ErrNotFound is returned.
-func ResolveAPIResourceByKind(ctx context.Context, client discovery.DiscoveryInterface, kind string) (*APIResource, error) {
+var ResolveAPIResourceByKind = func(ctx context.Context, client discovery.DiscoveryInterface, kind string) (*APIResource, error) {
 	log.Printf("ResolveAPIResourceByKind: %s", kind)
 	start := time.Now()
 	defer func() {

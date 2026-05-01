@@ -74,7 +74,7 @@ func listK8sAPIResources(ctx context.Context, _ *mcp.CallToolRequest, args *list
 		return textResult("Error marshalling API resources: %v", err), nil, nil
 	}
 
-	return textResult(string(bytes)), nil, nil
+	return textResult("%s", string(bytes)), nil, nil
 }
 
 func listK8sAPIResourcesImpl(ctx context.Context, client discovery.DiscoveryInterface) ([]*GroupVersionResourceList, error) {

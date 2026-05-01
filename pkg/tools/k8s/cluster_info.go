@@ -24,7 +24,7 @@ func getK8sClusterInfo(ctx context.Context, _ *mcp.CallToolRequest, args *getK8s
 		return nil, nil, fmt.Errorf("failed to list nodes: %w", err)
 	}
 
-	return textResult(clusterInfo), nil, nil
+	return textResult("%s", clusterInfo), nil, nil
 }
 
 func getK8sClusterInfoImpl(ctx context.Context, client *Clientset) (string, error) {
@@ -41,6 +41,22 @@ func getK8sClusterInfoImpl(ctx context.Context, client *Clientset) (string, erro
 	for _, s := range services {
 		lines = append(lines, fmt.Sprintf("%s is running at %s", serviceName(s), serviceLink(s, client.RestConfig, client.Client)))
 	}
+
+	nodes, err := client.Client.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to list nodes: %w", err)
+	}
+	for _, n := range nodes.Items {
+		status := "NotReady"
+		for _, c := range n.Status.Conditions {
+			if c.Type == corev1.NodeReady && c.Status == corev1.ConditionTrue {
+				status = "Ready"
+				break
+			}
+		}
+		lines = append(lines, fmt.Sprintf("Node: %s, Status: %s", n.Name, status))
+	}
+
 	return strings.Join(lines, "\n"), nil
 }
 

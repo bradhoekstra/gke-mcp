@@ -27,18 +27,23 @@ func checkK8sAuth(ctx context.Context, _ *mcp.CallToolRequest, args *checkK8sAut
 		return nil, nil, fmt.Errorf("failed to list nodes: %w", err)
 	}
 
-	return textResult(text), nil, nil
+	return textResult("%s", text), nil, nil
 }
 
 func checkK8sAuthImpl(ctx context.Context, a *checkK8sAuthArgs, client *Clientset) (string, error) {
 	authStatus := AuthStatus{}
+
+	discClient, err := newDiscoveryClient(client.RestConfig)
+	if err != nil {
+		return "", fmt.Errorf("failed to create discovery client: %w", err)
+	}
 
 	// Resolve the resource and validate the command.
 	var resource *schema.GroupVersionResource
 	if a.ResourceName != "" {
 		var warning string
 		var err error
-		resource, warning, err = ResourceFor(ctx, client.Client.Discovery(), a.ResourceName)
+		resource, warning, err = ResourceFor(ctx, discClient, a.ResourceName)
 		if err != nil {
 			return "", fmt.Errorf("failed to resolve resource: %w", err)
 		}
@@ -46,11 +51,11 @@ func checkK8sAuthImpl(ctx context.Context, a *checkK8sAuthArgs, client *Clientse
 			authStatus.AddWarning(warning)
 		}
 	}
-	validate(ctx, a, client.Client.Discovery(), resource, &authStatus)
+	validate(ctx, a, discClient, resource, &authStatus)
 
 	// Create the self subject access review.
 	ssar := createSSARUnstructured(a, resource)
-	apiResource, err := ResolveAPIResourceByKind(ctx, client.Client.Discovery(), "selfsubjectaccessreviews")
+	apiResource, err := ResolveAPIResourceByKind(ctx, discClient, "selfsubjectaccessreviews")
 	if err != nil {
 		return "", fmt.Errorf("failed to resolve kind to GVR: %w", err)
 	}
@@ -111,7 +116,7 @@ func isNamespaced(ctx context.Context, client discovery.DiscoveryInterface, gvr 
 }
 
 func validate(ctx context.Context, a *checkK8sAuthArgs, client discovery.DiscoveryInterface, gvr *schema.GroupVersionResource, authStatus *AuthStatus) {
-	if !gvr.Empty() && a.Namespace != "" {
+	if gvr != nil && !gvr.Empty() && a.Namespace != "" {
 		if namespaced, err := isNamespaced(ctx, client, gvr); err == nil && !namespaced {
 			if len(gvr.Group) == 0 {
 				authStatus.AddWarning(fmt.Sprintf("resource '%s' is not namespace scoped\n", gvr.Resource))
@@ -132,12 +137,17 @@ func createSSARUnstructured(a *checkK8sAuthArgs, resource *schema.GroupVersionRe
 			"kind":       "SelfSubjectAccessReview",
 		},
 	}
+	var group, res string
+	if resource != nil {
+		group = resource.Group
+		res = resource.Resource
+	}
 	ssar.Object["spec"] = map[string]any{
 		"resourceAttributes": map[string]any{
 			"namespace":   a.Namespace,
 			"verb":        a.Verb,
-			"group":       resource.Group,
-			"resource":    resource.Resource,
+			"group":       group,
+			"resource":    res,
 			"subresource": a.Subresource,
 			"name":        a.ResourceName,
 		},
