@@ -13,13 +13,17 @@ Cost optimization in GKE involves tracking costs, setting limits to prevent wast
 
 ## Workflows
 
-### 1. Enable GKE Cost Allocation
+### 1. Diagnosis: Identifying Cost Drivers
+
+Before optimizing, understand where costs are coming from.
+
+- **Check Recommendations**: Use the `list_recommendations` MCP tool to find cost optimization opportunities.
+- **Analyze Usage**: Use Cloud Billing reports with GKE Cost Allocation enabled to group costs by namespace and labels.
+- **Check for Waste**: Look for idle resources, over-provisioned Pods, and unused persistent volumes.
+
+### 2. Enable GKE Cost Allocation
 
 GKE cost allocation allows you to see the cost of your GKE resources in Cloud Billing, broken down by namespace and cluster labels.
-
-**Steps:**
-
-1. Enable GKE cost allocation in the cluster settings.
 
 **Command:**
 
@@ -29,9 +33,9 @@ gcloud container clusters update <cluster-name> \
     --region <region>
 ```
 
-2. View costs in the Cloud Billing reports by grouping by namespace or labels.
+_Note: You can also use the `update_cluster` MCP tool with appropriate JSON payload._
 
-### 2. Configure Resource Quotas
+### 3. Configure Resource Quotas
 
 Resource quotas restrict the total resource consumption in a namespace, preventing any single tenant from consuming all cluster resources.
 
@@ -51,17 +55,26 @@ spec:
     limits.memory: 32Gi
 ```
 
-### 3. Rightsizing Strategies
+### 4. Rightsizing Strategies
 
 Rightsizing involves adjusting the requested resources of your workloads to match their actual utilization.
 
 - **Use VPA in Recommender Mode**: Let VPA observe usage and recommend CPU and memory requests.
-- **Use MPA**: Reconcile HPA and VPA to avoid conflicts.
-- **Review Cost Recommendations**: Check the Google Cloud Console for GKE cost optimization recommendations.
+- **Use Autopilot**: Autopilot automatically rightsizes Pods based on requested resources and manages node provisioning efficiently.
+
+### 5. Advanced Spot VM usage with ComputeClasses
+
+For Standard clusters, use `ComputeClass` to manage Spot VMs with fallback to on-demand VMs and active migration.
+
+- **Spot Fallback**: Configure priorities in `ComputeClass` to prefer Spot VMs but fallback to On-Demand if Spot is unavailable.
+- **Active Migration**: Set `spec.activeMigration.optimizeRulePriority: true` to move workloads back to Spot VMs when available.
+
+Refer to `gke-compute-class-creator` skill for details.
 
 ## Best Practices
 
 1. **Enable Cost Allocation**: Always enable GKE cost allocation to understand where your money is going.
 2. **Use Resource Quotas**: Enforce resource quotas in multi-tenant clusters to prevent cost runaways.
-3. **Leverage Spot VMs**: Use Spot VMs for fault-tolerant, stateless workloads to save up to 91%.
-4. **Automate Scaling**: Use Cluster Autoscaler and HPA/VPA to ensure you only pay for what you need.
+3. **Leverage Spot VMs**: Use Spot VMs for fault-tolerant, stateless workloads. Use `ComputeClass` for better management.
+4. **Automate Scaling**: Use Cluster Autoscaler and HPA/VPA or switch to Autopilot.
+5. **Review Recommendations**: Regularly check GKE cost optimization recommendations using `list_recommendations`.
