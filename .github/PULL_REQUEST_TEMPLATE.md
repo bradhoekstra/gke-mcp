@@ -30,10 +30,12 @@
 ## Testing
 
 ```bash
+./dev/tasks/presubmit.sh  # Pass
 # List the relevant checks you ran and their results.
 ```
 
-<!-- If checks were not run, explain why. -->
+<!-- Run ./dev/tasks/presubmit.sh locally before creating the PR. If it could
+not be run or did not pass, explain why. -->
 
 ---
 

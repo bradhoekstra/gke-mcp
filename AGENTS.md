@@ -28,7 +28,7 @@ live under `skills/`, each with its own `SKILL.md`.
 - Run UI tests: `npm --prefix ui run test`
 - Run UI lint: `npm --prefix ui run lint`
 - Format all supported files: `./dev/tasks/format.sh`
-- Run local presubmit: `make presubmit`
+- Run local presubmit: `./dev/tasks/presubmit.sh` or `make presubmit`
 
 Run the smallest relevant check for the files you changed. For broad changes,
 prefer `make presubmit` when feasible.
@@ -88,6 +88,8 @@ updated `ui/dist/apps/*/index.html` files in the same change.
 - Push PR branches to a fork, not to the upstream repository.
 - Use `.github/PULL_REQUEST_TEMPLATE.md` for PR body structure and level of
   detail.
+- Run `./dev/tasks/presubmit.sh` locally before creating a PR, and only create
+  the PR once presubmit passes.
 - Mention any checks that could not be run and why.
 - For generated bundle changes, explain which source or build configuration
   change caused the regenerated output.
