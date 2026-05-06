@@ -1,8 +1,10 @@
-## Why This Change?
+# Pull Request
+
+## Why This Change
 
 <!-- Explain the problem, motivation, or user need this PR addresses. -->
 
-## What Changed?
+## What Changed
 
 <!-- Summarize the important files, behavior, or workflow changes. -->
 
@@ -16,15 +18,15 @@
 
 ## Why This Matters
 
-### 1.
+### 1
 
 -
 
-### 2.
+### 2
 
 -
 
-### 3.
+### 3
 
 -
 
