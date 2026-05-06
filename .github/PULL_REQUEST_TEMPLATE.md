@@ -34,8 +34,9 @@
 # List the relevant checks you ran and their results.
 ```
 
-<!-- Run ./dev/tasks/presubmit.sh locally before creating the PR. If it could
-not be run or did not pass, explain why. -->
+<!-- Run ./dev/tasks/presubmit.sh locally before creating the PR. It can take
+several minutes, so run it as a background or otherwise non-blocking task when
+possible. If it could not be run or did not pass, explain why. -->
 
 ---
 

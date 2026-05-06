@@ -90,6 +90,9 @@ updated `ui/dist/apps/*/index.html` files in the same change.
   detail.
 - Run `./dev/tasks/presubmit.sh` locally before creating a PR, and only create
   the PR once presubmit passes.
+- The presubmit script can take several minutes; when tooling supports it, run
+  it as a background or otherwise non-blocking task while continuing other PR
+  preparation.
 - Mention any checks that could not be run and why.
 - For generated bundle changes, explain which source or build configuration
   change caused the regenerated output.
