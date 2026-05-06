@@ -26,7 +26,7 @@ export default defineConfig({
 
         // Guard recursive assignment against inherited prototype properties.
         return code.replace(
-          'if (key in target) {',
+          /if\s*\(\s*key\s+in\s+target\s*\)\s*\{/,
           'if (Object.prototype.hasOwnProperty.call(target, key)) {'
         );
       },
