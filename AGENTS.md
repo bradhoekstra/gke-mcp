@@ -28,6 +28,7 @@ live under `skills/`, each with its own `SKILL.md`.
 - Run UI tests: `npm --prefix ui run test`
 - Run UI lint: `npm --prefix ui run lint`
 - Format all supported files: `./dev/tasks/format.sh`
+- Format Markdown files after editing: `npx prettier --write <files>`
 - Run local presubmit: `./dev/tasks/presubmit.sh` or `make presubmit`
 
 Run the smallest relevant check for the files you changed. For broad changes,
@@ -88,6 +89,8 @@ updated `ui/dist/apps/*/index.html` files in the same change.
 - Push PR branches to a fork, not to the upstream repository.
 - Use `.github/PULL_REQUEST_TEMPLATE.md` for PR body structure and level of
   detail.
+- When updating Markdown files, run `npx prettier --write <files>` on the
+  changed Markdown files before committing.
 - Run `./dev/tasks/presubmit.sh` locally before creating a PR, and only create
   the PR once presubmit passes.
 - The presubmit script can take several minutes; when tooling supports it, run

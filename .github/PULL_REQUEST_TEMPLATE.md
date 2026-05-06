@@ -7,21 +7,26 @@
 <!-- Summarize the important files, behavior, or workflow changes. -->
 
 **Files:**
+
 - `path/to/file`
 
 **Added/Changed/Fixed:**
-- 
+
+-
 
 ## Why This Matters
 
-### 1. 
-- 
+### 1.
 
-### 2. 
-- 
+-
 
-### 3. 
-- 
+### 2.
+
+-
+
+### 3.
+
+-
 
 ## Context
 
@@ -36,7 +41,9 @@
 
 <!-- Run ./dev/tasks/presubmit.sh locally before creating the PR. It can take
 several minutes, so run it as a background or otherwise non-blocking task when
-possible. If it could not be run or did not pass, explain why. -->
+possible. If this PR updates Markdown files, run npx prettier --write on those
+files before committing. If presubmit could not be run or did not pass, explain
+why. -->
 
 ---
 
