@@ -73,7 +73,9 @@ export function transformApiData(apiResponse: AppTimeSeries[], originalQuery: st
 
   const data: ChartDataPoint[] = Array.from(timeMap.entries())
     .sort(([timestampA], [timestampB]) => timestampA - timestampB)
-    .map(([timestamp, point]) => Object.assign(Object.create(null), point, { [TIMESTAMP_KEY]: new Date(timestamp) }));
+    .map(([timestamp, point]) =>
+      Object.assign(Object.create(null), point, { [TIMESTAMP_KEY]: new Date(timestamp) })
+    );
 
   return { data, series };
 }
