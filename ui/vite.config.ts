@@ -5,7 +5,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const fastDeepAssignModule = '/@mui/utils/fastDeepAssign/fastDeepAssign.';
+const fastDeepAssignModule = '/node_modules/@mui/utils/fastDeepAssign/fastDeepAssign.';
 
 const appName = process.env.VITE_APP_NAME;
 
