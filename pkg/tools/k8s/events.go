@@ -120,7 +120,7 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 
 	var buf bytes.Buffer
 	w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
-	
+
 	if args.AllNamespaces {
 		fmt.Fprintf(w, "NAMESPACE\t")
 	}
