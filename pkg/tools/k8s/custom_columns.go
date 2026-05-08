@@ -54,7 +54,7 @@ func FormatCustomColumns(items []unstructured.Unstructured, customColumns string
 	w := tabwriter.NewWriter(buf, 0, 8, 2, ' ', 0)
 
 	// Write headers
-	fmt.Fprintln(w, strings.Join(headers, "\t"))
+	_, _ = fmt.Fprintln(w, strings.Join(headers, "\t"))
 
 	// Write rows
 	for _, item := range items {
@@ -71,7 +71,7 @@ func FormatCustomColumns(items []unstructured.Unstructured, customColumns string
 				row = append(row, "<none>")
 			}
 		}
-		fmt.Fprintln(w, strings.Join(row, "\t"))
+		_, _ = fmt.Fprintln(w, strings.Join(row, "\t"))
 	}
 
 	if err := w.Flush(); err != nil {

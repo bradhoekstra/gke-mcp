@@ -24,7 +24,7 @@ import (
 )
 
 // ResolveGVR resolves a resource kind or name (e.g., "pods", "deployments") to its GroupVersionResource.
-func ResolveGVR(ctx context.Context, discoveryClient discovery.DiscoveryInterface, resource string) (schema.GroupVersionResource, bool, error) {
+func ResolveGVR(_ context.Context, discoveryClient discovery.DiscoveryInterface, resource string) (schema.GroupVersionResource, bool, error) {
 	groupResources, err := restmapper.GetAPIGroupResources(discoveryClient)
 	if err != nil {
 		return schema.GroupVersionResource{}, false, fmt.Errorf("failed to get API group resources: %w", err)

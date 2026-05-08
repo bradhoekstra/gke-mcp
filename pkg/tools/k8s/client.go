@@ -29,8 +29,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd/api"
 )
 
-// clientProvider provides Kubernetes clients for a GKE cluster.
-type clientProvider struct {
+// ClientProvider provides Kubernetes clients for a GKE cluster.
+type ClientProvider struct {
 	cmClient cmClient
 }
 
@@ -38,15 +38,15 @@ type cmClient interface {
 	GetCluster(ctx context.Context, req *containerpb.GetClusterRequest, opts ...gax.CallOption) (*containerpb.Cluster, error)
 }
 
-// NewClientProvider creates a new clientProvider.
-func NewClientProvider(cmClient cmClient) *clientProvider {
-	return &clientProvider{
+// NewClientProvider creates a new ClientProvider.
+func NewClientProvider(cmClient cmClient) *ClientProvider {
+	return &ClientProvider{
 		cmClient: cmClient,
 	}
 }
 
 // RESTConfig returns a rest.Config for the given cluster.
-func (p *clientProvider) RESTConfig(ctx context.Context, clusterPath string) (*rest.Config, error) {
+func (p *ClientProvider) RESTConfig(ctx context.Context, clusterPath string) (*rest.Config, error) {
 	req := &containerpb.GetClusterRequest{
 		Name: clusterPath,
 	}
@@ -87,7 +87,7 @@ func (p *clientProvider) RESTConfig(ctx context.Context, clusterPath string) (*r
 }
 
 // DynamicClient returns a dynamic.Interface for the given cluster.
-func (p *clientProvider) DynamicClient(ctx context.Context, clusterPath string) (dynamic.Interface, error) {
+func (p *ClientProvider) DynamicClient(ctx context.Context, clusterPath string) (dynamic.Interface, error) {
 	config, err := p.RESTConfig(ctx, clusterPath)
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (p *clientProvider) DynamicClient(ctx context.Context, clusterPath string) 
 }
 
 // DynamicClientWithHeaders returns a dynamic.Interface that adds specific headers to every request.
-func (p *clientProvider) DynamicClientWithHeaders(ctx context.Context, clusterPath string, headerName, headerValue string) (dynamic.Interface, error) {
+func (p *ClientProvider) DynamicClientWithHeaders(ctx context.Context, clusterPath string, headerName, headerValue string) (dynamic.Interface, error) {
 	config, err := p.RESTConfig(ctx, clusterPath)
 	if err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func (p *clientProvider) DynamicClientWithHeaders(ctx context.Context, clusterPa
 }
 
 // DiscoveryClient returns a discovery.DiscoveryInterface for the given cluster.
-func (p *clientProvider) DiscoveryClient(ctx context.Context, clusterPath string) (discovery.DiscoveryInterface, error) {
+func (p *ClientProvider) DiscoveryClient(ctx context.Context, clusterPath string) (discovery.DiscoveryInterface, error) {
 	config, err := p.RESTConfig(ctx, clusterPath)
 	if err != nil {
 		return nil, err
@@ -129,6 +129,7 @@ type HeaderRoundTripper struct {
 	HeaderValue string
 }
 
+// RoundTrip implements the http.RoundTripper interface.
 func (t *HeaderRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	reqCopy := req.Clone(req.Context())
 	reqCopy.Header.Set(t.HeaderName, t.HeaderValue)

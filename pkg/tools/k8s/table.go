@@ -42,22 +42,22 @@ func FormatTable(obj *unstructured.Unstructured) (string, error) {
 
 	// Write headers
 	for i, col := range table.ColumnDefinitions {
-		fmt.Fprint(w, col.Name)
+		_, _ = fmt.Fprint(w, col.Name)
 		if i < len(table.ColumnDefinitions)-1 {
-			fmt.Fprint(w, "\t")
+			_, _ = fmt.Fprint(w, "\t")
 		}
 	}
-	fmt.Fprintln(w)
+	_, _ = fmt.Fprintln(w)
 
 	// Write rows
 	for _, row := range table.Rows {
 		for i, cell := range row.Cells {
-			fmt.Fprintf(w, "%v", cell)
+			_, _ = fmt.Fprintf(w, "%v", cell)
 			if i < len(row.Cells)-1 {
-				fmt.Fprint(w, "\t")
+				_, _ = fmt.Fprint(w, "\t")
 			}
 		}
-		fmt.Fprintln(w)
+		_, _ = fmt.Fprintln(w)
 	}
 
 	if err := w.Flush(); err != nil {
