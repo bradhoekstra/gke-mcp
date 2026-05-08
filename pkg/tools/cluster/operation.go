@@ -19,20 +19,21 @@ import (
 	"fmt"
 
 	containerpb "cloud.google.com/go/container/apiv1/containerpb"
+	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/params"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type listOperationsArgs struct {
-	Parent string `json:"parent" jsonschema:"Required. The parent (project and location) where the operations will be listed. Specified in the format projects/*/locations/*."`
+	params.LocationRequired
 }
 
 type getOperationArgs struct {
-	Name string `json:"name" jsonschema:"Required. The name (project, location, operation id) of the operation to get. Specified in the format projects/*/locations/*/operations/*."`
+	params.Operation
 }
 
 type cancelOperationArgs struct {
-	Name   string `json:"name" jsonschema:"Required. The name (project, location, operation id) of the operation to cancel. Specified in the format projects/*/locations/*/operations/*."`
+	params.Operation
 }
 
 func (h *handlers) listOperations(ctx context.Context, _ *mcp.CallToolRequest, args *listOperationsArgs) (*mcp.CallToolResult, any, error) {
@@ -40,7 +41,7 @@ func (h *handlers) listOperations(ctx context.Context, _ *mcp.CallToolRequest, a
 		return nil, nil, fmt.Errorf("client not initialized")
 	}
 	req := &containerpb.ListOperationsRequest{
-		Parent: args.Parent,
+		Parent: args.LocationPath(),
 	}
 	resp, err := h.cmClient.ListOperations(ctx, req)
 	if err != nil {
@@ -59,7 +60,7 @@ func (h *handlers) getOperation(ctx context.Context, _ *mcp.CallToolRequest, arg
 		return nil, nil, fmt.Errorf("client not initialized")
 	}
 	req := &containerpb.GetOperationRequest{
-		Name: args.Name,
+		Name: args.OperationPath(),
 	}
 	resp, err := h.cmClient.GetOperation(ctx, req)
 	if err != nil {
@@ -78,7 +79,7 @@ func (h *handlers) cancelOperation(ctx context.Context, _ *mcp.CallToolRequest, 
 		return nil, nil, fmt.Errorf("client not initialized")
 	}
 	req := &containerpb.CancelOperationRequest{
-		Name: args.Name,
+		Name: args.OperationPath(),
 	}
 	err := h.cmClient.CancelOperation(ctx, req)
 	if err != nil {
@@ -87,7 +88,7 @@ func (h *handlers) cancelOperation(ctx context.Context, _ *mcp.CallToolRequest, 
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
-			&mcp.TextContent{Text: fmt.Sprintf("Operation %s cancelled successfully.", args.Name)},
+			&mcp.TextContent{Text: fmt.Sprintf("Operation %s cancelled successfully.", args.OperationPath())},
 		},
 	}, nil, nil
 }

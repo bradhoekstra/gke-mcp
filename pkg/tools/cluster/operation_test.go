@@ -20,32 +20,49 @@ import (
 )
 
 func TestListOperationsArgs_Fields(t *testing.T) {
-	args := listOperationsArgs{
-		Parent: "projects/test-project/locations/us-central1",
-	}
+	args := listOperationsArgs{}
+	args.ProjectID = "test-project"
+	args.Location = "us-central1"
 
-	if args.Parent != "projects/test-project/locations/us-central1" {
-		t.Errorf("Parent = %s, want projects/test-project/locations/us-central1", args.Parent)
+	if args.ProjectID != "test-project" {
+		t.Errorf("ProjectID = %s, want test-project", args.ProjectID)
+	}
+	if args.Location != "us-central1" {
+		t.Errorf("Location = %s, want us-central1", args.Location)
 	}
 }
 
 func TestGetOperationArgs_Fields(t *testing.T) {
-	args := getOperationArgs{
-		Name: "projects/test-project/locations/us-central1/operations/my-op",
-	}
+	args := getOperationArgs{}
+	args.ProjectID = "test-project"
+	args.Location = "us-central1"
+	args.OperationID = "my-op"
 
-	if args.Name != "projects/test-project/locations/us-central1/operations/my-op" {
-		t.Errorf("Name = %s, want projects/test-project/locations/us-central1/operations/my-op", args.Name)
+	if args.ProjectID != "test-project" {
+		t.Errorf("ProjectID = %s, want test-project", args.ProjectID)
+	}
+	if args.Location != "us-central1" {
+		t.Errorf("Location = %s, want us-central1", args.Location)
+	}
+	if args.OperationID != "my-op" {
+		t.Errorf("OperationID = %s, want my-op", args.OperationID)
 	}
 }
 
 func TestCancelOperationArgs_Fields(t *testing.T) {
-	args := cancelOperationArgs{
-		Name: "projects/test-project/locations/us-central1/operations/my-op",
-	}
+	args := cancelOperationArgs{}
+	args.ProjectID = "test-project"
+	args.Location = "us-central1"
+	args.OperationID = "my-op"
 
-	if args.Name != "projects/test-project/locations/us-central1/operations/my-op" {
-		t.Errorf("Name = %s, want projects/test-project/locations/us-central1/operations/my-op", args.Name)
+	if args.ProjectID != "test-project" {
+		t.Errorf("ProjectID = %s, want test-project", args.ProjectID)
+	}
+	if args.Location != "us-central1" {
+		t.Errorf("Location = %s, want us-central1", args.Location)
+	}
+	if args.OperationID != "my-op" {
+		t.Errorf("OperationID = %s, want my-op", args.OperationID)
 	}
 }
 

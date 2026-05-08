@@ -73,3 +73,14 @@ type NodePool struct {
 func (n *NodePool) NodePoolPath() string {
 	return fmt.Sprintf("%s/nodePools/%s", n.ClusterPath(), n.NodePoolName)
 }
+
+// Operation represents GKE operation parameters.
+type Operation struct {
+	LocationRequired
+	OperationID string `json:"operation_id" jsonschema:"Required. GKE operation ID."`
+}
+
+// OperationPath returns the full resource path for the operation.
+func (o *Operation) OperationPath() string {
+	return fmt.Sprintf("%s/operations/%s", o.LocationPath(), o.OperationID)
+}
