@@ -24,8 +24,8 @@ func TestListClustersArgs_Fields(t *testing.T) {
 	args.Location = "us-central1"
 	args.ReadMask = "name,status"
 
-	if args.Parent != "projects/test-project/locations/us-central1" {
-		t.Errorf("Parent = %s, want projects/test-project/locations/us-central1", args.Parent)
+	if args.LocationPath() != "projects/test-project/locations/us-central1" {
+		t.Errorf("LocationPath() = %s, want projects/test-project/locations/us-central1", args.LocationPath())
 	}
 	if args.ReadMask != "name,status" {
 		t.Errorf("ReadMask = %s, want name,status", args.ReadMask)
@@ -45,8 +45,8 @@ func TestGetClustersArgs_Fields(t *testing.T) {
 	args.ClusterName = "my-cluster"
 	args.ReadMask = "name,status"
 
-	if args.Name != "projects/test-project/locations/us-central1/clusters/my-cluster" {
-		t.Errorf("Name = %s, want projects/test-project/locations/us-central1/clusters/my-cluster", args.Name)
+	if args.ClusterPath() != "projects/test-project/locations/us-central1/clusters/my-cluster" {
+		t.Errorf("ClusterPath() = %s, want projects/test-project/locations/us-central1/clusters/my-cluster", args.ClusterPath())
 	}
 	if args.Location != "us-central1" {
 		t.Errorf("Location = %s, want us-central1", args.Location)
@@ -65,8 +65,8 @@ func TestCreateClustersArgs_Fields(t *testing.T) {
 	args.Location = "us-central1"
 	args.Cluster = `{"name": "my-cluster"}`
 
-	if args.Parent != "projects/test-project/locations/us-central1" {
-		t.Errorf("Parent = %s, want projects/test-project/locations/us-central1", args.Parent)
+	if args.LocationPath() != "projects/test-project/locations/us-central1" {
+		t.Errorf("LocationPath() = %s, want projects/test-project/locations/us-central1", args.LocationPath())
 	}
 	if args.Location != "us-central1" {
 		t.Errorf("Location = %s, want us-central1", args.Location)
@@ -117,14 +117,11 @@ func TestGetNodeSosReportArgs_Fields(t *testing.T) {
 
 func TestListClustersArgs_Empty(t *testing.T) {
 	args := listClustersArgs{}
-	if args.Parent != "" {
-		t.Errorf("Expected empty Parent, got %s", args.Parent)
+	if args.ProjectID != "" {
+		t.Errorf("Expected empty ProjectID, got %s", args.ProjectID)
 	}
-	if args.ReadMask != "" {
-		t.Errorf("Expected empty ReadMask, got %s", args.ReadMask)
-	}
-	if args.ReadMask != "" {
-		t.Errorf("Expected empty ReadMask, got %s", args.ReadMask)
+	if args.Location != "" {
+		t.Errorf("Expected empty Location, got %s", args.Location)
 	}
 	if args.ReadMask != "" {
 		t.Errorf("Expected empty ReadMask, got %s", args.ReadMask)
@@ -133,7 +130,7 @@ func TestListClustersArgs_Empty(t *testing.T) {
 
 func TestGetClustersArgs_Empty(t *testing.T) {
 	args := getClustersArgs{}
-if args.ProjectID != "" {
+	if args.ProjectID != "" {
 		t.Errorf("Expected empty ProjectID, got %s", args.ProjectID)
 	}
 	if args.Location != "" {
