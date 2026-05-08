@@ -36,6 +36,7 @@ type getK8SResourceArgs struct {
 	LabelSelector string `json:"labelSelector,omitempty" jsonschema:"Optional. A label selector to filter resources."`
 	FieldSelector string `json:"fieldSelector,omitempty" jsonschema:"Optional. A field selector to filter resources."`
 	OutputFormat  string `json:"outputFormat,omitempty" jsonschema:"Optional. The output format. One of: (table, wide, yaml, json). If not specified, defaults to table."`
+	CustomColumns string `json:"customColumns,omitempty" jsonschema:"Optional. The custom columns to output in the format HEADER:JSONPATH,HEADER:JSONPATH. e.g. 'NAME:.metadata.name,STATUS:.status.phase'. If specified, outputFormat is ignored."`
 }
 
 func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, args *getK8SResourceArgs) (*mcp.CallToolResult, any, error) {
@@ -51,7 +52,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 		return nil, nil, err
 	}
 
-	useTable := args.OutputFormat == "" || strings.ToLower(args.OutputFormat) == "table" || strings.ToLower(args.OutputFormat) == "wide"
+	useTable := (args.OutputFormat == "" || strings.ToLower(args.OutputFormat) == "table" || strings.ToLower(args.OutputFormat) == "wide") && args.CustomColumns == ""
 	
 	var dynamicClient dynamic.Interface
 	if useTable {
@@ -80,7 +81,12 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to get resource: %w", err)
 		}
-		result, err = h.formatResource(obj, args.OutputFormat)
+
+		if args.CustomColumns != "" {
+			result, err = FormatCustomColumns([]unstructured.Unstructured{*obj}, args.CustomColumns)
+		} else {
+			result, err = h.formatResource(obj, args.OutputFormat)
+		}
 		if err != nil {
 			return nil, nil, err
 		}
@@ -93,7 +99,9 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 			return nil, nil, fmt.Errorf("failed to list resources: %w", err)
 		}
 		
-		if useTable {
+		if args.CustomColumns != "" {
+			result, err = FormatCustomColumns(list.Items, args.CustomColumns)
+		} else if useTable {
 			// In table mode, the list.Object itself is the Table
 			result, err = FormatTable(&unstructured.Unstructured{Object: list.Object})
 		} else {
