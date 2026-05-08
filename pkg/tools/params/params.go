@@ -15,7 +15,23 @@
 // Package params provide common tool parameter types.
 package params
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+)
+
+// ErrorResult returns a CallToolResult with the given error as text content and IsError set to true.
+func ErrorResult(err error) *mcp.CallToolResult {
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			&mcp.TextContent{
+				Text: fmt.Sprintf("Error: %v", err),
+			},
+		},
+		IsError: true,
+	}
+}
 
 // Project contains the GCP project ID.
 type Project struct {

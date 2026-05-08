@@ -44,12 +44,12 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 
 	discoveryClient, err := h.provider.DiscoveryClient(ctx, clusterPath)
 	if err != nil {
-		return errorResult(fmt.Errorf("failed to get discovery client: %w", err)), nil, nil
+		return params.ErrorResult(fmt.Errorf("failed to get discovery client: %w", err)), nil, nil
 	}
 
 	gvr, isNamespaced, err := ResolveGVR(ctx, discoveryClient, args.ResourceType)
 	if err != nil {
-		return errorResult(err), nil, nil
+		return params.ErrorResult(err), nil, nil
 	}
 
 	useTable := (args.OutputFormat == "" || strings.ToLower(args.OutputFormat) == "table" || strings.ToLower(args.OutputFormat) == "wide") && args.CustomColumns == ""
@@ -65,7 +65,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 		dynamicClient, err = h.provider.DynamicClient(ctx, clusterPath)
 	}
 	if err != nil {
-		return errorResult(fmt.Errorf("failed to get dynamic client: %w", err)), nil, nil
+		return params.ErrorResult(fmt.Errorf("failed to get dynamic client: %w", err)), nil, nil
 	}
 
 	var resourceInterface dynamic.ResourceInterface
@@ -79,7 +79,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 	if args.Name != "" {
 		obj, err := resourceInterface.Get(ctx, args.Name, metav1.GetOptions{})
 		if err != nil {
-			return errorResult(fmt.Errorf("failed to get resource: %w", err)), nil, nil
+			return params.ErrorResult(fmt.Errorf("failed to get resource: %w", err)), nil, nil
 		}
 
 		if args.CustomColumns != "" {
@@ -88,7 +88,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 			result, err = h.formatResource(obj, args.OutputFormat)
 		}
 		if err != nil {
-			return errorResult(err), nil, nil
+			return params.ErrorResult(err), nil, nil
 		}
 	} else {
 		list, err := resourceInterface.List(ctx, metav1.ListOptions{
@@ -96,7 +96,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 			FieldSelector: args.FieldSelector,
 		})
 		if err != nil {
-			return errorResult(fmt.Errorf("failed to list resources: %w", err)), nil, nil
+			return params.ErrorResult(fmt.Errorf("failed to list resources: %w", err)), nil, nil
 		}
 
 		if args.CustomColumns != "" {
@@ -108,7 +108,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 			result, err = h.formatResourceList(list, args.OutputFormat)
 		}
 		if err != nil {
-			return errorResult(err), nil, nil
+			return params.ErrorResult(err), nil, nil
 		}
 	}
 
@@ -165,16 +165,5 @@ func (h *handlers) formatResourceList(list *unstructured.UnstructuredList, forma
 		return string(data), nil
 	default:
 		return "", fmt.Errorf("unsupported output format: %s", format)
-	}
-}
-
-func errorResult(err error) *mcp.CallToolResult {
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{
-				Text: fmt.Sprintf("Error: %v", err),
-			},
-		},
-		IsError: true,
 	}
 }
