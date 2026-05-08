@@ -28,7 +28,7 @@ type handlers struct {
 }
 
 // Install registers Kubernetes-related tools with the MCP server.
-func Install(ctx context.Context, s *mcp.Server, c *config.Config) error {
+func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	h := &handlers{
 		c:        c,
 		provider: NewClientProvider(),

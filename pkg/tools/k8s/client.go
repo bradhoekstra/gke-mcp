@@ -36,7 +36,7 @@ func NewClientProvider() *ClientProvider {
 }
 
 // RESTConfig returns a rest.Config for the given cluster.
-func (p *ClientProvider) RESTConfig(ctx context.Context, clusterPath string) (*rest.Config, error) {
+func (p *ClientProvider) RESTConfig(_ context.Context, clusterPath string) (*rest.Config, error) {
 	// Extract context name from clusterPath
 	// clusterPath format: projects/PROJECT/locations/LOCATION/clusters/CLUSTER
 	parts := strings.Split(clusterPath, "/")
