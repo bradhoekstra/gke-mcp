@@ -122,15 +122,15 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 	w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
 
 	if args.AllNamespaces {
-		fmt.Fprintf(w, "NAMESPACE\t")
+		_, _ = fmt.Fprintf(w, "NAMESPACE\t")
 	}
-	fmt.Fprintf(w, "LAST SEEN\tTYPE\tREASON\tOBJECT\tMESSAGE\n")
+	_, _ = fmt.Fprintf(w, "LAST SEEN\tTYPE\tREASON\tOBJECT\tMESSAGE\n")
 
 	for _, event := range eventList.Items {
 		if args.AllNamespaces {
-			fmt.Fprintf(w, "%s\t", event.InvolvedObject.Namespace)
+			_, _ = fmt.Fprintf(w, "%s\t", event.InvolvedObject.Namespace)
 		}
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s/%s\t%s\n",
+		_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s/%s\t%s\n",
 			getInterval(event),
 			event.Type,
 			event.Reason,
@@ -139,7 +139,7 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 			event.Message,
 		)
 	}
-	w.Flush()
+	_ = w.Flush()
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
