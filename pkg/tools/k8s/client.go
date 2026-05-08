@@ -16,74 +16,42 @@ package k8s
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strings"
 
-	containerpb "cloud.google.com/go/container/apiv1/containerpb"
-	"github.com/googleapis/gax-go/v2"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd/api"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 // ClientProvider provides Kubernetes clients for a GKE cluster.
 type ClientProvider struct {
-	cmClient cmClient
-}
-
-type cmClient interface {
-	GetCluster(ctx context.Context, req *containerpb.GetClusterRequest, opts ...gax.CallOption) (*containerpb.Cluster, error)
 }
 
 // NewClientProvider creates a new ClientProvider.
-func NewClientProvider(cmClient cmClient) *ClientProvider {
-	return &ClientProvider{
-		cmClient: cmClient,
-	}
+func NewClientProvider() *ClientProvider {
+	return &ClientProvider{}
 }
 
 // RESTConfig returns a rest.Config for the given cluster.
 func (p *ClientProvider) RESTConfig(ctx context.Context, clusterPath string) (*rest.Config, error) {
-	req := &containerpb.GetClusterRequest{
-		Name: clusterPath,
+	// Extract context name from clusterPath
+	// clusterPath format: projects/PROJECT/locations/LOCATION/clusters/CLUSTER
+	parts := strings.Split(clusterPath, "/")
+	if len(parts) != 6 {
+		return nil, fmt.Errorf("invalid cluster path: %s", clusterPath)
 	}
-	resp, err := p.cmClient.GetCluster(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get cluster %s: %w", clusterPath, err)
-	}
+	project := parts[1]
+	location := parts[3]
+	cluster := parts[5]
+	contextName := fmt.Sprintf("gke_%s_%s_%s", project, location, cluster)
 
-	clusterCaCertificate := resp.GetMasterAuth().GetClusterCaCertificate()
-	endpoint := resp.GetEndpoint()
-
-	if clusterCaCertificate == "" || endpoint == "" {
-		return nil, fmt.Errorf("clusterCaCertificate or endpoint not found for cluster")
-	}
-
-	if !strings.HasPrefix(endpoint, "https://") {
-		endpoint = "https://" + endpoint
-	}
-
-	caData, err := base64.StdEncoding.DecodeString(clusterCaCertificate)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode clusterCaCertificate: %w", err)
-	}
-
-	config := &rest.Config{
-		Host: endpoint,
-		TLSClientConfig: rest.TLSClientConfig{
-			CAData: caData,
-		},
-		ExecProvider: &api.ExecConfig{
-			APIVersion:         "client.authentication.k8s.io/v1beta1",
-			Command:            "gke-gcloud-auth-plugin",
-			ProvideClusterInfo: true,
-		},
-	}
-
-	return config, nil
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	configOverrides := &clientcmd.ConfigOverrides{CurrentContext: contextName}
+	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
+	return kubeConfig.ClientConfig()
 }
 
 // DynamicClient returns a dynamic.Interface for the given cluster.

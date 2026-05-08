@@ -17,31 +17,21 @@ package k8s
 
 import (
 	"context"
-	"fmt"
 
-	container "cloud.google.com/go/container/apiv1"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"google.golang.org/api/option"
 )
 
 type handlers struct {
 	c        *config.Config
-	cmClient *container.ClusterManagerClient
 	provider *ClientProvider
 }
 
 // Install registers Kubernetes-related tools with the MCP server.
 func Install(ctx context.Context, s *mcp.Server, c *config.Config) error {
-	cmClient, err := container.NewClusterManagerClient(ctx, option.WithUserAgent(c.UserAgent()))
-	if err != nil {
-		return fmt.Errorf("failed to create cluster manager client: %w", err)
-	}
-
 	h := &handlers{
 		c:        c,
-		cmClient: cmClient,
-		provider: NewClientProvider(cmClient),
+		provider: NewClientProvider(),
 	}
 
 	mcp.AddTool(s, &mcp.Tool{
