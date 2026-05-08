@@ -30,7 +30,7 @@ import (
 )
 
 type getK8SResourceArgs struct {
-	params.Parent
+	params.Cluster
 	ResourceType  string `json:"resourceType" jsonschema:"Required. The type of resource to retrieve. Kubernetes resource/kind name in singular form, lower case. e.g. \"pod\", \"deployment\", \"service\"."`
 	Name          string `json:"name,omitempty" jsonschema:"Optional. The name of the resource to retrieve. If not specified, all resources of the given type are returned."`
 	Namespace     string `json:"namespace,omitempty" jsonschema:"Optional. The namespace of the resource. If not specified, all namespaces are searched."`
@@ -41,22 +41,17 @@ type getK8SResourceArgs struct {
 }
 
 func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, args *getK8SResourceArgs) (*mcp.CallToolResult, any, error) {
-	projectID, location, clusterName, err := args.Parse()
-	if err != nil {
-		return nil, nil, err
-	}
-
 	// 1. Get cluster info from GKE API to setup kubeconfig
 	req := &containerpb.GetClusterRequest{
-		Name: args.Parent.Parent,
+		Name: args.ClusterPath(),
 	}
 	resp, err := h.cmClient.GetCluster(ctx, req)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get cluster %s: %w", args.Parent.Parent, err)
+		return nil, nil, fmt.Errorf("failed to get cluster %s: %w", args.ClusterPath(), err)
 	}
 
 	// 2. Setup temporary kubeconfig
-	kubeconfigPath, cleanup, err := h.setupTempKubeconfig(resp, projectID, location, clusterName)
+	kubeconfigPath, cleanup, err := h.setupTempKubeconfig(resp, args.ProjectID, args.Location, args.ClusterName)
 	if err != nil {
 		return nil, nil, err
 	}

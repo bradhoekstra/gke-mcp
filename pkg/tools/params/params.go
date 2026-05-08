@@ -15,10 +15,7 @@
 // Package params provide common tool parameter types.
 package params
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 // Project contains the GCP project ID.
 type Project struct {
@@ -64,21 +61,6 @@ type Cluster struct {
 // ClusterPath returns the full GKE cluster resource path.
 func (c *Cluster) ClusterPath() string {
 	return fmt.Sprintf("%s/clusters/%s", c.LocationPath(), c.ClusterName)
-}
-
-// Parent contains the full GKE cluster resource path as a single string.
-// Format: projects/{project}/locations/{location}/clusters/{cluster}
-type Parent struct {
-	Parent string `json:"parent" jsonschema:"Required. The cluster, which owns this collection of resources. Format: projects/{project}/locations/{location}/clusters/{cluster}"`
-}
-
-// Parse parses the parent string into project, location and cluster name.
-func (p *Parent) Parse() (projectID, location, clusterName string, err error) {
-	parts := strings.Split(p.Parent, "/")
-	if len(parts) != 6 || parts[0] != "projects" || parts[2] != "locations" || parts[4] != "clusters" {
-		return "", "", "", fmt.Errorf("invalid parent format: %q, expected projects/{project}/locations/{location}/clusters/{cluster}", p.Parent)
-	}
-	return parts[1], parts[3], parts[5], nil
 }
 
 // NodePool represents GKE node pool parameters.

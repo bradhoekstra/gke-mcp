@@ -27,7 +27,9 @@ func TestGetK8SResourceArgs_Fields(t *testing.T) {
 		FieldSelector: "status.phase=Running",
 		OutputFormat:  "yaml",
 	}
-	args.Parent.Parent = "projects/p/locations/l/clusters/c"
+	args.ProjectID = "p"
+	args.Location = "l"
+	args.ClusterName = "c"
 
 	if args.ResourceType != "pod" {
 		t.Errorf("ResourceType = %s, want pod", args.ResourceType)
@@ -47,7 +49,7 @@ func TestGetK8SResourceArgs_Fields(t *testing.T) {
 	if args.OutputFormat != "yaml" {
 		t.Errorf("OutputFormat = %s, want yaml", args.OutputFormat)
 	}
-	if args.Parent.Parent != "projects/p/locations/l/clusters/c" {
-		t.Errorf("Parent = %s, want projects/p/locations/l/clusters/c", args.Parent.Parent)
+	if args.ClusterPath() != "projects/p/locations/l/clusters/c" {
+		t.Errorf("ClusterPath = %s, want projects/p/locations/l/clusters/c", args.ClusterPath())
 	}
 }
