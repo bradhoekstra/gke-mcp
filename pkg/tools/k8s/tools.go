@@ -28,6 +28,7 @@ import (
 type handlers struct {
 	c        *config.Config
 	cmClient *container.ClusterManagerClient
+	provider *clientProvider
 }
 
 // Install registers Kubernetes-related tools with the MCP server.
@@ -40,6 +41,7 @@ func Install(ctx context.Context, s *mcp.Server, c *config.Config) error {
 	h := &handlers{
 		c:        c,
 		cmClient: cmClient,
+		provider: NewClientProvider(cmClient),
 	}
 
 	mcp.AddTool(s, &mcp.Tool{
