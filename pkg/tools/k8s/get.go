@@ -53,7 +53,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 	}
 
 	useTable := (args.OutputFormat == "" || strings.ToLower(args.OutputFormat) == "table" || strings.ToLower(args.OutputFormat) == "wide") && args.CustomColumns == ""
-	
+
 	var dynamicClient dynamic.Interface
 	if useTable {
 		headerValue := "application/json;as=Table;v=v1;g=meta.k8s.io"
@@ -98,7 +98,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to list resources: %w", err)
 		}
-		
+
 		if args.CustomColumns != "" {
 			result, err = FormatCustomColumns(list.Items, args.CustomColumns)
 		} else if useTable {

@@ -101,7 +101,7 @@ func (p *clientProvider) DynamicClientWithHeaders(ctx context.Context, clusterPa
 	if err != nil {
 		return nil, err
 	}
-	
+
 	config.Wrap(func(rt http.RoundTripper) http.RoundTripper {
 		return &HeaderRoundTripper{
 			Wrapped:     rt,
@@ -109,7 +109,7 @@ func (p *clientProvider) DynamicClientWithHeaders(ctx context.Context, clusterPa
 			HeaderValue: headerValue,
 		}
 	})
-	
+
 	return dynamic.NewForConfig(config)
 }
 

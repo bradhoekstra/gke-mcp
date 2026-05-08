@@ -64,7 +64,7 @@ func TestFormatCustomColumns(t *testing.T) {
 
 func TestFormatCustomColumns_Invalid(t *testing.T) {
 	items := []unstructured.Unstructured{{Object: map[string]interface{}{}}}
-	
+
 	_, err := FormatCustomColumns(items, "INVALID")
 	if err == nil {
 		t.Error("Expected error for invalid column format, got nil")

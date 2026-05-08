@@ -31,7 +31,7 @@ func ResolveGVR(ctx context.Context, discoveryClient discovery.DiscoveryInterfac
 	}
 
 	mapper := restmapper.NewDiscoveryRESTMapper(groupResources)
-	
+
 	// Try to resolve as a direct resource name (e.g., "pods")
 	gvr, err := mapper.ResourceFor(schema.GroupVersionResource{Resource: resource})
 	if err == nil {

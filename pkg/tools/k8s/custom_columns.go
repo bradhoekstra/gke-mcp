@@ -41,7 +41,7 @@ func FormatCustomColumns(items []unstructured.Unstructured, customColumns string
 			return "", fmt.Errorf("invalid custom column format: %s. Expected HEADER:JSONPATH", col)
 		}
 		headers = append(headers, parts[0])
-		
+
 		jp := jsonpath.New("custom")
 		// kubectl expects jsonpath without the surrounding {}
 		if err := jp.Parse(fmt.Sprintf("{%s}", parts[1])); err != nil {
