@@ -33,7 +33,6 @@ type getOperationArgs struct {
 
 type cancelOperationArgs struct {
 	Name   string `json:"name" jsonschema:"Required. The name (project, location, operation id) of the operation to cancel. Specified in the format projects/*/locations/*/operations/*."`
-	Parent string `json:"parent" jsonschema:"Required. The parent cluster of the operation. Specified in the format projects/*/locations/*/clusters/*."`
 }
 
 func (h *handlers) listOperations(ctx context.Context, _ *mcp.CallToolRequest, args *listOperationsArgs) (*mcp.CallToolResult, any, error) {

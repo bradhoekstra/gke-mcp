@@ -41,15 +41,11 @@ func TestGetOperationArgs_Fields(t *testing.T) {
 
 func TestCancelOperationArgs_Fields(t *testing.T) {
 	args := cancelOperationArgs{
-		Name:   "projects/test-project/locations/us-central1/operations/my-op",
-		Parent: "projects/test-project/locations/us-central1/clusters/my-cluster",
+		Name: "projects/test-project/locations/us-central1/operations/my-op",
 	}
 
 	if args.Name != "projects/test-project/locations/us-central1/operations/my-op" {
 		t.Errorf("Name = %s, want projects/test-project/locations/us-central1/operations/my-op", args.Name)
-	}
-	if args.Parent != "projects/test-project/locations/us-central1/clusters/my-cluster" {
-		t.Errorf("Parent = %s, want projects/test-project/locations/us-central1/clusters/my-cluster", args.Parent)
 	}
 }
 
