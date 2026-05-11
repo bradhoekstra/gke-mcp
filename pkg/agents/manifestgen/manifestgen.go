@@ -72,6 +72,11 @@ type AnswerQueryArgs struct {
 	Query string `json:"query" jsonschema:"The query to answer. Required."`
 }
 
+// SearchDocumentsArgs holds arguments for searching documents.
+type SearchDocumentsArgs struct {
+	Query string `json:"query" jsonschema:"The query to search for. Required."`
+}
+
 // createDKTools creates the tools for the Developer Knowledge API.
 func createDKTools(client dk.DeveloperKnowledgeClient) ([]tool.Tool, error) {
 	if client == nil {
@@ -90,7 +95,20 @@ func createDKTools(client dk.DeveloperKnowledgeClient) ([]tool.Tool, error) {
 		return nil, fmt.Errorf("failed to create dk_answer_query tool: %w", err)
 	}
 
-	return []tool.Tool{answerQueryTool}, nil
+	searchDocsTool, err := functiontool.New(
+		functiontool.Config{
+			Name:        "dk_search_documents",
+			Description: "Search for documents in the Developer Knowledge base.",
+		},
+		func(ctx tool.Context, args SearchDocumentsArgs) (string, error) {
+			return client.SearchDocuments(ctx, args.Query)
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create dk_search_documents tool: %w", err)
+	}
+
+	return []tool.Tool{answerQueryTool, searchDocsTool}, nil
 }
 
 // NewAgent creates a new Agent attached to a specific text generator model.
