@@ -143,19 +143,5 @@ This is similar to running "gcloud container clusters create-auto" or "gcloud co
 		}, h.deleteNodePool)
 	}
 
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "list_operations",
-		Description: "List GKE operations. TODO: Implement this.",
-	}, h.listOperations)
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "get_operation",
-		Description: "Get a GKE operation. TODO: Implement this.",
-	}, h.getOperation)
-
-	mcp.AddTool(s, &mcp.Tool{
-		Name:        "cancel_operation",
-		Description: "Cancel a GKE operation. TODO: Implement this.",
-	}, h.cancelOperation)
 	return nil
 }
