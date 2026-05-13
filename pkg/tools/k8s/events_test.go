@@ -227,3 +227,43 @@ func TestListK8SEvents_WithResourceType(t *testing.T) {
 		t.Fatalf("listK8SEvents returned error result: %v", result.Content[0])
 	}
 }
+
+func TestListK8SEvents_AllNamespacesOverridesNamespace(t *testing.T) {
+	ctx := context.Background()
+
+	fakeClientset := fake.NewSimpleClientset()
+
+	mockProvider := &mockClientProvider{
+		kubernetesClient: fakeClientset,
+	}
+
+	h := &handlers{
+		c:        &config.Config{},
+		provider: mockProvider,
+	}
+
+	args := &listK8SEventsArgs{
+		Namespace:     "some-namespace",
+		AllNamespaces: true,
+	}
+	args.ProjectID = "p"
+	args.Location = "l"
+	args.ClusterName = "c"
+
+	_, _, err := h.listK8SEvents(ctx, &mcp.CallToolRequest{}, args)
+	if err != nil {
+		t.Fatalf("listK8SEvents failed: %v", err)
+	}
+
+	actions := fakeClientset.Actions()
+	if len(actions) < 1 {
+		t.Fatalf("expected at least 1 action, got %d", len(actions))
+	}
+	action := actions[0]
+	if action.GetVerb() != "list" {
+		t.Errorf("expected list action, got %s", action.GetVerb())
+	}
+	if action.GetNamespace() != "" {
+		t.Errorf("expected all namespaces (empty string), got %s", action.GetNamespace())
+	}
+}

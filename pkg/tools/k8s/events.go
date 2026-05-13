@@ -65,7 +65,9 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 	}
 
 	namespace := args.Namespace
-	if !args.AllNamespaces && namespace == "" {
+	if args.AllNamespaces {
+		namespace = ""
+	} else if namespace == "" {
 		namespace = "default"
 	}
 
