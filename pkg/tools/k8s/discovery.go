@@ -24,10 +24,10 @@ import (
 )
 
 // ResolveGVR resolves a resource kind or name (e.g., "pods", "deployments") to its GroupVersionResource.
-func ResolveGVR(_ context.Context, discoveryClient discovery.DiscoveryInterface, resource string) (schema.GroupVersionResource, bool, error) {
+func ResolveGVR(_ context.Context, discoveryClient discovery.DiscoveryInterface, resource string) (schema.GroupVersionResource, schema.GroupVersionKind, bool, error) {
 	groupResources, err := restmapper.GetAPIGroupResources(discoveryClient)
 	if err != nil {
-		return schema.GroupVersionResource{}, false, fmt.Errorf("failed to get API group resources: %w", err)
+		return schema.GroupVersionResource{}, schema.GroupVersionKind{}, false, fmt.Errorf("failed to get API group resources: %w", err)
 	}
 
 	mapper := restmapper.NewDiscoveryRESTMapper(groupResources)
@@ -37,13 +37,13 @@ func ResolveGVR(_ context.Context, discoveryClient discovery.DiscoveryInterface,
 	if err == nil {
 		gvk, err := mapper.KindFor(gvr)
 		if err != nil {
-			return gvr, false, err
+			return gvr, schema.GroupVersionKind{}, false, err
 		}
 		mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 		if err != nil {
-			return gvr, false, err
+			return gvr, schema.GroupVersionKind{}, false, err
 		}
-		return gvr, mapping.Scope.Name() == "namespace", nil
+		return gvr, gvk, mapping.Scope.Name() == "namespace", nil
 	}
 
 	// Then try to resolve as a kind (e.g., "Pod")
@@ -51,10 +51,10 @@ func ResolveGVR(_ context.Context, discoveryClient discovery.DiscoveryInterface,
 	if err == nil {
 		mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 		if err != nil {
-			return schema.GroupVersionResource{}, false, err
+			return schema.GroupVersionResource{}, schema.GroupVersionKind{}, false, err
 		}
-		return mapping.Resource, mapping.Scope.Name() == "namespace", nil
+		return mapping.Resource, gvk, mapping.Scope.Name() == "namespace", nil
 	}
 
-	return schema.GroupVersionResource{}, false, fmt.Errorf("failed to resolve resource %q: %w", resource, err)
+	return schema.GroupVersionResource{}, schema.GroupVersionKind{}, false, fmt.Errorf("failed to resolve resource %q: %w", resource, err)
 }

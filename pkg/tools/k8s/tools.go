@@ -24,7 +24,7 @@ import (
 
 type handlers struct {
 	c        *config.Config
-	provider *ClientProvider
+	provider Provider
 }
 
 // Install registers Kubernetes-related tools with the MCP server.
@@ -41,6 +41,14 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 			ReadOnlyHint: true,
 		},
 	}, h.getK8SResource)
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "list_k8s_events",
+		Description: "Retrieves events from a Kubernetes cluster. This is similar to running `kubectl events`.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.listK8SEvents)
 
 	return nil
 }

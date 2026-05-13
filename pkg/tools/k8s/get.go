@@ -47,7 +47,7 @@ func (h *handlers) getK8SResource(ctx context.Context, _ *mcp.CallToolRequest, a
 		return params.ErrorResult(fmt.Errorf("failed to get discovery client: %w", err)), nil, nil
 	}
 
-	gvr, isNamespaced, err := ResolveGVR(ctx, discoveryClient, args.ResourceType)
+	gvr, _, isNamespaced, err := ResolveGVR(ctx, discoveryClient, args.ResourceType)
 	if err != nil {
 		return params.ErrorResult(err), nil, nil
 	}
