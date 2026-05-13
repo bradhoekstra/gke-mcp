@@ -103,6 +103,7 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 		return getLastSeenTime(eventList.Items[i]).After(getLastSeenTime(eventList.Items[j]))
 	})
 
+	replacer := strings.NewReplacer("\n", " ", "\t", " ")
 	var buf bytes.Buffer
 	w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
 
@@ -121,7 +122,7 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 			event.Reason,
 			event.InvolvedObject.Kind,
 			event.InvolvedObject.Name,
-			event.Message,
+			replacer.Replace(event.Message),
 		)
 	}
 	_ = w.Flush()
