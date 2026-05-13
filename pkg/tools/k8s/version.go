@@ -27,6 +27,9 @@ type getK8SVersionArgs struct {
 }
 
 func (h *handlers) getK8SVersion(ctx context.Context, _ *mcp.CallToolRequest, args *getK8SVersionArgs) (*mcp.CallToolResult, any, error) {
+	if args == nil {
+		return params.ErrorResult(fmt.Errorf("args cannot be nil")), nil, nil
+	}
 	clusterPath := args.ClusterPath()
 
 	discoveryClient, err := h.provider.DiscoveryClient(ctx, clusterPath)
