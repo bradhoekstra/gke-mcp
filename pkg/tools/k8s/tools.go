@@ -24,7 +24,7 @@ import (
 
 type handlers struct {
 	c        *config.Config
-	provider *ClientProvider
+	provider Provider
 }
 
 // Install registers Kubernetes-related tools with the MCP server.

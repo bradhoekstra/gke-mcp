@@ -22,9 +22,19 @@ import (
 
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
+
+// Provider defines the interface for providing Kubernetes clients.
+type Provider interface {
+	RESTConfig(ctx context.Context, clusterPath string) (*rest.Config, error)
+	DynamicClient(ctx context.Context, clusterPath string) (dynamic.Interface, error)
+	DynamicClientWithHeaders(ctx context.Context, clusterPath string, headerName, headerValue string) (dynamic.Interface, error)
+	DiscoveryClient(ctx context.Context, clusterPath string) (discovery.DiscoveryInterface, error)
+	KubernetesClient(ctx context.Context, clusterPath string) (kubernetes.Interface, error)
+}
 
 // ClientProvider provides Kubernetes clients for a GKE cluster.
 type ClientProvider struct {
@@ -88,6 +98,15 @@ func (p *ClientProvider) DiscoveryClient(ctx context.Context, clusterPath string
 		return nil, err
 	}
 	return discovery.NewDiscoveryClientForConfig(config)
+}
+
+// KubernetesClient returns a kubernetes.Interface for the given cluster.
+func (p *ClientProvider) KubernetesClient(ctx context.Context, clusterPath string) (kubernetes.Interface, error) {
+	config, err := p.RESTConfig(ctx, clusterPath)
+	if err != nil {
+		return nil, err
+	}
+	return kubernetes.NewForConfig(config)
 }
 
 // HeaderRoundTripper is an http.RoundTripper that adds a specific header to each request.

@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -26,10 +27,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/duration"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/restmapper"
 )
 
 type listK8SEventsArgs struct {
@@ -44,14 +42,9 @@ type listK8SEventsArgs struct {
 func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, args *listK8SEventsArgs) (*mcp.CallToolResult, any, error) {
 	clusterPath := args.ClusterPath()
 
-	config, err := h.provider.RESTConfig(ctx, clusterPath)
+	clientset, err := h.provider.KubernetesClient(ctx, clusterPath)
 	if err != nil {
-		return params.ErrorResult(fmt.Errorf("failed to get rest config: %w", err)), nil, nil
-	}
-
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return params.ErrorResult(fmt.Errorf("failed to create clientset: %w", err)), nil, nil
+		return params.ErrorResult(fmt.Errorf("failed to get kubernetes client: %w", err)), nil, nil
 	}
 
 	apiVersion := ""
@@ -62,26 +55,9 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 			return params.ErrorResult(fmt.Errorf("failed to get discovery client: %w", err)), nil, nil
 		}
 
-		groupResources, err := restmapper.GetAPIGroupResources(discoveryClient)
+		_, gvk, _, err := ResolveGVR(ctx, discoveryClient, args.ResourceType)
 		if err != nil {
-			return params.ErrorResult(fmt.Errorf("failed to get API group resources: %w", err)), nil, nil
-		}
-		mapper := restmapper.NewDiscoveryRESTMapper(groupResources)
-
-		// Try to resolve as a direct resource name (e.g., "pods")
-		gvr, err := mapper.ResourceFor(schema.GroupVersionResource{Resource: args.ResourceType})
-		var gvk schema.GroupVersionKind
-		if err == nil {
-			gvk, err = mapper.KindFor(gvr)
-			if err != nil {
-				return params.ErrorResult(fmt.Errorf("failed to get kind for resource: %w", err)), nil, nil
-			}
-		} else {
-			// Then try to resolve as a kind (e.g., "Pod")
-			gvk, err = mapper.KindFor(schema.GroupVersionResource{Resource: args.ResourceType})
-			if err != nil {
-				return params.ErrorResult(fmt.Errorf("failed to resolve resource type %q: %w", args.ResourceType, err)), nil, nil
-			}
+			return params.ErrorResult(err), nil, nil
 		}
 
 		kind = gvk.Kind
@@ -98,17 +74,20 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 		limit = 500
 	}
 
-	selector := ""
+	var selectorParts []string
 	if !args.AllNamespaces {
-		selector = fmt.Sprintf("involvedObject.namespace=%s,", namespace)
+		selectorParts = append(selectorParts, fmt.Sprintf("involvedObject.namespace=%s", namespace))
 	}
 	if kind != "" {
-		selector = selector + fmt.Sprintf("involvedObject.kind=%s,involvedObject.name=%s", kind, args.Name)
-		if apiVersion != "" {
-			selector = selector + fmt.Sprintf(",involvedObject.apiVersion=%s", apiVersion)
-		}
+		selectorParts = append(selectorParts, fmt.Sprintf("involvedObject.kind=%s", kind))
 	}
-	selector = strings.TrimSuffix(selector, ",")
+	if args.Name != "" {
+		selectorParts = append(selectorParts, fmt.Sprintf("involvedObject.name=%s", args.Name))
+	}
+	if apiVersion != "" {
+		selectorParts = append(selectorParts, fmt.Sprintf("involvedObject.apiVersion=%s", apiVersion))
+	}
+	selector := strings.Join(selectorParts, ",")
 
 	eventList, err := clientset.CoreV1().Events(namespace).List(ctx, metav1.ListOptions{
 		Limit:         limit,
@@ -117,6 +96,10 @@ func (h *handlers) listK8SEvents(ctx context.Context, _ *mcp.CallToolRequest, ar
 	if err != nil {
 		return params.ErrorResult(fmt.Errorf("failed to list events: %w", err)), nil, nil
 	}
+
+	sort.Slice(eventList.Items, func(i, j int) bool {
+		return getLastSeenTime(eventList.Items[i]).After(getLastSeenTime(eventList.Items[j]))
+	})
 
 	var buf bytes.Buffer
 	w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
@@ -176,4 +159,17 @@ func translateTimestampSince(timestamp metav1.Time) string {
 		return "<unknown>"
 	}
 	return duration.HumanDuration(time.Since(timestamp.Time))
+}
+
+func getLastSeenTime(e corev1.Event) time.Time {
+	if e.Series != nil && !e.Series.LastObservedTime.IsZero() {
+		return e.Series.LastObservedTime.Time
+	}
+	if !e.LastTimestamp.IsZero() {
+		return e.LastTimestamp.Time
+	}
+	if !e.EventTime.IsZero() {
+		return e.EventTime.Time
+	}
+	return e.FirstTimestamp.Time
 }

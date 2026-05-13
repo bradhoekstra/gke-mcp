@@ -15,7 +15,18 @@
 package k8s
 
 import (
+	"context"
+	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	fakediscovery "k8s.io/client-go/discovery/fake"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestGetK8SResourceArgs_Fields(t *testing.T) {
@@ -51,5 +62,85 @@ func TestGetK8SResourceArgs_Fields(t *testing.T) {
 	}
 	if args.ClusterPath() != "projects/p/locations/l/clusters/c" {
 		t.Errorf("ClusterPath = %s, want projects/p/locations/l/clusters/c", args.ClusterPath())
+	}
+}
+
+func TestGetK8SResource(t *testing.T) {
+	ctx := context.Background()
+
+	// Create a fake unstructured pod
+	pod := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "v1",
+			"kind":       "Pod",
+			"metadata": map[string]interface{}{
+				"name":      "my-pod",
+				"namespace": "default",
+				"labels": map[string]interface{}{
+					"app": "myapp",
+				},
+			},
+			"status": map[string]interface{}{
+				"phase": "Running",
+			},
+		},
+	}
+
+	scheme := runtime.NewScheme()
+	fakeDynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, pod)
+
+	// We need to mock discovery for ResolveGVR
+	fakeClientset := fake.NewSimpleClientset()
+	fakeDiscovery := fakeClientset.Discovery().(*fakediscovery.FakeDiscovery)
+	fakeDiscovery.Resources = []*metav1.APIResourceList{
+		{
+			GroupVersion: "v1",
+			APIResources: []metav1.APIResource{
+				{Name: "pods", Namespaced: true, Kind: "Pod"},
+			},
+		},
+	}
+
+	mockProvider := &mockClientProvider{
+		dynamicClient:   fakeDynamicClient,
+		discoveryClient: fakeDiscovery,
+	}
+
+	h := &handlers{
+		c:        &config.Config{},
+		provider: mockProvider,
+	}
+
+	args := &getK8SResourceArgs{
+		ResourceType: "pod",
+		Name:         "my-pod",
+		Namespace:    "default",
+		OutputFormat: "yaml",
+	}
+	args.ProjectID = "p"
+	args.Location = "l"
+	args.ClusterName = "c"
+
+	result, _, err := h.getK8SResource(ctx, &mcp.CallToolRequest{}, args)
+	if err != nil {
+		t.Fatalf("getK8SResource failed: %v", err)
+	}
+
+	if result.IsError {
+		t.Fatalf("getK8SResource returned error result: %v", result.Content[0])
+	}
+
+	if len(result.Content) != 1 {
+		t.Fatalf("len(result.Content) = %d, want 1", len(result.Content))
+	}
+
+	textContent, ok := result.Content[0].(*mcp.TextContent)
+	if !ok {
+		t.Fatalf("result.Content[0] is not TextContent")
+	}
+
+	// Verify output contains pod name
+	if !strings.Contains(textContent.Text, "my-pod") {
+		t.Errorf("output does not contain 'my-pod'")
 	}
 }
