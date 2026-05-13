@@ -52,7 +52,7 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "get_k8s_version",
-		Description: "Retrieves Kubernetes client and server versions for a given cluster. This is similar to running `kubectl version`.",
+		Description: "Retrieves the Kubernetes server version for a given cluster. This is similar to running kubectl version.",
 		Annotations: &mcp.ToolAnnotations{
 			ReadOnlyHint: true,
 		},
