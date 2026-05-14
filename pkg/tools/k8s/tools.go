@@ -50,5 +50,13 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 		},
 	}, h.listK8SEvents)
 
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_k8s_version",
+		Description: "Retrieves the Kubernetes server version for a given cluster. This is similar to running kubectl version.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.getK8SVersion)
+
 	return nil
 }
