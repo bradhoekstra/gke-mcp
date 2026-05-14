@@ -16,8 +16,14 @@
 package dk
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"time"
 )
 
 // DeveloperKnowledgeClient defines the interface for interacting with the Developer Knowledge API.
@@ -27,14 +33,67 @@ type DeveloperKnowledgeClient interface {
 	SearchDocuments(ctx context.Context, query string) (string, error)
 }
 
-// RealDeveloperKnowledgeClient is the actual implementation (stubbed for now).
+// RealDeveloperKnowledgeClient is the actual implementation.
 type RealDeveloperKnowledgeClient struct {
-	// Add configuration fields here (e.g., API key, base URL)
+	baseURL    string
+	httpClient *http.Client
+	apiKey     string
+	userAgent  string
 }
 
 // NewRealDeveloperKnowledgeClient creates a new real client instance.
-func NewRealDeveloperKnowledgeClient() *RealDeveloperKnowledgeClient {
-	return &RealDeveloperKnowledgeClient{}
+func NewRealDeveloperKnowledgeClient(baseURL string, apiKey string, userAgent string) *RealDeveloperKnowledgeClient {
+	return &RealDeveloperKnowledgeClient{
+		baseURL: baseURL,
+		httpClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+		apiKey:    apiKey,
+		userAgent: userAgent,
+	}
+}
+
+// doPost executes a POST request to the Developer Knowledge API.
+func (c *RealDeveloperKnowledgeClient) doPost(ctx context.Context, path string, reqBody interface{}) (string, error) {
+	reqURL, err := url.JoinPath(c.baseURL, path)
+	if err != nil {
+		return "", err
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.apiKey != "" {
+		req.Header.Set("X-Goog-Api-Key", c.apiKey)
+	}
+	if c.userAgent != "" {
+		req.Header.Set("User-Agent", c.userAgent)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024*1024))
+		return "", fmt.Errorf("API request failed with status %s: %s", resp.Status, string(body))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
 }
 
 // GetDocuments fetches specific documents by their IDs.
@@ -48,6 +107,8 @@ func (c *RealDeveloperKnowledgeClient) AnswerQuery(_ context.Context, _ string) 
 }
 
 // SearchDocuments searches for documents related to a query.
-func (c *RealDeveloperKnowledgeClient) SearchDocuments(_ context.Context, _ string) (string, error) {
-	return "", fmt.Errorf("SearchDocuments not implemented")
+func (c *RealDeveloperKnowledgeClient) SearchDocuments(ctx context.Context, query string) (string, error) {
+	return c.doPost(ctx, "/v1/documents:searchDocumentChunks", map[string]interface{}{
+		"query": query,
+	})
 }
