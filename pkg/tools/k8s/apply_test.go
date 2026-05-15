@@ -89,11 +89,7 @@ metadata:
 			}
 			fakeDynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, pod)
 
-			fakeDynamicClient.PrependReactor("patch", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-				if tc.dryRun {
-					// We can't easily check dry-run options here without casting to specific internal types that might be hard to access.
-					// But we can at least ensure the reactor is called.
-				}
+			fakeDynamicClient.PrependReactor("patch", "pods", func(_ k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 				return true, pod, nil
 			})
 
