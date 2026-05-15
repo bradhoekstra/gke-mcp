@@ -90,7 +90,8 @@ func (h *handlers) applyK8SManifest(ctx context.Context, _ *mcp.CallToolRequest,
 		if mapping.Scope.Name() == "namespace" {
 			ns := obj.GetNamespace()
 			if ns == "" {
-				ns = "default"
+				errors = append(errors, fmt.Sprintf("document %d with kind %s: namespace is required but not specified", i+1, gvk.Kind))
+				continue
 			}
 			appliedObj, err = dynamicClient.Resource(gvr).Namespace(ns).Apply(ctx, name, obj, applyOptions)
 		} else {
@@ -121,6 +122,7 @@ func (h *handlers) applyK8SManifest(ctx context.Context, _ *mcp.CallToolRequest,
 		Content: []mcp.Content{
 			&mcp.TextContent{Text: result},
 		},
+		IsError: len(errors) > 0,
 	}, nil, nil
 }
 
