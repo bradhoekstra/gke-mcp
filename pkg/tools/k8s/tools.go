@@ -58,5 +58,10 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 		},
 	}, h.getK8SVersion)
 
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "apply_k8s_manifest",
+		Description: "Applies a Kubernetes manifest to a cluster using server-side apply. This is similar to running `kubectl apply --server-side`.",
+	}, h.applyK8SManifest)
+
 	return nil
 }
