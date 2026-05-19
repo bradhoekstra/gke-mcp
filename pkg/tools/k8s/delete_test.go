@@ -186,7 +186,7 @@ func TestDeleteK8SResource_InvalidCascade(t *testing.T) {
 	fakeDynamicClient := dynamicfake.NewSimpleDynamicClient(scheme)
 
 	h := &handlers{
-		c:        &config.Config{},
+		c: &config.Config{},
 		provider: &mockClientProvider{
 			discoveryClient: fakeDiscovery,
 			dynamicClient:   fakeDynamicClient,
