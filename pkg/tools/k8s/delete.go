@@ -52,14 +52,17 @@ func (h *handlers) deleteK8SResource(ctx context.Context, _ *mcp.CallToolRequest
 	}
 
 	var resourceInterface dynamic.ResourceInterface
+	var resourceDesc string
 	if isNamespaced {
 		ns := args.Namespace
 		if ns == "" {
 			ns = "default"
 		}
 		resourceInterface = dynamicClient.Resource(gvr).Namespace(ns)
+		resourceDesc = fmt.Sprintf("%s/%s", ns, args.Name)
 	} else {
 		resourceInterface = dynamicClient.Resource(gvr)
+		resourceDesc = args.Name
 	}
 
 	deleteOptions := metav1.DeleteOptions{}
@@ -87,7 +90,7 @@ func (h *handlers) deleteK8SResource(ctx context.Context, _ *mcp.CallToolRequest
 		return params.ErrorResult(fmt.Errorf("failed to delete resource: %w", err)), nil, nil
 	}
 
-	result := fmt.Sprintf("Resource %s/%s (kind: %s) deleted", args.Namespace, args.Name, args.ResourceType)
+	result := fmt.Sprintf("Resource %s (kind: %s) deleted", resourceDesc, args.ResourceType)
 	if args.DryRun {
 		result += " (dry-run)"
 	}

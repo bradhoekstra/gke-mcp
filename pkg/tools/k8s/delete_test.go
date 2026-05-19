@@ -221,3 +221,68 @@ func TestDeleteK8SResource_InvalidCascade(t *testing.T) {
 		t.Errorf("output does not contain 'invalid cascade policy'")
 	}
 }
+
+func TestDeleteK8SResource_ClusterScoped(t *testing.T) {
+	ctx := context.Background()
+
+	node := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "v1",
+			"kind":       "Node",
+			"metadata": map[string]interface{}{
+				"name": "my-node",
+			},
+		},
+	}
+
+	scheme := runtime.NewScheme()
+	fakeDynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, node)
+
+	fakeClientset := fake.NewSimpleClientset()
+	fakeDiscovery := fakeClientset.Discovery().(*fakediscovery.FakeDiscovery)
+	fakeDiscovery.Resources = []*metav1.APIResourceList{
+		{
+			GroupVersion: "v1",
+			APIResources: []metav1.APIResource{
+				{Name: "nodes", Namespaced: false, Kind: "Node"},
+			},
+		},
+	}
+
+	mockProvider := &mockClientProvider{
+		dynamicClient:   fakeDynamicClient,
+		discoveryClient: fakeDiscovery,
+	}
+
+	h := &handlers{
+		c:        &config.Config{},
+		provider: mockProvider,
+	}
+
+	args := &deleteK8SResourceArgs{
+		ResourceType: "node",
+		Name:         "my-node",
+	}
+	args.ProjectID = "p"
+	args.Location = "l"
+	args.ClusterName = "c"
+
+	result, _, err := h.deleteK8SResource(ctx, &mcp.CallToolRequest{}, args)
+	if err != nil {
+		t.Fatalf("deleteK8SResource failed: %v", err)
+	}
+
+	if result.IsError {
+		t.Fatalf("deleteK8SResource returned error result: %v", result.Content[0])
+	}
+
+	textContent, ok := result.Content[0].(*mcp.TextContent)
+	if !ok {
+		t.Fatalf("result.Content[0] is not TextContent")
+	}
+
+	expectedMsg := "Resource my-node (kind: node) deleted"
+	if textContent.Text != expectedMsg {
+		t.Errorf("output = %q, want %q", textContent.Text, expectedMsg)
+	}
+}
