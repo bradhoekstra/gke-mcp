@@ -69,6 +69,11 @@ For detailed instructions on how to connect the GKE MCP Server to various AI cli
 - `get_k8s_changelog`: Get Kubernetes changelog for upgrades.
 - `get_gke_release_notes`: Get GKE release notes.
 - `generate_manifest`: Generate a Kubernetes manifest using Vertex AI.
+- `get_k8s_resource`: Gets one or more Kubernetes resources from a cluster.
+- `list_k8s_events`: Retrieves events from a Kubernetes cluster.
+- `get_k8s_version`: Retrieves the Kubernetes server version for a given cluster.
+- `apply_k8s_manifest`: Applies a Kubernetes manifest to a cluster using server-side apply.
+- `get_k8s_logs`: Gets logs from a Kubernetes container in a pod.
 
 ## MCP Prompts
 

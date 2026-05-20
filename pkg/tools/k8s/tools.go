@@ -63,5 +63,13 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 		Description: "Applies a Kubernetes manifest to a cluster using server-side apply. This is similar to running `kubectl apply --server-side`.",
 	}, h.applyK8SManifest)
 
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_k8s_logs",
+		Description: "Gets logs from a Kubernetes container in a pod. This is similar to running `kubectl logs`.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.getK8SLogs)
+
 	return nil
 }
