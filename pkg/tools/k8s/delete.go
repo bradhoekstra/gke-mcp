@@ -66,20 +66,22 @@ func (h *handlers) deleteK8SResource(ctx context.Context, _ *mcp.CallToolRequest
 	}
 
 	deleteOptions := metav1.DeleteOptions{}
-	if args.Cascade != "" {
-		var propagationPolicy metav1.DeletionPropagation
-		switch args.Cascade {
-		case "background":
-			propagationPolicy = metav1.DeletePropagationBackground
-		case "foreground":
-			propagationPolicy = metav1.DeletePropagationForeground
-		case "orphan":
-			propagationPolicy = metav1.DeletePropagationOrphan
-		default:
-			return params.ErrorResult(fmt.Errorf("invalid cascade policy: %s", args.Cascade)), nil, nil
-		}
-		deleteOptions.PropagationPolicy = &propagationPolicy
+	cascade := args.Cascade
+	if cascade == "" {
+		cascade = "background"
 	}
+	var propagationPolicy metav1.DeletionPropagation
+	switch cascade {
+	case "background":
+		propagationPolicy = metav1.DeletePropagationBackground
+	case "foreground":
+		propagationPolicy = metav1.DeletePropagationForeground
+	case "orphan":
+		propagationPolicy = metav1.DeletePropagationOrphan
+	default:
+		return params.ErrorResult(fmt.Errorf("invalid cascade policy: %s", args.Cascade)), nil, nil
+	}
+	deleteOptions.PropagationPolicy = &propagationPolicy
 
 	if args.DryRun {
 		deleteOptions.DryRun = []string{"All"}
