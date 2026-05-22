@@ -34,6 +34,15 @@ func TestGetK8SClusterInfo(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "kube-dns",
 			Namespace: "kube-system",
+			Labels: map[string]string{
+				"kubernetes.io/cluster-service": "true",
+				"kubernetes.io/name":            "CoreDNS",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{Name: "dns", Port: 53},
+			},
 		},
 	})
 
@@ -66,7 +75,7 @@ func TestGetK8SClusterInfo(t *testing.T) {
 		t.Fatalf("result.Content[0] is not TextContent")
 	}
 
-	if !strings.Contains(textContent.Text, "Kubernetes control plane is at https://10.0.0.1") {
+	if !strings.Contains(textContent.Text, "Kubernetes control plane is running at https://10.0.0.1") {
 		t.Errorf("output does not contain control plane info")
 	}
 
