@@ -50,11 +50,12 @@ func (h *handlers) getK8SClusterInfo(ctx context.Context, _ *mcp.CallToolRequest
 		return params.ErrorResult(fmt.Errorf("failed to list services: %w", err)), nil, nil
 	}
 
+	host := strings.TrimSuffix(config.Host, "/")
 	var lines []string
-	lines = append(lines, fmt.Sprintf("Kubernetes control plane is running at %s", config.Host))
+	lines = append(lines, fmt.Sprintf("Kubernetes control plane is running at %s", host))
 
 	for _, s := range services.Items {
-		lines = append(lines, fmt.Sprintf("%s is running at %s", serviceName(s), serviceLink(s, config.Host)))
+		lines = append(lines, fmt.Sprintf("%s is running at %s", serviceName(s), serviceLink(s, host)))
 	}
 
 	return &mcp.CallToolResult{
@@ -78,13 +79,13 @@ func serviceLink(s corev1.Service, host string) string {
 		if ip == "" {
 			ip = ingress.Hostname
 		}
-		var link strings.Builder
+		var links []string
 		for _, port := range s.Spec.Ports {
-			link.WriteString("http://" + ip + ":" + strconv.Itoa(int(port.Port)))
+			links = append(links, "http://"+ip+":"+strconv.Itoa(int(port.Port)))
 		}
-		return link.String()
+		return strings.Join(links, ", ")
 	}
-	return host + "/api/v1/namespaces/" + s.Namespace + "/services/" + serviceProxyResourceName(s) + "/proxy"
+	return strings.TrimSuffix(host, "/") + "/api/v1/namespaces/" + s.Namespace + "/services/" + serviceProxyResourceName(s) + "/proxy"
 }
 
 func serviceProxyResourceName(service corev1.Service) string {
@@ -97,7 +98,7 @@ func serviceProxyResourceName(service corev1.Service) string {
 		if len(port.Name) > 0 {
 			return serviceName + ":" + port.Name
 		}
-		return serviceName
+		return serviceName + ":" + strconv.Itoa(int(port.Port))
 	}
 	return service.Name
 }
