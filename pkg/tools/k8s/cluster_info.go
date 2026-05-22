@@ -65,10 +65,10 @@ func (h *handlers) getK8SClusterInfo(ctx context.Context, _ *mcp.CallToolRequest
 }
 
 func serviceName(s corev1.Service) string {
-	if name, found := s.ObjectMeta.GetLabels()["kubernetes.io/name"]; found {
+	if name, found := s.GetLabels()["kubernetes.io/name"]; found {
 		return name
 	}
-	return s.ObjectMeta.GetName()
+	return s.GetName()
 }
 
 func serviceLink(s corev1.Service, host string) string {
@@ -84,11 +84,11 @@ func serviceLink(s corev1.Service, host string) string {
 		}
 		return link.String()
 	}
-	return host + "/api/v1/namespaces/" + s.ObjectMeta.Namespace + "/services/" + serviceProxyResourceName(s) + "/proxy"
+	return host + "/api/v1/namespaces/" + s.Namespace + "/services/" + serviceProxyResourceName(s) + "/proxy"
 }
 
 func serviceProxyResourceName(service corev1.Service) string {
-	serviceName := service.ObjectMeta.Name
+	serviceName := service.Name
 	if len(service.Spec.Ports) > 0 {
 		port := service.Spec.Ports[0]
 		if scheme := guessScheme(port); len(scheme) > 0 {
@@ -99,7 +99,7 @@ func serviceProxyResourceName(service corev1.Service) string {
 		}
 		return serviceName
 	}
-	return service.ObjectMeta.Name
+	return service.Name
 }
 
 func guessScheme(port corev1.ServicePort) string {
