@@ -83,6 +83,7 @@ updated `ui/dist/apps/*/index.html` files in the same change.
 
 ## Pull Request Hygiene
 
+- Perform a local code-review before sending or updating PRs.
 - Keep changes scoped to the request.
 - Do not commit unrelated formatting or generated output.
 - Use Conventional Commits for commit messages.
