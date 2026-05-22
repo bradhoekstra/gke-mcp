@@ -81,7 +81,11 @@ func serviceLink(s corev1.Service, host string) string {
 		}
 		var links []string
 		for _, port := range s.Spec.Ports {
-			links = append(links, "http://"+ip+":"+strconv.Itoa(int(port.Port)))
+			scheme := guessScheme(port)
+			if scheme == "" {
+				scheme = "http"
+			}
+			links = append(links, scheme+"://"+ip+":"+strconv.Itoa(int(port.Port)))
 		}
 		return strings.Join(links, ", ")
 	}
