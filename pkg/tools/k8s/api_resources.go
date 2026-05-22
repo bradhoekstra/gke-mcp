@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/tools/params"
@@ -28,6 +29,7 @@ type listK8SAPIResourcesArgs struct {
 	params.Cluster
 }
 
+// APIGroupDiscovery represents a discovery document for an API group/resource.
 type APIGroupDiscovery struct {
 	Name             string   `json:"name"`
 	Versions         []string `json:"versions"`
@@ -47,8 +49,12 @@ func (h *handlers) listK8SAPIResources(ctx context.Context, _ *mcp.CallToolReque
 		return params.ErrorResult(fmt.Errorf("failed to get server groups and resources: %w", err)), nil, nil
 	}
 
-	resourceVersions := make(map[string][]string)
-	resourcePreferredVersion := make(map[string]string)
+	type resourceKey struct {
+		name  string
+		group string
+	}
+	resourceMap := make(map[resourceKey][]string)
+	resourcePrefMap := make(map[resourceKey]string)
 
 	// Map group name to preferred version
 	prefVersions := make(map[string]string)
@@ -63,7 +69,6 @@ func (h *handlers) listK8SAPIResources(ctx context.Context, _ *mcp.CallToolReque
 				// Skip subresources like pods/log
 				continue
 			}
-			resourceVersions[r.Name] = append(resourceVersions[r.Name], gv)
 
 			// Find group name
 			parts := strings.Split(gv, "/")
@@ -72,22 +77,33 @@ func (h *handlers) listK8SAPIResources(ctx context.Context, _ *mcp.CallToolReque
 				group = parts[0]
 			}
 
+			key := resourceKey{name: r.Name, group: group}
+			resourceMap[key] = append(resourceMap[key], gv)
+
 			pref := prefVersions[group]
 			if pref == "" {
 				pref = "v1" // fallback for core group
 			}
-			resourcePreferredVersion[r.Name] = pref
+			resourcePrefMap[key] = pref
 		}
 	}
 
 	var resources []APIGroupDiscovery
-	for name, versions := range resourceVersions {
+	for k, versions := range resourceMap {
 		resources = append(resources, APIGroupDiscovery{
-			Name:             name,
+			Name:             k.name,
 			Versions:         versions,
-			PreferredVersion: resourcePreferredVersion[name],
+			PreferredVersion: resourcePrefMap[k],
 		})
 	}
+
+	// Sort resources by name to ensure deterministic output
+	sort.Slice(resources, func(i, j int) bool {
+		if resources[i].Name != resources[j].Name {
+			return resources[i].Name < resources[j].Name
+		}
+		return resources[i].PreferredVersion < resources[j].PreferredVersion
+	})
 
 	data, err := json.MarshalIndent(resources, "", "  ")
 	if err != nil {
