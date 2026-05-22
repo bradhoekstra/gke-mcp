@@ -74,6 +74,7 @@ For detailed instructions on how to connect the GKE MCP Server to various AI cli
 - `get_k8s_version`: Retrieves the Kubernetes server version for a given cluster.
 - `apply_k8s_manifest`: Applies a Kubernetes manifest to a cluster using server-side apply.
 - `get_k8s_logs`: Gets logs from a Kubernetes container in a pod.
+- `delete_k8s_resource`: Delete a Kubernetes resource from a cluster.
 
 ## MCP Prompts
 
