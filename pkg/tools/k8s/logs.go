@@ -51,8 +51,8 @@ func (h *handlers) getK8SLogs(ctx context.Context, _ *mcp.CallToolRequest, args 
 	name := args.Name
 	if strings.Contains(name, "/") {
 		parts := strings.Split(name, "/")
-		if len(parts) != 2 {
-			return params.ErrorResult(fmt.Errorf("invalid resource name: %q, expected format is type/name with a single slash", name)), nil, nil
+		if len(parts) != 2 || parts[1] == "" {
+			return params.ErrorResult(fmt.Errorf("invalid resource name: %q, expected format is type/name", name)), nil, nil
 		}
 		rt, name = parts[0], parts[1]
 	}
@@ -113,26 +113,35 @@ func (h *handlers) getK8SLogs(ctx context.Context, _ *mcp.CallToolRequest, args 
 		cOpts := opts.DeepCopy()
 		cOpts.Container = cName
 
-		req := client.CoreV1().Pods(ns).GetLogs(name, cOpts)
-		podLogs, err := req.Stream(ctx)
-		if err != nil {
-			return params.ErrorResult(fmt.Errorf("failed to get logs for container %q: %w", cName, err)), nil, nil
-		}
-
-		buf := new(strings.Builder)
-		_, err = io.Copy(buf, podLogs)
-		if err != nil {
-			_ = podLogs.Close()
-			return params.ErrorResult(fmt.Errorf("failed to read logs for container %q: %w", cName, err)), nil, nil
-		}
-		if err := podLogs.Close(); err != nil {
-			return params.ErrorResult(fmt.Errorf("failed to close log stream for container %q: %w", cName, err)), nil, nil
-		}
-
 		if len(containers) > 1 {
 			allLogs = append(allLogs, fmt.Sprintf("===== Container: %s =====", cName))
 		}
-		allLogs = append(allLogs, buf.String())
+
+		req := client.CoreV1().Pods(ns).GetLogs(name, cOpts)
+		podLogs, err := req.Stream(ctx)
+		if err != nil {
+			allLogs = append(allLogs, fmt.Sprintf("Error: failed to stream logs: %v", err))
+			continue
+		}
+
+		const maxLogSize = 1024 * 1024 // 1MB safety limit
+		buf := new(strings.Builder)
+		n, err := io.Copy(buf, io.LimitReader(podLogs, maxLogSize))
+		_ = podLogs.Close()
+
+		if err != nil {
+			allLogs = append(allLogs, fmt.Sprintf("Error: failed to read logs: %v", err))
+			continue
+		}
+
+		logText := buf.String()
+		if n >= maxLogSize {
+			logText += "\n... (logs truncated due to size limit)"
+		}
+		if logText == "" {
+			logText = "(no logs found)"
+		}
+		allLogs = append(allLogs, logText)
 	}
 
 	return &mcp.CallToolResult{
