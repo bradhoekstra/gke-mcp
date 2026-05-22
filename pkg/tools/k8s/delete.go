@@ -66,13 +66,9 @@ func (h *handlers) deleteK8SResource(ctx context.Context, _ *mcp.CallToolRequest
 	}
 
 	deleteOptions := metav1.DeleteOptions{}
-	cascade := args.Cascade
-	if cascade == "" {
-		cascade = "background"
-	}
 	var propagationPolicy metav1.DeletionPropagation
-	switch cascade {
-	case "background":
+	switch args.Cascade {
+	case "", "background":
 		propagationPolicy = metav1.DeletePropagationBackground
 	case "foreground":
 		propagationPolicy = metav1.DeletePropagationForeground
