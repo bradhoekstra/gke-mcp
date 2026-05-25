@@ -197,4 +197,3 @@ func TestDescribeK8SResource_NoResources(t *testing.T) {
 		t.Errorf("output %q does not contain %q", textContent.Text, "No resources found.")
 	}
 }
-
