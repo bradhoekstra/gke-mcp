@@ -66,14 +66,14 @@ func TestDescribeK8SResource(t *testing.T) {
 			Namespace: "default",
 		},
 		InvolvedObject: corev1.ObjectReference{
-			Kind:      "Pod",
-			Name:      "my-pod",
-			Namespace: "default",
+			Kind:       "Pod",
+			Name:       "my-pod",
+			Namespace:  "default",
 			APIVersion: "v1",
 		},
-		Message: "Test event message",
-		Reason:  "TestReason",
-		Type:    "Normal",
+		Message:       "Test event message",
+		Reason:        "TestReason",
+		Type:          "Normal",
 		LastTimestamp: metav1.Time{Time: metav1.Now().Time},
 	}
 	fakeClientset := fake.NewSimpleClientset(event)
