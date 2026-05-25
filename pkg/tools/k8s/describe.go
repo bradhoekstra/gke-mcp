@@ -118,15 +118,15 @@ func (h *handlers) describeK8SResource(ctx context.Context, _ *mcp.CallToolReque
 
 func (h *handlers) describeObject(ctx context.Context, obj *unstructured.Unstructured, kind string, isNamespaced bool, cluster params.Cluster) (string, error) {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Name: %s\n", obj.GetName()))
-	sb.WriteString(fmt.Sprintf("Namespace: %s\n", obj.GetNamespace()))
-	sb.WriteString(fmt.Sprintf("Kind: %s\n", kind))
+	fmt.Fprintf(&sb, "Name: %s\n", obj.GetName())
+	fmt.Fprintf(&sb, "Namespace: %s\n", obj.GetNamespace())
+	fmt.Fprintf(&sb, "Kind: %s\n", kind)
 
 	labels := obj.GetLabels()
 	if len(labels) > 0 {
 		sb.WriteString("Labels:\n")
 		for k, v := range labels {
-			sb.WriteString(fmt.Sprintf("  %s=%s\n", k, v))
+			fmt.Fprintf(&sb, "  %s=%s\n", k, v)
 		}
 	}
 
@@ -134,7 +134,7 @@ func (h *handlers) describeObject(ctx context.Context, obj *unstructured.Unstruc
 	if len(annotations) > 0 {
 		sb.WriteString("Annotations:\n")
 		for k, v := range annotations {
-			sb.WriteString(fmt.Sprintf("  %s=%s\n", k, v))
+			fmt.Fprintf(&sb, "  %s=%s\n", k, v)
 		}
 	}
 
