@@ -94,5 +94,4 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 
 	return nil
 
-
 }
