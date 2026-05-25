@@ -93,5 +93,4 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	}, h.checkK8SAuth)
 
 	return nil
-
 }

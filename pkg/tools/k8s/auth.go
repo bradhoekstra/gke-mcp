@@ -44,6 +44,9 @@ func (h *handlers) checkK8SAuth(ctx context.Context, _ *mcp.CallToolRequest, arg
 	if args == nil {
 		return params.ErrorResult(fmt.Errorf("args cannot be nil")), nil, nil
 	}
+	if args.Verb == "" {
+		return params.ErrorResult(fmt.Errorf("verb is required")), nil, nil
+	}
 	clusterPath := args.ClusterPath()
 
 	clientset, err := h.provider.KubernetesClient(ctx, clusterPath)
