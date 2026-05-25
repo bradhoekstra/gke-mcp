@@ -28,12 +28,15 @@ type getK8SRolloutStatusArgs struct {
 	params.Cluster
 	ResourceType string `json:"resourceType" jsonschema:"Required. The type of resource to check. e.g. \"deployment\", \"daemonset\", \"statefulset\"."`
 	Name         string `json:"name" jsonschema:"Required. The name of the resource to check."`
-	Namespace    string `json:"namespace,omitempty" jsonschema:"Optional. The namespace of the resource. If not specified, \"default\" is used."`
+	Namespace    string `json:"namespace" jsonschema:"Required. The namespace of the resource."`
 }
 
 func (h *handlers) getK8SRolloutStatus(ctx context.Context, _ *mcp.CallToolRequest, args *getK8SRolloutStatusArgs) (*mcp.CallToolResult, any, error) {
 	if args == nil {
 		return params.ErrorResult(fmt.Errorf("args cannot be nil")), nil, nil
+	}
+	if args.Namespace == "" {
+		return params.ErrorResult(fmt.Errorf("namespace is required")), nil, nil
 	}
 	clusterPath := args.ClusterPath()
 
@@ -42,15 +45,13 @@ func (h *handlers) getK8SRolloutStatus(ctx context.Context, _ *mcp.CallToolReque
 		return params.ErrorResult(fmt.Errorf("failed to get discovery client: %w", err)), nil, nil
 	}
 
-	_, gvk, isNamespaced, err := ResolveGVR(ctx, discoveryClient, args.ResourceType)
+	_, gvk, _, err := ResolveGVR(ctx, discoveryClient, args.ResourceType)
 	if err != nil {
 		return params.ErrorResult(err), nil, nil
 	}
 
 	namespace := args.Namespace
-	if isNamespaced && namespace == "" {
-		namespace = "default"
-	}
+
 
 	clientset, err := h.provider.KubernetesClient(ctx, clusterPath)
 	if err != nil {
