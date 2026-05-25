@@ -39,6 +39,15 @@ func (h *handlers) patchK8SResource(ctx context.Context, _ *mcp.CallToolRequest,
 	if args == nil {
 		return params.ErrorResult(fmt.Errorf("args cannot be nil")), nil, nil
 	}
+	if args.ProjectID == "" {
+		return params.ErrorResult(fmt.Errorf("projectId is required")), nil, nil
+	}
+	if args.Location == "" {
+		return params.ErrorResult(fmt.Errorf("location is required")), nil, nil
+	}
+	if args.ClusterName == "" {
+		return params.ErrorResult(fmt.Errorf("clusterName is required")), nil, nil
+	}
 	clusterPath := args.ClusterPath()
 
 	discoveryClient, err := h.provider.DiscoveryClient(ctx, clusterPath)
@@ -79,8 +88,16 @@ func (h *handlers) patchK8SResource(ctx context.Context, _ *mcp.CallToolRequest,
 	} else {
 		resourceInterface = dynamicClient.Resource(gvr)
 	}
+	patchBytes := []byte(args.Patch)
+	if pt == types.StrategicMergePatchType || pt == types.MergePatchType {
+		var err error
+		patchBytes, err = yaml.YAMLToJSON(patchBytes)
+		if err != nil {
+			return params.ErrorResult(fmt.Errorf("failed to convert patch to JSON: %w", err)), nil, nil
+		}
+	}
 
-	patchedObj, err := resourceInterface.Patch(ctx, args.Name, pt, []byte(args.Patch), metav1.PatchOptions{})
+	patchedObj, err := resourceInterface.Patch(ctx, args.Name, pt, patchBytes, metav1.PatchOptions{})
 	if err != nil {
 		return params.ErrorResult(fmt.Errorf("failed to patch resource: %w", err)), nil, nil
 	}
