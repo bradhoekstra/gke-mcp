@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
@@ -139,3 +140,61 @@ func TestDescribeK8SResource(t *testing.T) {
 		t.Errorf("output does not contain 'Test event message'")
 	}
 }
+
+func TestDescribeK8SResource_NoResources(t *testing.T) {
+	ctx := context.Background()
+
+	scheme := runtime.NewScheme()
+	gvrToKind := map[schema.GroupVersionResource]string{
+		{Group: "", Version: "v1", Resource: "pods"}: "PodList",
+	}
+	fakeDynamicClient := dynamicfake.NewSimpleDynamicClientWithCustomListKinds(scheme, gvrToKind)
+
+	fakeClientset := fake.NewSimpleClientset()
+	fakeDiscovery := fakeClientset.Discovery().(*fakediscovery.FakeDiscovery)
+	fakeDiscovery.Resources = []*metav1.APIResourceList{
+		{
+			GroupVersion: "v1",
+			APIResources: []metav1.APIResource{
+				{Name: "pods", Namespaced: true, Kind: "Pod"},
+			},
+		},
+	}
+
+	mockProvider := &mockClientProvider{
+		dynamicClient:    fakeDynamicClient,
+		kubernetesClient: fakeClientset,
+		discoveryClient:  fakeDiscovery,
+	}
+
+	h := &handlers{
+		c:        &config.Config{},
+		provider: mockProvider,
+	}
+
+	args := &describeK8SResourceArgs{
+		ResourceType: "pod",
+	}
+	args.ProjectID = "p"
+	args.Location = "l"
+	args.ClusterName = "c"
+
+	result, _, err := h.describeK8SResource(ctx, &mcp.CallToolRequest{}, args)
+	if err != nil {
+		t.Fatalf("describeK8SResource failed: %v", err)
+	}
+
+	if result.IsError {
+		t.Fatalf("describeK8SResource returned error result: %v", result.Content[0])
+	}
+
+	textContent, ok := result.Content[0].(*mcp.TextContent)
+	if !ok {
+		t.Fatalf("result.Content[0] is not TextContent")
+	}
+
+	if !strings.Contains(textContent.Text, "No resources found.") {
+		t.Errorf("output %q does not contain %q", textContent.Text, "No resources found.")
+	}
+}
+

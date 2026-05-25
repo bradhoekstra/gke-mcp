@@ -76,7 +76,7 @@ func (h *handlers) describeK8SResource(ctx context.Context, _ *mcp.CallToolReque
 			return params.ErrorResult(fmt.Errorf("failed to get resource: %w", err)), nil, nil
 		}
 
-		desc, err := h.describeObject(ctx, obj, gvk.Kind, args.Cluster)
+		desc, err := h.describeObject(ctx, obj, gvk.Kind, isNamespaced, args.Cluster)
 		if err != nil {
 			return params.ErrorResult(err), nil, nil
 		}
@@ -89,8 +89,16 @@ func (h *handlers) describeK8SResource(ctx context.Context, _ *mcp.CallToolReque
 			return params.ErrorResult(fmt.Errorf("failed to list resources: %w", err)), nil, nil
 		}
 
+		if len(list.Items) == 0 {
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: "No resources found."},
+				},
+			}, nil, nil
+		}
+
 		for i, item := range list.Items {
-			desc, err := h.describeObject(ctx, &item, gvk.Kind, args.Cluster)
+			desc, err := h.describeObject(ctx, &item, gvk.Kind, isNamespaced, args.Cluster)
 			if err != nil {
 				return params.ErrorResult(err), nil, nil
 			}
@@ -108,7 +116,7 @@ func (h *handlers) describeK8SResource(ctx context.Context, _ *mcp.CallToolReque
 	}, nil, nil
 }
 
-func (h *handlers) describeObject(ctx context.Context, obj *unstructured.Unstructured, kind string, cluster params.Cluster) (string, error) {
+func (h *handlers) describeObject(ctx context.Context, obj *unstructured.Unstructured, kind string, isNamespaced bool, cluster params.Cluster) (string, error) {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Name: %s\n", obj.GetName()))
 	sb.WriteString(fmt.Sprintf("Namespace: %s\n", obj.GetNamespace()))
@@ -133,24 +141,31 @@ func (h *handlers) describeObject(ctx context.Context, obj *unstructured.Unstruc
 	// Show spec and status as YAML
 	spec, ok := obj.Object["spec"]
 	if ok {
-		specYAML, _ := yaml.Marshal(spec)
+		specYAML, err := yaml.Marshal(spec)
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal spec to YAML: %w", err)
+		}
 		sb.WriteString("Spec:\n")
 		sb.WriteString(indent(string(specYAML), "  "))
 	}
 
 	status, ok := obj.Object["status"]
 	if ok {
-		statusYAML, _ := yaml.Marshal(status)
+		statusYAML, err := yaml.Marshal(status)
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal status to YAML: %w", err)
+		}
 		sb.WriteString("Status:\n")
 		sb.WriteString(indent(string(statusYAML), "  "))
 	}
 
 	// Fetch events
 	eventsResult, _, err := h.listK8SEvents(ctx, nil, &listK8SEventsArgs{
-		Cluster:      cluster,
-		Name:         obj.GetName(),
-		Namespace:    obj.GetNamespace(),
-		ResourceType: kind,
+		Cluster:       cluster,
+		Name:          obj.GetName(),
+		Namespace:     obj.GetNamespace(),
+		ResourceType:  kind,
+		AllNamespaces: !isNamespaced,
 	})
 
 	if err == nil && !eventsResult.IsError && len(eventsResult.Content) > 0 {
