@@ -118,8 +118,8 @@ func TestGetK8SRolloutStatus_Table(t *testing.T) {
 			discoveryRes: []metav1.APIResource{{Name: "pods", Namespaced: true, Kind: "Pod"}},
 		},
 		{
-			name: "missing namespace",
-			args: &getK8SRolloutStatusArgs{ResourceType: "deployment", Name: "my-dep"},
+			name:         "missing namespace",
+			args:         &getK8SRolloutStatusArgs{ResourceType: "deployment", Name: "my-dep"},
 			wantOutput:   "namespace is required",
 			discoveryRes: []metav1.APIResource{{Name: "deployments", Namespaced: true, Kind: "Deployment"}},
 		},

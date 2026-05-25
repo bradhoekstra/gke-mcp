@@ -52,7 +52,6 @@ func (h *handlers) getK8SRolloutStatus(ctx context.Context, _ *mcp.CallToolReque
 
 	namespace := args.Namespace
 
-
 	clientset, err := h.provider.KubernetesClient(ctx, clusterPath)
 	if err != nil {
 		return params.ErrorResult(fmt.Errorf("failed to get kubernetes client: %w", err)), nil, nil
