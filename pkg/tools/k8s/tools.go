@@ -84,5 +84,13 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 		Description: "Deletes a Kubernetes resource from a cluster. This is similar to running `kubectl delete`.",
 	}, h.deleteK8SResource)
 
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "describe_k8s_resource",
+		Description: "Shows the details of a specific Kubernetes resource. This is similar to running `kubectl describe`.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.describeK8SResource)
+
 	return nil
 }
