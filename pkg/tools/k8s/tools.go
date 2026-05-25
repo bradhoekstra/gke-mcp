@@ -84,5 +84,15 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 		Description: "Deletes a Kubernetes resource from a cluster. This is similar to running `kubectl delete`.",
 	}, h.deleteK8SResource)
 
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "check_k8s_auth",
+		Description: "Checks whether an action is allowed on a Kubernetes resource. This is similar to running `kubectl auth can-i`.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.checkK8SAuth)
+
 	return nil
+
+
 }
