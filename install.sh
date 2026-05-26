@@ -78,6 +78,9 @@ TARBALL="${BINARY}_${OS}_${ARCH}.tar.gz"
 TAR_GZ_URL="https://github.com/${REPO}/releases/download/${LATEST_TAG}/${TARBALL}"
 CHECKSUM_URL="https://github.com/${REPO}/releases/download/${LATEST_TAG}/gke-mcp_${VERSION}_checksums.txt"
 
+# Set up trap for cleanup
+trap 'rm -f "${TARBALL}" checksums.txt' EXIT
+
 # Download and extract
 echo "Downloading ${TAR_GZ_URL} ..."
 curl -fSL --retry 3 "${TAR_GZ_URL}" -o "${TARBALL}"
@@ -86,10 +89,15 @@ echo "Downloading ${CHECKSUM_URL} ..."
 curl -fSL --retry 3 "${CHECKSUM_URL}" -o checksums.txt
 
 echo "Verifying checksum ..."
+if ! grep -Fq "${TARBALL}" checksums.txt; then
+  echo "Error: Checksum for ${TARBALL} not found in checksums.txt"
+  exit 1
+fi
+
 if command -v sha256sum >/dev/null 2>&1; then
-  grep "${TARBALL}" checksums.txt | sha256sum -c -
+  grep -F "${TARBALL}" checksums.txt | sha256sum -c -
 else
-  grep "${TARBALL}" checksums.txt | shasum -a 256 -c -
+  grep -F "${TARBALL}" checksums.txt | shasum -a 256 -c -
 fi
 
 tar --no-same-owner -xzf "${TARBALL}"
@@ -98,7 +106,6 @@ tar --no-same-owner -xzf "${TARBALL}"
 echo "Installing ${BINARY} to /usr/local/bin (may require sudo)..."
 install -m 0755 "${BINARY}" /usr/local/bin/ || sudo install -m 0755 "${BINARY}" /usr/local/bin/
 
-# Clean up
-rm "${TARBALL}" checksums.txt
+# Cleanup is handled by trap on EXIT
 
 echo "✅ ${BINARY} installed successfully! Run '${BINARY} --help' to get started."
