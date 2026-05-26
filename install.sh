@@ -25,6 +25,12 @@ for cmd in curl tar; do
   fi
 done
 
+# Check for hash verification tool
+if ! command -v sha256sum >/dev/null 2>&1 && ! command -v shasum >/dev/null 2>&1; then
+  echo "Error: Neither sha256sum nor shasum is installed. Please install one of them to proceed."
+  exit 1
+fi
+
 REPO="GoogleCloudPlatform/gke-mcp"
 BINARY="gke-mcp"
 
@@ -65,14 +71,27 @@ if [ -z "${LATEST_TAG}" ]; then
   echo "Failed to fetch latest release tag."
   exit 1
 fi
+VERSION="${LATEST_TAG#v}"
 
 # Compose download URL
 TARBALL="${BINARY}_${OS}_${ARCH}.tar.gz"
-URL="https://github.com/${REPO}/releases/download/${LATEST_TAG}/${TARBALL}"
+TAR_GZ_URL="https://github.com/${REPO}/releases/download/${LATEST_TAG}/${TARBALL}"
+CHECKSUM_URL="https://github.com/${REPO}/releases/download/${LATEST_TAG}/gke-mcp_${VERSION}_checksums.txt"
 
 # Download and extract
-echo "Downloading ${URL} ..."
-curl -fSL --retry 3 "${URL}" -o "${TARBALL}"
+echo "Downloading ${TAR_GZ_URL} ..."
+curl -fSL --retry 3 "${TAR_GZ_URL}" -o "${TARBALL}"
+
+echo "Downloading ${CHECKSUM_URL} ..."
+curl -fSL --retry 3 "${CHECKSUM_URL}" -o checksums.txt
+
+echo "Verifying checksum ..."
+if command -v sha256sum >/dev/null 2>&1; then
+  grep "${TARBALL}" checksums.txt | sha256sum -c -
+else
+  grep "${TARBALL}" checksums.txt | shasum -a 256 -c -
+fi
+
 tar --no-same-owner -xzf "${TARBALL}"
 
 # Move binary to /usr/local/bin (may require sudo)
@@ -80,6 +99,6 @@ echo "Installing ${BINARY} to /usr/local/bin (may require sudo)..."
 install -m 0755 "${BINARY}" /usr/local/bin/ || sudo install -m 0755 "${BINARY}" /usr/local/bin/
 
 # Clean up
-rm "${TARBALL}"
+rm "${TARBALL}" checksums.txt
 
 echo "✅ ${BINARY} installed successfully! Run '${BINARY} --help' to get started."
