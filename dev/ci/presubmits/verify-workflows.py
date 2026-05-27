@@ -44,10 +44,20 @@ def check_workflow(file_path):
     failed = False
 
     jobs = wf.get('jobs', {})
+    if not isinstance(jobs, dict):
+        return True
     for job_name, job in jobs.items():
+        if not isinstance(job, dict):
+            continue
         steps = job.get('steps', [])
+        if not isinstance(steps, list):
+            continue
         for step in steps:
+            if not isinstance(step, dict):
+                continue
             uses = step.get('uses', '')
+            if not isinstance(uses, str):
+                continue
             if 'actions/checkout' in uses:
                 with_params = step.get('with', {})
                 ref = str(with_params.get('ref', ''))
@@ -66,9 +76,10 @@ def check_workflow(file_path):
     return not failed
 
 def main():
-    workflow_dir = '.github/workflows'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    workflow_dir = os.path.abspath(os.path.join(script_dir, '../../..', '.github/workflows'))
     if not os.path.isdir(workflow_dir):
-        print("No workflows directory found.")
+        print(f"No workflows directory found at {workflow_dir}")
         sys.exit(0)
 
     failed = False
