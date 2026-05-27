@@ -17,44 +17,79 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-WORKFLOW_DIR=".github/workflows"
+python3 - <<'EOF'
+import os
+import sys
+import yaml
 
-if [ ! -d "$WORKFLOW_DIR" ]; then
-    echo "No workflows directory found."
-    exit 0
-fi
+def check_workflow(file_path):
+    with open(file_path, 'r') as f:
+        try:
+            wf = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            print(f"Error parsing {file_path}: {e}")
+            return False
 
-FAILED=0
+    if not wf:
+        return True
 
-for file in "$WORKFLOW_DIR"/*.yml "$WORKFLOW_DIR"/*.yaml; do
-    [ -e "$file" ] || continue
-    
-    # Check if file uses pull_request_target
-    if grep -q "pull_request_target" "$file"; then
-        echo "Checking $file for insecure pull_request_target usage..."
-        
-        # Check if it checks out untrusted code
-        if grep -q "ref:.*github\.event\.pull_request\.head" "$file"; then
-            echo "Error: $file uses pull_request_target and checks out untrusted code (pull_request.head)."
-            FAILED=1
-        fi
-        
-        if grep -q "ref:.*github\.head_ref" "$file"; then
-            echo "Error: $file uses pull_request_target and checks out untrusted code (head_ref)."
-            FAILED=1
-        fi
+    triggers = wf.get('on', {})
+    has_pr_target = False
+    if isinstance(triggers, str):
+        has_pr_target = (triggers == 'pull_request_target')
+    elif isinstance(triggers, list):
+        has_pr_target = 'pull_request_target' in triggers
+    elif isinstance(triggers, dict):
+        has_pr_target = 'pull_request_target' in triggers
 
-        if grep -q "repository:.*github\.event\.pull_request\.head" "$file"; then
-            echo "Error: $file uses pull_request_target and checks out an untrusted repository."
-            FAILED=1
-        fi
-    fi
-done
+    if not has_pr_target:
+        return True
 
-if [ $FAILED -ne 0 ]; then
-    echo "Workflow security check failed."
-    exit 1
-fi
+    print(f"Checking {file_path} for insecure pull_request_target usage...")
+    failed = False
 
-echo "Workflow security check passed."
-exit 0
+    jobs = wf.get('jobs', {})
+    for job_name, job in jobs.items():
+        steps = job.get('steps', [])
+        for step in steps:
+            uses = step.get('uses', '')
+            if 'actions/checkout' in uses:
+                with_params = step.get('with', {})
+                ref = str(with_params.get('ref', ''))
+                repo = str(with_params.get('repository', ''))
+
+                if 'github.event.pull_request.head' in ref:
+                    print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out untrusted code (ref: {ref})")
+                    failed = True
+                if 'github.head_ref' in ref:
+                    print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out untrusted code (ref: {ref})")
+                    failed = True
+                if 'github.event.pull_request.head' in repo:
+                    print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out an untrusted repository (repository: {repo})")
+                    failed = True
+
+    return not failed
+
+def main():
+    workflow_dir = '.github/workflows'
+    if not os.path.isdir(workflow_dir):
+        print("No workflows directory found.")
+        sys.exit(0)
+
+    failed = False
+    for filename in os.listdir(workflow_dir):
+        if filename.endswith('.yml') or filename.endswith('.yaml'):
+            file_path = os.path.join(workflow_dir, filename)
+            if not check_workflow(file_path):
+                failed = True
+
+    if failed:
+        print("Workflow security check failed.")
+        sys.exit(1)
+
+    print("Workflow security check passed.")
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()
+EOF
