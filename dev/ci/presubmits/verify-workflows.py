@@ -73,14 +73,8 @@ def check_workflow(file_path):
                 ref = str(with_params.get('ref', ''))
                 repo = str(with_params.get('repository', ''))
 
-                if 'github.event.pull_request.head' in ref:
+                if any(p in ref for p in ['github.event.pull_request.head', 'github.head_ref', 'refs/pull/']):
                     print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out untrusted code (ref: {ref})")
-                    failed = True
-                if 'github.head_ref' in ref:
-                    print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out untrusted code (ref: {ref})")
-                    failed = True
-                if 'refs/pull/' in ref:
-                    print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out a pull request ref (ref: {ref})")
                     failed = True
                 if 'github.event.pull_request.head' in repo:
                     print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out an untrusted repository (repository: {repo})")
