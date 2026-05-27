@@ -23,7 +23,7 @@ except ImportError:
     sys.exit(1)
 
 def check_workflow(file_path):
-    with open(file_path, 'r') as f:
+    with open(file_path, 'r', encoding='utf-8') as f:
         try:
             wf = yaml.safe_load(f)
         except yaml.YAMLError as e:
@@ -66,7 +66,7 @@ def check_workflow(file_path):
             uses = step.get('uses', '')
             if not isinstance(uses, str):
                 continue
-            if 'actions/checkout' in uses:
+            if isinstance(uses, str) and (uses.startswith('actions/checkout@') or uses == 'actions/checkout'):
                 with_params = step.get('with')
                 if not isinstance(with_params, dict):
                     with_params = {}
@@ -78,6 +78,9 @@ def check_workflow(file_path):
                     failed = True
                 if 'github.head_ref' in ref:
                     print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out untrusted code (ref: {ref})")
+                    failed = True
+                if 'refs/pull/' in ref:
+                    print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out a pull request ref (ref: {ref})")
                     failed = True
                 if 'github.event.pull_request.head' in repo:
                     print(f"Error: {file_path} (job: {job_name}) uses pull_request_target and checks out an untrusted repository (repository: {repo})")
