@@ -51,6 +51,14 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	}, h.listK8SEvents)
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name:        "list_k8s_api_resources",
+		Description: "Retrieves the available API groups and resources from a Kubernetes cluster. This is similar to running `kubectl api-resources`.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.listK8SAPIResources)
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name:        "get_k8s_version",
 		Description: "Retrieves the Kubernetes server version for a given cluster. This is similar to running kubectl version.",
 		Annotations: &mcp.ToolAnnotations{
