@@ -85,6 +85,14 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	}, h.deleteK8SResource)
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name:        "check_k8s_auth",
+		Description: "Checks whether an action is allowed on a Kubernetes resource. This is similar to running `kubectl auth can-i`.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.checkK8SAuth)
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name:        "describe_k8s_resource",
 		Description: "Shows the details of a specific Kubernetes resource. This is similar to running `kubectl describe`.",
 		Annotations: &mcp.ToolAnnotations{
