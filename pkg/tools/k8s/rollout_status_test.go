@@ -107,6 +107,31 @@ func TestGetK8SRolloutStatus_Table(t *testing.T) {
 			discoveryRes: []metav1.APIResource{{Name: "statefulsets", Namespaced: true, Kind: "StatefulSet"}},
 		},
 		{
+			name: "statefulset partitioned success",
+			args: &getK8SRolloutStatusArgs{ResourceType: "statefulset", Name: "my-ss-part", Namespace: "default"},
+			objects: []runtime.Object{
+				&appsv1.StatefulSet{
+					ObjectMeta: metav1.ObjectMeta{Name: "my-ss-part", Namespace: "default", Generation: 1},
+					Spec: appsv1.StatefulSetSpec{
+						Replicas: int32Ptr(2),
+						UpdateStrategy: appsv1.StatefulSetUpdateStrategy{
+							Type: appsv1.RollingUpdateStatefulSetStrategyType,
+							RollingUpdate: &appsv1.RollingUpdateStatefulSetStrategy{
+								Partition: int32Ptr(1),
+							},
+						},
+					},
+					Status: appsv1.StatefulSetStatus{
+						ObservedGeneration: 1,
+						ReadyReplicas:      2,
+						UpdatedReplicas:    1,
+					},
+				},
+			},
+			wantOutput:   "statefulset \"my-ss-part\" successfully rolled out",
+			discoveryRes: []metav1.APIResource{{Name: "statefulsets", Namespaced: true, Kind: "StatefulSet"}},
+		},
+		{
 			name: "unsupported kind",
 			args: &getK8SRolloutStatusArgs{ResourceType: "pod", Name: "my-pod", Namespace: "default"},
 			objects: []runtime.Object{
