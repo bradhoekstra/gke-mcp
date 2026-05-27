@@ -152,11 +152,10 @@ func checkStatefulSetRolloutStatus(statefulSet *appsv1.StatefulSet) string {
 				return fmt.Sprintf("waiting for partitioned rollout to finish: %d of %d pods in partition have been updated", statefulSet.Status.UpdatedReplicas, replicas-partition)
 			}
 			return fmt.Sprintf("statefulset %q successfully rolled out", statefulSet.Name)
-		} else {
-			// Full rolling update.
-			if statefulSet.Status.UpdatedReplicas < replicas {
-				return fmt.Sprintf("waiting for rollout to finish: %d of %d pods have been updated", statefulSet.Status.UpdatedReplicas, replicas)
-			}
+		}
+		// Full rolling update.
+		if statefulSet.Status.UpdatedReplicas < replicas {
+			return fmt.Sprintf("waiting for rollout to finish: %d of %d pods have been updated", statefulSet.Status.UpdatedReplicas, replicas)
 		}
 	}
 
