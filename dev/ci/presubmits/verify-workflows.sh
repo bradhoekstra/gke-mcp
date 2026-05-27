@@ -33,9 +33,19 @@ for file in "$WORKFLOW_DIR"/*.yml "$WORKFLOW_DIR"/*.yaml; do
     if grep -q "pull_request_target" "$file"; then
         echo "Checking $file for insecure pull_request_target usage..."
         
-        # Check if it checks out the PR branch or HEAD
+        # Check if it checks out untrusted code
         if grep -q "ref:.*github\.event\.pull_request\.head" "$file"; then
-            echo "Error: $file uses pull_request_target and checks out untrusted code from the pull request."
+            echo "Error: $file uses pull_request_target and checks out untrusted code (pull_request.head)."
+            FAILED=1
+        fi
+        
+        if grep -q "ref:.*github\.head_ref" "$file"; then
+            echo "Error: $file uses pull_request_target and checks out untrusted code (head_ref)."
+            FAILED=1
+        fi
+
+        if grep -q "repository:.*github\.event\.pull_request\.head" "$file"; then
+            echo "Error: $file uses pull_request_target and checks out an untrusted repository."
             FAILED=1
         fi
     fi
