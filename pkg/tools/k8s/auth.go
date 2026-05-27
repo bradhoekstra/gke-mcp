@@ -37,7 +37,7 @@ type checkK8SAuthArgs struct {
 	Verb         string `json:"verb" jsonschema:"Required. The verb to check. e.g. \"get\", \"list\", \"watch\", \"create\", \"update\", \"patch\", \"delete\"."`
 	ResourceType string `json:"resourceType" jsonschema:"Required. The type of resource to check. e.g. \"pods\", \"deployments\", \"services\"."`
 	Namespace    string `json:"namespace,omitempty" jsonschema:"Optional. The namespace of the resource. If not specified, \"default\" is used for namespace-scoped resources."`
-	Resource     string `json:"resource,omitempty" jsonschema:"Optional. The name of the resource to check."`
+	Name         string `json:"name,omitempty" jsonschema:"Optional. The name of the resource to check."`
 }
 
 func (h *handlers) checkK8SAuth(ctx context.Context, _ *mcp.CallToolRequest, args *checkK8SAuthArgs) (*mcp.CallToolResult, any, error) {
@@ -85,7 +85,7 @@ func (h *handlers) checkK8SAuth(ctx context.Context, _ *mcp.CallToolRequest, arg
 				Verb:      args.Verb,
 				Group:     gvr.Group,
 				Resource:  gvr.Resource,
-				Name:      args.Resource,
+				Name:      args.Name,
 			},
 		},
 	}
