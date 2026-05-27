@@ -85,6 +85,11 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	}, h.deleteK8SResource)
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name:        "patch_k8s_resource",
+		Description: "Patches a Kubernetes resource. This is similar to running `kubectl patch`.",
+	}, h.patchK8SResource)
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name:        "get_k8s_rollout_status",
 		Description: "Checks the current rollout status of a Kubernetes resource. This is similar to running `kubectl rollout status`.",
 		Annotations: &mcp.ToolAnnotations{
