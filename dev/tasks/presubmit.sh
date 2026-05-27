@@ -47,6 +47,7 @@ run_task "./dev/ci/presubmits/go-test.sh"
 run_task "./dev/ci/presubmits/go-vet.sh"
 run_task "./dev/ci/presubmits/docker-build.sh"
 run_task "./dev/ci/presubmits/validate-skills.sh"
+run_task "./dev/ci/presubmits/verify-workflows.sh"
 
 run_task "./dev/tasks/super-linter.sh"
 
