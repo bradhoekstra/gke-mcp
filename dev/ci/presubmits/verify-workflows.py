@@ -15,7 +15,12 @@
 
 import os
 import sys
-import yaml
+
+try:
+    import yaml
+except ImportError:
+    print("Error: PyYAML is required. Install it with 'pip install PyYAML'.")
+    sys.exit(1)
 
 def check_workflow(file_path):
     with open(file_path, 'r') as f:
@@ -26,6 +31,9 @@ def check_workflow(file_path):
             return False
 
     if not wf:
+        return True
+
+    if not isinstance(wf, dict):
         return True
 
     triggers = wf.get('on', {})
@@ -59,7 +67,9 @@ def check_workflow(file_path):
             if not isinstance(uses, str):
                 continue
             if 'actions/checkout' in uses:
-                with_params = step.get('with', {})
+                with_params = step.get('with')
+                if not isinstance(with_params, dict):
+                    with_params = {}
                 ref = str(with_params.get('ref', ''))
                 repo = str(with_params.get('repository', ''))
 
