@@ -85,6 +85,14 @@ func Install(_ context.Context, s *mcp.Server, c *config.Config) error {
 	}, h.deleteK8SResource)
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name:        "get_k8s_rollout_status",
+		Description: "Checks the current rollout status of a Kubernetes resource. This is similar to running `kubectl rollout status`.",
+		Annotations: &mcp.ToolAnnotations{
+			ReadOnlyHint: true,
+		},
+	}, h.getK8SRolloutStatus)
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name:        "check_k8s_auth",
 		Description: "Checks whether an action is allowed on a Kubernetes resource. This is similar to running `kubectl auth can-i`.",
 		Annotations: &mcp.ToolAnnotations{
