@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 # Copyright 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o errexit
-set -o nounset
-set -o pipefail
-
-python3 - <<'EOF'
 import os
 import sys
 import yaml
@@ -92,4 +87,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-EOF

@@ -166,9 +166,9 @@ jobs:
       contents: "read"
     steps:
       - uses: actions/checkout@v6
-      - name: "Run dev/ci/presubmits/verify-workflows.sh"
+      - name: "Run dev/ci/presubmits/verify-workflows.py"
         run: |
-          ./dev/ci/presubmits/verify-workflows.sh
+          ./dev/ci/presubmits/verify-workflows.py
 
   super-linter:
     runs-on: ubuntu-latest
