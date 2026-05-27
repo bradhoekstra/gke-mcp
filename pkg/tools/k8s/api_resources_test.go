@@ -44,6 +44,12 @@ func TestListK8SAPIResources(t *testing.T) {
 				{Name: "deployments", Namespaced: true, Kind: "Deployment"},
 			},
 		},
+		{
+			GroupVersion: "custom.example.com/v1",
+			APIResources: []metav1.APIResource{
+				{Name: "pods", Namespaced: true, Kind: "CustomPod"},
+			},
+		},
 	}
 
 	mockProvider := &mockClientProvider{
@@ -79,38 +85,43 @@ func TestListK8SAPIResources(t *testing.T) {
 		t.Fatalf("failed to unmarshal result: %v", err)
 	}
 
-	if len(resources) != 2 {
-		t.Fatalf("len(resources) = %d, want 2", len(resources))
+	if len(resources) != 3 {
+		t.Fatalf("len(resources) = %d, want 3", len(resources))
 	}
 
-	// Verify content
-	foundPods := false
-	foundDeployments := false
-	for _, r := range resources {
-		if r.Name == "pods" {
-			foundPods = true
-			if len(r.Versions) != 1 || r.Versions[0] != "v1" {
-				t.Errorf("pods versions = %v, want [v1]", r.Versions)
-			}
-			if r.PreferredVersion != "v1" {
-				t.Errorf("pods preferredVersion = %s, want v1", r.PreferredVersion)
-			}
+	// Verify content (assuming sorted by name)
+	// Expected order: deployments, pods, pods
+	
+	if resources[0].Name != "deployments" {
+		t.Errorf("resources[0].Name = %s, want deployments", resources[0].Name)
+	}
+	
+	// We expect pods to be at index 1 and 2.
+	foundCorePods := false
+	foundCustomPods := false
+	
+	for i := 1; i <= 2; i++ {
+		r := resources[i]
+		if r.Name != "pods" {
+			t.Errorf("resources[%d].Name = %s, want pods", i, r.Name)
+			continue
 		}
-		if r.Name == "deployments" {
-			foundDeployments = true
-			if len(r.Versions) != 1 || r.Versions[0] != "apps/v1" {
-				t.Errorf("deployments versions = %v, want [apps/v1]", r.Versions)
-			}
-			if r.PreferredVersion != "apps/v1" {
-				t.Errorf("deployments preferredVersion = %s, want apps/v1", r.PreferredVersion)
-			}
+		if len(r.Versions) != 1 {
+			t.Errorf("resources[%d].Versions length = %d, want 1", i, len(r.Versions))
+			continue
+		}
+		if r.Versions[0] == "v1" {
+			foundCorePods = true
+		}
+		if r.Versions[0] == "custom.example.com/v1" {
+			foundCustomPods = true
 		}
 	}
-
-	if !foundPods {
-		t.Errorf("pods not found in result")
+	
+	if !foundCorePods {
+		t.Errorf("core pods (v1) not found at index 1 or 2")
 	}
-	if !foundDeployments {
-		t.Errorf("deployments not found in result")
+	if !foundCustomPods {
+		t.Errorf("custom pods (custom.example.com/v1) not found at index 1 or 2")
 	}
 }

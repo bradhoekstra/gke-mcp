@@ -102,7 +102,14 @@ func (h *handlers) listK8SAPIResources(ctx context.Context, _ *mcp.CallToolReque
 		if resources[i].Name != resources[j].Name {
 			return resources[i].Name < resources[j].Name
 		}
-		return resources[i].PreferredVersion < resources[j].PreferredVersion
+		if resources[i].PreferredVersion != resources[j].PreferredVersion {
+			return resources[i].PreferredVersion < resources[j].PreferredVersion
+		}
+		// Fallback to sorting by the first version to ensure determinism
+		if len(resources[i].Versions) > 0 && len(resources[j].Versions) > 0 {
+			return resources[i].Versions[0] < resources[j].Versions[0]
+		}
+		return false
 	})
 
 	data, err := json.MarshalIndent(resources, "", "  ")
