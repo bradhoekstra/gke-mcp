@@ -91,15 +91,15 @@ func TestListK8SAPIResources(t *testing.T) {
 
 	// Verify content (assuming sorted by name)
 	// Expected order: deployments, pods, pods
-	
+
 	if resources[0].Name != "deployments" {
 		t.Errorf("resources[0].Name = %s, want deployments", resources[0].Name)
 	}
-	
+
 	// We expect pods to be at index 1 and 2.
 	foundCorePods := false
 	foundCustomPods := false
-	
+
 	for i := 1; i <= 2; i++ {
 		r := resources[i]
 		if r.Name != "pods" {
@@ -117,7 +117,7 @@ func TestListK8SAPIResources(t *testing.T) {
 			foundCustomPods = true
 		}
 	}
-	
+
 	if !foundCorePods {
 		t.Errorf("core pods (v1) not found at index 1 or 2")
 	}

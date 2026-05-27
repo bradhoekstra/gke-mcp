@@ -64,7 +64,7 @@ func (h *handlers) listK8SAPIResources(ctx context.Context, _ *mcp.CallToolReque
 
 	for _, rl := range resourceLists {
 		gv := rl.GroupVersion
-		
+
 		// Find group name
 		parts := strings.Split(gv, "/")
 		var group string
