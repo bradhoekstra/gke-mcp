@@ -64,17 +64,18 @@ func (h *handlers) listK8SAPIResources(ctx context.Context, _ *mcp.CallToolReque
 
 	for _, rl := range resourceLists {
 		gv := rl.GroupVersion
+		
+		// Find group name
+		parts := strings.Split(gv, "/")
+		var group string
+		if len(parts) == 2 {
+			group = parts[0]
+		}
+
 		for _, r := range rl.APIResources {
 			if strings.Contains(r.Name, "/") {
 				// Skip subresources like pods/log
 				continue
-			}
-
-			// Find group name
-			parts := strings.Split(gv, "/")
-			var group string
-			if len(parts) == 2 {
-				group = parts[0]
 			}
 
 			key := resourceKey{name: r.Name, group: group}
