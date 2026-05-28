@@ -66,7 +66,7 @@ def check_workflow(file_path):
             uses = step.get('uses', '')
             if not isinstance(uses, str):
                 continue
-            if isinstance(uses, str) and (uses.startswith('actions/checkout@') or uses == 'actions/checkout'):
+            if uses.startswith('actions/checkout@') or uses == 'actions/checkout':
                 with_params = step.get('with')
                 if not isinstance(with_params, dict):
                     with_params = {}
