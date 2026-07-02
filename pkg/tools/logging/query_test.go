@@ -23,6 +23,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	ltype "google.golang.org/genproto/googleapis/logging/type"
 	"google.golang.org/protobuf/testing/protocmp"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -80,6 +81,22 @@ func TestLogQueryRequest_Validate(t *testing.T) {
 				Format:    "{{.invalid",
 			},
 			wantErr: true,
+		},
+		{
+			name: "invalid view parameter",
+			req: LogQueryRequest{
+				ProjectID: "test-project",
+				View:      "INVALID",
+			},
+			wantErr: true,
+		},
+		{
+			name: "valid view parameter",
+			req: LogQueryRequest{
+				ProjectID: "test-project",
+				View:      "FULL",
+			},
+			wantErr: false,
 		},
 	}
 
@@ -164,6 +181,17 @@ func TestFormatter(t *testing.T) {
 		Timestamp: timestamppb.New(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)),
 	}
 
+	protoEntry := &loggingpb.LogEntry{
+		Payload: &loggingpb.LogEntry_ProtoPayload{
+			ProtoPayload: &anypb.Any{
+				TypeUrl: "type.googleapis.com/unknown.MessageType",
+				Value:   []byte("raw_bytes_123"),
+			},
+		},
+		Severity:  ltype.LogSeverity_ERROR,
+		Timestamp: timestamppb.New(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)),
+	}
+
 	tests := []struct {
 		name    string
 		req     LogQueryRequest
@@ -173,8 +201,49 @@ func TestFormatter(t *testing.T) {
 		isJSON  bool
 	}{
 		{
-			name:  "json formatter text payload",
+			name:  "compact formatter text payload default",
 			req:   LogQueryRequest{},
+			entry: entry,
+			want: `{
+  "severity": "ERROR",
+  "message": "test log",
+  "timestamp": "2023-01-01T00:00:00Z"
+}`,
+			wantErr: false,
+			isJSON:  true,
+		},
+		{
+			name:  "compact formatter json payload default",
+			req:   LogQueryRequest{},
+			entry: jsonEntry,
+			want: `{
+  "message": {
+    "key": "value"
+  },
+  "severity": "ERROR",
+  "timestamp": "2023-01-01T00:00:00Z"
+}`,
+			wantErr: false,
+			isJSON:  true,
+		},
+		{
+			name:  "compact formatter unregistered proto payload fallback",
+			req:   LogQueryRequest{},
+			entry: protoEntry,
+			want: `{
+  "message": {
+    "@type": "type.googleapis.com/unknown.MessageType",
+    "value": "cmF3X2J5dGVzXzEyMw=="
+  },
+  "severity": "ERROR",
+  "timestamp": "2023-01-01T00:00:00Z"
+}`,
+			wantErr: false,
+			isJSON:  true,
+		},
+		{
+			name:  "json formatter text payload full view",
+			req:   LogQueryRequest{View: "FULL"},
 			entry: entry,
 			want: `{
   "severity": "ERROR",
@@ -185,8 +254,8 @@ func TestFormatter(t *testing.T) {
 			isJSON:  true,
 		},
 		{
-			name:  "json formatter json payload",
-			req:   LogQueryRequest{},
+			name:  "json formatter json payload full view",
+			req:   LogQueryRequest{View: "FULL"},
 			entry: jsonEntry,
 			want: `{
   "jsonPayload": {
