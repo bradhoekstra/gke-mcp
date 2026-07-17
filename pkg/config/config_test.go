@@ -201,3 +201,84 @@ func TestNewConfigDifferentVersions(t *testing.T) {
 		})
 	}
 }
+
+func TestMockMode(t *testing.T) {
+	origBuildMockMode := BuildMockMode
+	defer func() { BuildMockMode = origBuildMockMode }()
+
+	cfg := &Config{}
+
+	BuildMockMode = "false"
+	if cfg.MockMode() {
+		t.Error("Expected MockMode to be false by default")
+	}
+
+	t.Setenv("GKE_MCP_MOCK", "true")
+	if !cfg.MockMode() {
+		t.Error("Expected MockMode to be true when GKE_MCP_MOCK=true")
+	}
+
+	t.Setenv("GKE_MCP_MOCK", "false")
+	BuildMockMode = "true"
+	if !cfg.MockMode() {
+		t.Error("Expected MockMode to be true when BuildMockMode=true")
+	}
+}
+
+func TestMockDataDir(t *testing.T) {
+	origBuildMockMode := BuildMockMode
+	origBuildMockDataDir := BuildMockDataDir
+	defer func() {
+		BuildMockMode = origBuildMockMode
+		BuildMockDataDir = origBuildMockDataDir
+	}()
+
+	cfg := &Config{}
+
+	BuildMockMode = "false"
+	if got := cfg.MockDataDir(); got != "mock_data" {
+		t.Errorf("MockDataDir() = %s, want mock_data", got)
+	}
+
+	t.Setenv("GKE_MCP_MOCK_DATA_DIR", "custom_dir")
+	if got := cfg.MockDataDir(); got != "custom_dir" {
+		t.Errorf("MockDataDir() = %s, want custom_dir", got)
+	}
+
+	BuildMockMode = "true"
+	BuildMockDataDir = "build_dir"
+	if got := cfg.MockDataDir(); got != "build_dir" {
+		t.Errorf("MockDataDir() = %s, want build_dir", got)
+	}
+}
+
+func TestMockSkillAndCase(t *testing.T) {
+	origSkill := BuildMockSkill
+	origCase := BuildMockCase
+	defer func() {
+		BuildMockSkill = origSkill
+		BuildMockCase = origCase
+	}()
+
+	cfg := &Config{}
+
+	BuildMockSkill = "test-skill"
+	BuildMockCase = "test_case"
+
+	if got := cfg.MockSkill(); got != "test-skill" {
+		t.Errorf("MockSkill() = %s, want test-skill", got)
+	}
+	if got := cfg.MockCase(); got != "test_case" {
+		t.Errorf("MockCase() = %s, want test_case", got)
+	}
+
+	t.Setenv("GKE_MCP_MOCK_SKILL", "env-skill")
+	t.Setenv("GKE_MCP_MOCK_CASE", "env_case")
+
+	if got := cfg.MockSkill(); got != "env-skill" {
+		t.Errorf("MockSkill() = %s, want env-skill", got)
+	}
+	if got := cfg.MockCase(); got != "env_case" {
+		t.Errorf("MockCase() = %s, want env_case", got)
+	}
+}
