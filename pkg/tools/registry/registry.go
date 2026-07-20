@@ -24,8 +24,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/GoogleCloudPlatform/gke-mcp/pkg/config"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 var (
