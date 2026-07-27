@@ -27,7 +27,11 @@ description: Diagnose and predict node disruption during Compute Engine host mai
 ### Step 2: [Low Risk] Investigation via Cloud Monitoring (PromQL)
 
 - **Action**: Call `query_prometheus` tool to query Cloud Monitoring PromQL metrics for the cluster. If `query_prometheus` is unavailable or fails due to missing permissions, provide the PromQL queries below to the user for manual verification in Google Cloud Console.
-- **For Past Disruptions**: When investigating past disruptions (e.g., historical timestamps or past interruptions), immediately pass the `timestamp` parameter to `query_prometheus` to check `kubernetes_io:node_interruption_count{monitored_resource="k8s_node", interruption_reason="HW/SW Maintenance"}` around that specific time. If metric value > 0, conclude that Compute Engine host maintenance WAS confirmed as the cause of the past disruption.
+- **For Past Disruptions**: When investigating past disruptions (e.g., historical timestamps or past
+  interruptions), immediately pass the `timestamp` parameter to `query_prometheus` to check
+  `kubernetes_io:node_interruption_count{monitored_resource="k8s_node", interruption_reason="HW/SW Maintenance"}`
+  around that specific time. If metric value > 0, conclude that Compute Engine host maintenance WAS
+  confirmed as the cause of the past disruption.
 - **Example PromQL Queries**:
   ```promql
   # Fetch host maintenance events for nodes
@@ -44,7 +48,7 @@ description: Diagnose and predict node disruption during Compute Engine host mai
 - **Action**: Call `query_logs` or `describe_k8s_resource` to filter GKE logs and check node status/taints for active ongoing node maintenance.
 - **Active Ongoing Maintenance Detection**:
   - Look for `cloud.google.com/active-node-maintenance` set to `ONGOING` or the `cloud.google.com/impending-node-termination:NoSchedule` taint on the node.
-  - **Explicit Conclusion Required**: If `active-node-maintenance` is `ONGOING` or the `impending-node-termination:NoSchedule` taint is present, explicitly inform the user: *"GKE is actively stopping workloads due to ongoing Compute Engine host maintenance."*
+  - **Explicit Conclusion Required**: If `active-node-maintenance` is `ONGOING` or the `impending-node-termination:NoSchedule` taint is present, explicitly inform the user: _"GKE is actively stopping workloads due to ongoing Compute Engine host maintenance."_
   - **Mandatory Taint Warning**: Explicitly advise the user **NOT to tolerate** the `cloud.google.com/impending-node-termination:NoSchedule` taint, as the node will be terminated by GKE regardless.
 
 ### Step 4: Conclusion and Resolution
