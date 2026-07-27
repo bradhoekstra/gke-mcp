@@ -48,15 +48,29 @@ description: Diagnose and predict node disruption during Compute Engine host mai
 - **Action**: Call `query_logs` or `describe_k8s_resource` to filter GKE logs and check node status/taints for active ongoing node maintenance.
 - **Active Ongoing Maintenance Detection**:
   - Look for `cloud.google.com/active-node-maintenance` set to `ONGOING` or the `cloud.google.com/impending-node-termination:NoSchedule` taint on the node.
-  - **Explicit Conclusion Required**: If `active-node-maintenance` is `ONGOING` or the `impending-node-termination:NoSchedule` taint is present, explicitly inform the user: _"GKE is actively stopping workloads due to ongoing Compute Engine host maintenance."_
-  - **Mandatory Taint Warning**: Explicitly advise the user **NOT to tolerate** the `cloud.google.com/impending-node-termination:NoSchedule` taint, as the node will be terminated by GKE regardless.
+  - **Explicit Conclusion Required**: If `active-node-maintenance` is `ONGOING` or the
+    `impending-node-termination:NoSchedule` taint is present, explicitly inform the user:
+    _"GKE is actively stopping workloads due to ongoing Compute Engine host maintenance."_
+  - **Mandatory Taint Warning**: Explicitly advise the user **NOT to tolerate** the
+    `cloud.google.com/impending-node-termination:NoSchedule` taint, as the node will be
+    terminated by GKE regardless.
 
 ### Step 4: Conclusion and Resolution
 
-- **Action**: Provide a summary of findings to the user and suggest appropriate mitigation strategies ONLY IF host maintenance events were confirmed or scheduled.
-- **Negative Finding Rule**: If NO evidence of scheduled or past host maintenance is found, explicitly conclude that the disruption was NOT caused by Compute Engine host maintenance and report this negative finding. DO NOT recommend configuring graceful termination or opportunistic maintenance when no maintenance events are detected.
-- **Reporting Rule**: Signal Only. Report high-signal information indicating that the disruption was caused by Compute Engine host maintenance, specifically affecting the underlying GPU/TPU nodes. DO NOT dump raw logs.
+- **Action**: Provide a summary of findings to the user and suggest appropriate mitigation
+  strategies ONLY IF host maintenance events were confirmed or scheduled.
+- **Negative Finding Rule**: If NO evidence of scheduled or past host maintenance is found,
+  explicitly conclude that the disruption was NOT caused by Compute Engine host maintenance and
+  report this negative finding. DO NOT recommend configuring graceful termination or opportunistic
+  maintenance when no maintenance events are detected.
+- **Reporting Rule**: Signal Only. Report high-signal information indicating that the disruption was
+  caused by Compute Engine host maintenance, specifically affecting the underlying GPU/TPU nodes.
+  DO NOT dump raw logs.
 - **Resolutions to Suggest (Only when maintenance is confirmed or scheduled)**:
-  1. **Configure Graceful Termination**: Recommend configuring graceful termination by setting `spec.terminationGracePeriodSeconds` (up to 60 minutes) to allow ML workloads (e.g., Orbax checkpointing) to save state upon receiving `SIGTERM` before the node terminates.
-  2. **Opportunistic Maintenance**: Recommend configuring Opportunistic Maintenance to trigger host updates automatically when GPU/TPU nodes are idle.
-  3. **Capacity Buffer / Resiliency**: Recommend configuring a `PodDisruptionBudget` (PDB) specifying `minAvailable` replicas to maintain availability during disruptions.
+  1. **Configure Graceful Termination**: Recommend configuring graceful termination by setting
+     `spec.terminationGracePeriodSeconds` (up to 60 minutes) to allow ML workloads (e.g., Orbax
+     checkpointing) to save state upon receiving `SIGTERM` before the node terminates.
+  2. **Opportunistic Maintenance**: Recommend configuring Opportunistic Maintenance to trigger host
+     updates automatically when GPU/TPU nodes are idle.
+  3. **Capacity Buffer / Resiliency**: Recommend configuring a `PodDisruptionBudget` (PDB)
+     specifying `minAvailable` replicas to maintain availability during disruptions.
